@@ -1,40 +1,39 @@
 import calendar
-from datetime import date
+from datetime import date, timedelta
 from django.shortcuts import render
-from .models import RotaDay
+from .models import RotaDay, Assignment
 from django.shortcuts import get_object_or_404, redirect
 
 def monthly_calendar(request, year, month):
-    cal = calendar.Calendar(firstweekday=0)  # Monday = 0
-    days_iter = cal.itermonthdates(year, month)
+    year = int(year)
+    month = int(month)
 
-    # Build weeks as a list of lists, each with exactly 7 entries
-    weeks = []
-    week = []
-    for d in days_iter:
-        week.append(d)
-        if len(week) == 7:
-            weeks.append(week)
-            week = []
-    if week:
-        # pad last week if needed (normally not required, but safe)
-        while len(week) < 7:
-            week.append(None)
-        weeks.append(week)
+    first_day = date(year, month, 1)
+    cal = calendar.Calendar(firstweekday=0)  # Monday = 0
+    weeks = cal.monthdatescalendar(year, month)  # list of weeks, each 7 date objects
+
+    # previous & next month for the arrows
+    prev_month_date = (first_day - timedelta(days=1)).replace(day=1)
+    next_month_date = (first_day + timedelta(days=31)).replace(day=1)
 
     rotadays = set(
-        RotaDay.objects
-        .filter(date__year=year, date__month=month)
-        .values_list("date", flat=True)
+        RotaDay.objects.filter(
+            date__year=year,
+            date__month=month
+        ).values_list("date", flat=True)
     )
 
     context = {
         "year": year,
         "month": month,
-        "month_name": calendar.month_name[month],
+        "month_name": first_day.strftime("%B"),
         "weeks": weeks,
-        "rotadays": rotadays,
         "today": date.today(),
+        "rotadays": rotadays,
+        "prev_year": prev_month_date.year,
+        "prev_month": prev_month_date.month,
+        "next_year": next_month_date.year,
+        "next_month": next_month_date.month,
     }
     return render(request, "rota/monthly_calendar.html", context)
 

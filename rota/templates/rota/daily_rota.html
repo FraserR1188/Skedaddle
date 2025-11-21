@@ -2,25 +2,63 @@
 <html>
   <head>
     <title>Rota for {{ date|date:"j F Y" }}</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+      }
+      .assignment {
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        padding: 12px;
+        margin-bottom: 12px;
+        background: #fafafa;
+        width: 380px;
+      }
+      .location {
+        font-weight: bold;
+        margin-bottom: 6px;
+      }
+      .no-rota {
+        font-size: 1.1em;
+        color: #777;
+        font-style: italic;
+      }
+      a {
+        text-decoration: none;
+        color: #007bff;
+      }
+    </style>
   </head>
+
   <body>
-    {% if rotaday %}
     <h1>Rota for {{ date|date:"j F Y" }}</h1>
 
-    {% if assignments %}
-    <ul>
-      {% for a in assignments %}
-      <li>
-        {{ a.staff_member }} – {{ a.clean_room }} – {{ a.isolator|default:"Room"
-        }}
-      </li>
-      {% endfor %}
-    </ul>
-    {% else %}
-    <p>No assignments recorded for this rota day.</p>
-    {% endif %} {% else %}
-    <h1>{{ date|date:"j F Y" }}</h1>
-    <p><strong>No Assigned Rota for Today.</strong></p>
+    {% if assignments %} {% for a in assignments %}
+    <div class="assignment">
+      <div class="location">
+        Cleanroom: {{ a.clean_room.name }} {% if a.isolator %} — {{
+        a.isolator.name }} {% endif %}
+      </div>
+
+      <div>
+        <strong>Staff:</strong>
+        {{ a.staff.full_name }}
+        <br />
+        <strong>Role:</strong>
+        {{ a.staff.get_role_display }}
+        <br />
+        <strong>Shift:</strong>
+        {{ a.shift.name }} ({{ a.shift.start_time }}–{{ a.shift.end_time }})
+        <br />
+
+        {% if a.notes %}
+        <strong>Notes:</strong>
+        {{ a.notes }} {% endif %}
+      </div>
+    </div>
+    {% endfor %} {% else %}
+    <p class="no-rota">No assigned rota for today.</p>
     {% endif %}
 
     <p>

@@ -4,28 +4,43 @@
     <title>{{ month_name }} {{ year }}</title>
     <style>
       table {
-        width: 100%;
         border-collapse: collapse;
+        width: 100%;
       }
       th,
       td {
-        width: 14%;
-        padding: 10px;
-        border: 1px solid #ccc;
+        border: 1px solid #ddd;
+        padding: 8px;
         text-align: center;
-        vertical-align: top;
+        min-width: 40px;
+      }
+      th {
+        background: #f2f2f2;
       }
       .today {
-        background: #ffe8a6;
-        font-weight: bold;
+        background: #ffe6b3;
       }
       .has-rota {
         background: #d0f0c0;
+      }
+      .other-month {
+        background: #fafafa;
+        color: #ccc;
+      }
+      a {
+        text-decoration: none;
+        color: inherit;
       }
     </style>
   </head>
   <body>
     <h1>{{ month_name }} {{ year }}</h1>
+
+    <a href="{% url 'monthly_calendar' prev_year prev_month %}">
+      &larr; Previous
+    </a>
+    &nbsp; {{ month_name }} {{ year }} &nbsp;
+    <a href="{% url 'monthly_calendar' next_year next_month %}">Next &rarr;</a>
 
     <table>
       <thead>
@@ -42,13 +57,11 @@
       <tbody>
         {% for week in weeks %}
         <tr>
-          {% for d in week %} {% if not d %}
-          <td></td>
-          {% elif d.month != month %}
-          <td></td>
+          {% for d in week %} {% if d.month != month %}
+          <td class="other-month"></td>
           {% else %}
           <td
-            class="{% if d == today %}today{% endif %}{% if d in rotadays %} has-rota{% endif %}"
+            class="{% if d == today %}today{% endif %} {% if d in rotadays %} has-rota{% endif %}"
           >
             <a href="{% url 'daily_rota' d.year d.month d.day %}">
               {{ d.day }}
