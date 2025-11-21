@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>{{ month_name }} {{ year }}</title>
+    <style>
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th,
+      td {
+        width: 14%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        text-align: center;
+        vertical-align: top;
+      }
+      .today {
+        background: #ffe8a6;
+        font-weight: bold;
+      }
+      .has-rota {
+        background: #d0f0c0;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>{{ month_name }} {{ year }}</h1>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Mon</th>
+          <th>Tue</th>
+          <th>Wed</th>
+          <th>Thu</th>
+          <th>Fri</th>
+          <th>Sat</th>
+          <th>Sun</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for week in weeks %}
+        <tr>
+          {% for d in week %} {% if not d %}
+          <td></td>
+          {% elif d.month != month %}
+          <td></td>
+          {% else %}
+          <td
+            class="{% if d == today %}today{% endif %}{% if d in rotadays %} has-rota{% endif %}"
+          >
+            <a href="{% url 'daily_rota' d.year d.month d.day %}">
+              {{ d.day }}
+            </a>
+          </td>
+          {% endif %} {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </body>
+</html>
