@@ -1,7 +1,7 @@
 import calendar
-from datetime import date, timedelta
+from datetime import date as date_cls, timedelta
 from django.shortcuts import render
-from .models import RotaDay, Assignment
+from .models import RotaDay, Assignment, CleanRoom
 from django.shortcuts import get_object_or_404, redirect
 
 def monthly_calendar(request, year, month):
@@ -39,20 +39,39 @@ def monthly_calendar(request, year, month):
 
 
 def daily_rota(request, year, month, day):
-    selected_date = date(year, month, day)
+    date = date_cls(year=year, month=month, day=day)
+    rotaday, _ = RotaDay.objects.get_or_create(date=date)
 
-    # Try to find a RotaDay; if none exists, rotaday will be None
-    rotaday = RotaDay.objects.filter(date=selected_date).first()
+    assignments = Assignment.objects.filter(rotaday=rotaday).select_related(
+        "staff", "staff__crew", "clean_room", "isolator", "shift"
+    )
 
-    if rotaday:
-        assignments = Assignment.objects.filter(rotaday=rotaday)
-    else:
-        assignments = []
+    cleanrooms = CleanRoom.objects.all().prefetch_related("isolators")
+
+    rooms_grid = []
+    for room in cleanrooms:
+        isolators = list(room.isolators.all())  # ordered by Meta.ordering
+
+        if room.number in (1, 3):
+            right_wall = isolators[0:4]
+            left_wall = isolators[4:8]
+        else:
+            right_wall = isolators
+            left_wall = []
+
+        rooms_grid.append(
+            {
+                "room": room,
+                "right_wall": right_wall,
+                "left_wall": left_wall,
+            }
+        )
 
     context = {
-        "date": selected_date,
+        "date": date,
         "rotaday": rotaday,
         "assignments": assignments,
+        "rooms_grid": rooms_grid,
     }
     return render(request, "rota/daily_rota.html", context)
 
