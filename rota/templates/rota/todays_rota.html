@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Today's Rota</title>
+  </head>
+  <body>
+    <h1>Rota for {{ date }}</h1>
+
+    {% if rotaday %}
+    <table border="1" cellpadding="6">
+      <thead>
+        <tr>
+          <th>Clean Room</th>
+          <th>Isolator</th>
+          <th>Staff</th>
+          <th>Shift</th>
+          <th>Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for a in assignments %}
+        <tr>
+          <td>{{ a.isolator.clean_room.name }}</td>
+          <td>{{ a.isolator.name }}</td>
+          <td>{{ a.staff.full_name }}</td>
+          <td>{{ a.shift.name }}</td>
+          <td>{{ a.notes }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p>No rota created for today yet.</p>
+    {% endif %}
+  </body>
+</html>
