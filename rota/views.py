@@ -1,8 +1,9 @@
 import calendar
-from datetime import date as date_cls, timedelta
-from django.shortcuts import render
+from datetime import date, timedelta
+
+from django.shortcuts import render, redirect
 from .models import RotaDay, Assignment, CleanRoom
-from django.shortcuts import get_object_or_404, redirect
+
 
 def monthly_calendar(request, year, month):
     year = int(year)
@@ -39,8 +40,16 @@ def monthly_calendar(request, year, month):
 
 
 def daily_rota(request, year, month, day):
-    date = date_cls(year=year, month=month, day=day)
-    rotaday, _ = RotaDay.objects.get_or_create(date=date)
+    # Convert URL params to ints
+    year = int(year)
+    month = int(month)
+    day = int(day)
+
+    # Use the imported datetime.date class and store it in a DIFFERENT variable
+    target_date = date(year=year, month=month, day=day)
+
+    # Get or create the RotaDay row for this date
+    rotaday, _ = RotaDay.objects.get_or_create(date=target_date)
 
     assignments = Assignment.objects.filter(rotaday=rotaday).select_related(
         "staff", "staff__crew", "clean_room", "isolator", "shift"
@@ -68,7 +77,7 @@ def daily_rota(request, year, month, day):
         )
 
     context = {
-        "date": date,
+        "date": target_date,      # safe to call this 'date' in the context
         "rotaday": rotaday,
         "assignments": assignments,
         "rooms_grid": rooms_grid,
