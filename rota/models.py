@@ -119,6 +119,9 @@ class Assignment(models.Model):
     class Meta:
         # e.g. can't put the same person on the same isolator/room twice in a shift
         unique_together = ("rotaday", "staff", "clean_room", "isolator", "shift")
+        permissions = [
+            ("manage_rota", "Can create and edit rota"),
+        ]
 
     def clean(self):
         """

@@ -2,9 +2,12 @@ import calendar
 from datetime import date, timedelta
 
 from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required, permission_required
+
 from .models import RotaDay, Assignment, CleanRoom
 
 
+@login_required
 def monthly_calendar(request, year, month):
     year = int(year)
     month = int(month)
@@ -39,6 +42,7 @@ def monthly_calendar(request, year, month):
     return render(request, "rota/monthly_calendar.html", context)
 
 
+@login_required
 def daily_rota(request, year, month, day):
     # Convert URL params to ints
     year = int(year)
