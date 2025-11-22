@@ -163,7 +163,6 @@
     <div class="page-header">
       <h1>Daily Rota – {{ date }}</h1>
       <div class="nav-links">
-        {# Back to month view – adjust URL name/params if different #}
         <a href="{% url 'monthly_calendar' date.year date.month %}">
           &larr; Back to month
         </a>
@@ -177,14 +176,31 @@
       Showing {{ assignments|length }} assignment{{ assignments|length|pluralize
       }} for this day.
     </div>
-    {% endif %} {# ================= SUITE LAYOUT GRID ================= #}
+    {% endif %}
+
+    <!-- ================= SUITE LAYOUT GRID ================= -->
     <div class="suite-row">
       {% for block in rooms_grid %}
       <div class="cleanroom-block">
         <h2>{{ block.room.name }}</h2>
 
         <div class="walls">
-          {# RIGHT WALL #}
+          <!-- LEFT WALL FIRST -->
+          {% if block.left_wall %}
+          <div class="wall wall-left">
+            <div class="wall-title">Left wall</div>
+            {% for iso in block.left_wall %}
+            <div class="isolator-box">
+              <div class="isolator-name">{{ iso.name }}</div>
+              <div class="isolator-empty">
+                No visual assignments shown here (see table below).
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          {% endif %}
+
+          <!-- RIGHT WALL SECOND -->
           <div class="wall wall-right">
             <div class="wall-title">Right wall</div>
             {% if block.right_wall %} {% for iso in block.right_wall %}
@@ -198,26 +214,12 @@
             <div class="isolator-empty">No isolators on this wall.</div>
             {% endif %}
           </div>
-
-          {# LEFT WALL (only for CR1 & CR3) #} {% if block.left_wall %}
-          <div class="wall wall-left">
-            <div class="wall-title">Left wall</div>
-            {% for iso in block.left_wall %}
-            <div class="isolator-box">
-              <div class="isolator-name">{{ iso.name }}</div>
-              <div class="isolator-empty">
-                No visual assignments shown here (see table below).
-              </div>
-            </div>
-            {% endfor %}
-          </div>
-          {% endif %}
         </div>
       </div>
       {% endfor %}
     </div>
 
-    {# ================= ASSIGNMENT LIST ================= #}
+    <!-- ================= ASSIGNMENT LIST ================= -->
     <section>
       <h3>Assignments for {{ date }}</h3>
 

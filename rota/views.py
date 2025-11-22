@@ -1,7 +1,7 @@
 import calendar
 from datetime import date, timedelta
 
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, permission_required
 
 from .models import RotaDay, Assignment, CleanRoom
@@ -30,15 +30,15 @@ def home(request):
 
 
 @login_required
+@permission_required("rota.rota_viewer", raise_exception=True)
 def monthly_calendar(request, year, month):
     year = int(year)
     month = int(month)
 
     first_day = date(year, month, 1)
-    cal = calendar.Calendar(firstweekday=0)  # Monday = 0
-    weeks = cal.monthdatescalendar(year, month)  # list of weeks, each 7 date objects
+    cal = calendar.Calendar(firstweekday=0)
+    weeks = cal.monthdatescalendar(year, month)
 
-    # previous & next month for the arrows
     prev_month_date = (first_day - timedelta(days=1)).replace(day=1)
     next_month_date = (first_day + timedelta(days=31)).replace(day=1)
 
@@ -65,16 +65,9 @@ def monthly_calendar(request, year, month):
 
 
 @login_required
+@permission_required("rota.rota_viewer", raise_exception=True)
 def daily_rota(request, year, month, day):
-    # Convert URL params to ints
-    year = int(year)
-    month = int(month)
-    day = int(day)
-
-    # Use the imported datetime.date class and store it in a DIFFERENT variable
-    target_date = date(year=year, month=month, day=day)
-
-    # Get or create the RotaDay row for this date
+    target_date = date(year=int(year), month=int(month), day=int(day))
     rotaday, _ = RotaDay.objects.get_or_create(date=target_date)
 
     assignments = Assignment.objects.filter(rotaday=rotaday).select_related(
@@ -103,7 +96,7 @@ def daily_rota(request, year, month, day):
         )
 
     context = {
-        "date": target_date,      # safe to call this 'date' in the context
+        "date": target_date,
         "rotaday": rotaday,
         "assignments": assignments,
         "rooms_grid": rooms_grid,
@@ -111,6 +104,9 @@ def daily_rota(request, year, month, day):
     return render(request, "rota/daily_rota.html", context)
 
 
+
+@login_required
+@permission_required("rota.rota_viewer", raise_exception=True)
 def current_month_redirect(request):
     today = date.today()
     return redirect("monthly_calendar", year=today.year, month=today.month)

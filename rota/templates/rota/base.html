@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>{% block title %}Skedaddle Rota{% endblock %}</title>
+    <style>
+      body {
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        margin: 0;
+        background: #f4f5f7;
+        color: #111827;
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+      a:hover {
+        text-decoration: underline;
+      }
+
+      /* NAVBAR */
+      .navbar {
+        background: #111827;
+        color: #f9fafb;
+        padding: 0.6rem 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .navbar-brand {
+        font-weight: 600;
+        font-size: 1.1rem;
+      }
+
+      .navbar-links {
+        display: flex;
+        gap: 1rem;
+        font-size: 0.9rem;
+      }
+
+      .navbar-links a {
+        color: #e5e7eb;
+      }
+      .navbar-links a:hover {
+        color: #ffffff;
+      }
+
+      .navbar-right {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 0.85rem;
+      }
+
+      .btn-pill {
+        border-radius: 999px;
+        padding: 0.25rem 0.7rem;
+        border: 1px solid #4b5563;
+        background: transparent;
+        color: #e5e7eb;
+        font-size: 0.8rem;
+      }
+      .btn-pill:hover {
+        background: #374151;
+        text-decoration: none;
+      }
+
+      /* PAGE WRAPPER */
+      .page-wrapper {
+        max-width: 1100px;
+        margin: 1.5rem auto 2rem;
+        padding: 0 1rem;
+      }
+
+      .flash-messages {
+        margin-bottom: 1rem;
+      }
+
+      .flash-message {
+        padding: 0.6rem 0.8rem;
+        border-radius: 4px;
+        font-size: 0.85rem;
+        margin-bottom: 0.4rem;
+      }
+
+      .flash-success {
+        background: #ecfdf3;
+        border: 1px solid #bbf7d0;
+      }
+
+      .flash-error {
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+      }
+
+      {% block extra_css %}{% endblock %}
+    </style>
+    {% block extra_head %}{% endblock %}
+  </head>
+
+  <body>
+    <header class="navbar">
+      <div class="navbar-left">
+        <a href="{% url 'home' %}" class="navbar-brand">Skedaddle Rota</a>
+      </div>
+
+      <nav class="navbar-links">
+        <a href="{% url 'home' %}">Home</a>
+        <a
+          href="{% url 'monthly_calendar' year=today.year month=today.month %}"
+        >
+          Calendar
+        </a>
+        <a
+          href="{% url 'daily_rota' year=today.year month=today.month day=today.day %}"
+        >
+          Today
+        </a>
+
+        {% if user.is_authenticated %}
+        <a href="{% url 'staff_list' %}">Staff</a>
+        {% endif %} {% if user.is_superuser %}
+        <a href="/admin/">Admin</a>
+        {% endif %}
+      </nav>
+
+      <div class="navbar-right">
+        {% if user.is_authenticated %}
+        <span>{{ user.username }}</span>
+        <a class="btn-pill" href="{% url 'logout' %}">Logout</a>
+        {% else %}
+        <a class="btn-pill" href="{% url 'login' %}">Login</a>
+        {% endif %}
+      </div>
+    </header>
+
+    <main class="page-wrapper">
+      {# messages #}
+      <div class="flash-messages">
+        {% if messages %} {% for message in messages %}
+        <div
+          class="flash-message {% if message.tags == 'success' %}flash-success{% elif message.tags == 'error' %}flash-error{% endif %}"
+        >
+          {{ message }}
+        </div>
+        {% endfor %} {% endif %}
+      </div>
+
+      {% block content %}{% endblock %}
+    </main>
+  </body>
+</html>
