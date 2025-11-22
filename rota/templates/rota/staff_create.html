@@ -1,0 +1,28 @@
+{% extends "rota/base.html" %} {% block title %}Add Staff – Skedaddle Rota{%
+endblock %} {% block content %}
+<h1>Add Staff Member</h1>
+<p style="color: #6b7280; font-size: 0.9rem">
+  Create a new staff member. As superuser you can later link these to rota
+  permissions / Django users as needed.
+</p>
+
+<form method="post" style="margin-top: 1rem; max-width: 420px">
+  {% csrf_token %} {{ form.as_p }}
+
+  <button
+    type="submit"
+    style="
+      margin-top: 0.5rem;
+      padding: 0.4rem 0.9rem;
+      border-radius: 6px;
+      border: none;
+      background: #2563eb;
+      color: #ffffff;
+      font-size: 0.9rem;
+      cursor: pointer;
+    "
+  >
+    Save staff member
+  </button>
+</form>
+{% endblock %}

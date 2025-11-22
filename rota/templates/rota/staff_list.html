@@ -1,0 +1,70 @@
+{% extends "rota/base.html" %} {% block title %}Staff – Skedaddle Rota{%
+endblock %} {% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center">
+  <h1>Staff</h1>
+  <a
+    href="{% url 'staff_create' %}"
+    style="
+      padding: 0.35rem 0.8rem;
+      border-radius: 6px;
+      border: none;
+      background: #2563eb;
+      color: #ffffff;
+      font-size: 0.9rem;
+      text-decoration: none;
+    "
+  >
+    + Add Staff
+  </a>
+</div>
+
+{% if staff %}
+<table
+  style="
+    width: 100%;
+    margin-top: 1rem;
+    border-collapse: collapse;
+    background: #ffffff;
+    border-radius: 6px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+  "
+>
+  <thead>
+    <tr style="background: #f3f4f6">
+      <th style="padding: 0.5rem; text-align: left; font-size: 0.85rem">
+        Name
+      </th>
+      <th style="padding: 0.5rem; text-align: left; font-size: 0.85rem">
+        Role
+      </th>
+      <th style="padding: 0.5rem; text-align: left; font-size: 0.85rem">
+        Crew
+      </th>
+      <th style="padding: 0.5rem; text-align: left; font-size: 0.85rem">
+        Active
+      </th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for s in staff %}
+    <tr>
+      <td style="padding: 0.5rem; font-size: 0.85rem">{{ s.full_name }}</td>
+      <td style="padding: 0.5rem; font-size: 0.85rem">
+        {{ s.get_role_display }}
+      </td>
+      <td style="padding: 0.5rem; font-size: 0.85rem">
+        {% if s.crew %}{{ s.crew.name }}{% else %}-{% endif %}
+      </td>
+      <td style="padding: 0.5rem; font-size: 0.85rem">
+        {% if s.is_active %}Yes{% else %}No{% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p style="margin-top: 1rem; color: #6b7280; font-size: 0.9rem">
+  No staff members yet.
+</p>
+{% endif %} {% endblock %}

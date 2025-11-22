@@ -31,4 +31,5 @@ urlpatterns = [
     path('calendar/', rota_views.current_month_redirect, name='current_month'),
     path('calendar/<int:year>/<int:month>/', rota_views.monthly_calendar, name='monthly_calendar'),
     path('day/<int:year>/<int:month>/<int:day>/', rota_views.daily_rota, name='daily_rota'),
+    path("", include("rota.urls")),
 ]
