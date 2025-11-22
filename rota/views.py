@@ -7,6 +7,28 @@ from django.contrib.auth.decorators import login_required, permission_required
 from .models import RotaDay, Assignment, CleanRoom
 
 
+def home(request):
+    """
+    Simple landing page for the rota system.
+
+    - If not logged in: show a 'Log in' button.
+    - If logged in: show their role (Rota Manager / Rota Viewer)
+      and link to the calendar.
+    """
+    user = request.user
+    is_authenticated = user.is_authenticated
+    is_manager = False
+
+    if is_authenticated:
+        is_manager = user.has_perm("rota.manage_rota")
+
+    context = {
+        "is_authenticated": is_authenticated,
+        "is_manager": is_manager,
+    }
+    return render(request, "rota/home.html", context)
+
+
 @login_required
 def monthly_calendar(request, year, month):
     year = int(year)

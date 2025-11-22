@@ -16,8 +16,19 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from rota import views as rota_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path("", include("rota.urls")),
+
+    # Django's built-in auth URLs: /accounts/login/, /accounts/logout/, etc.
+    path('accounts/', include('django.contrib.auth.urls')),
+
+    # Home / landing page
+    path('', rota_views.home, name='home'),
+
+    # Calendar + day views
+    path('calendar/', rota_views.current_month_redirect, name='current_month'),
+    path('calendar/<int:year>/<int:month>/', rota_views.monthly_calendar, name='monthly_calendar'),
+    path('day/<int:year>/<int:month>/<int:day>/', rota_views.daily_rota, name='daily_rota'),
 ]
