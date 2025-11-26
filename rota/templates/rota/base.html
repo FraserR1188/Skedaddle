@@ -19,6 +19,7 @@
         color: inherit;
         text-decoration: none;
       }
+
       a:hover {
         text-decoration: underline;
       }
@@ -47,6 +48,7 @@
       .navbar-links a {
         color: #e5e7eb;
       }
+
       .navbar-links a:hover {
         color: #ffffff;
       }
@@ -65,7 +67,9 @@
         background: transparent;
         color: #e5e7eb;
         font-size: 0.8rem;
+        cursor: pointer;
       }
+
       .btn-pill:hover {
         background: #374151;
         text-decoration: none;
@@ -98,10 +102,9 @@
         background: #fef2f2;
         border: 1px solid #fecaca;
       }
-
-      {% block extra_css %}{% endblock %}
     </style>
 
+    <!-- Global app stylesheet (calendar, daily rota, modals, etc.) -->
     <link rel="stylesheet" href="{% static 'rota/css/main.css' %}" />
 
     {% block extra_head %}{% endblock %}
@@ -155,5 +158,33 @@
 
       {% block content %}{% endblock %}
     </main>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        document
+          .querySelectorAll("[data-open-modal]")
+          .forEach(function (button) {
+            button.addEventListener("click", function () {
+              var id = this.getAttribute("data-open-modal");
+              var modal = document.getElementById(id);
+              if (modal) {
+                modal.classList.add("is-visible");
+              }
+            });
+          });
+
+        document
+          .querySelectorAll("[data-close-modal]")
+          .forEach(function (button) {
+            button.addEventListener("click", function () {
+              var id = this.getAttribute("data-close-modal");
+              var modal = document.getElementById(id);
+              if (modal) {
+                modal.classList.remove("is-visible");
+              }
+            });
+          });
+      });
+    </script>
   </body>
 </html>

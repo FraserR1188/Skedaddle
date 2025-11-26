@@ -79,6 +79,7 @@ class RotaDay(models.Model):
     def __str__(self):
         return self.date.isoformat()
 
+
 class Assignment(models.Model):
     """
     One person on one location (room or isolator) for a given day and shift.
@@ -122,30 +123,62 @@ class Assignment(models.Model):
     )
     notes = models.CharField(max_length=255, blank=True)
 
+    # NEW: batch (1–8) for isolator assignments
+    batch_number = models.PositiveSmallIntegerField(
+        choices=[(i, f"Batch {i}") for i in range(1, 9)],
+        null=True,
+        blank=True,
+    )
+
+    # NEW: flag to mark room supervisor assignments
+    is_room_supervisor = models.BooleanField(default=False)
+
     class Meta:
-        # e.g. can't put the same person on the same isolator/room twice in a shift
-        unique_together = ("rotaday", "staff", "clean_room", "isolator", "shift")
+        # avoid duplicate staff/location/shift/batch rows
+        unique_together = (
+            "rotaday",
+            "staff",
+            "clean_room",
+            "isolator",
+            "shift",
+            "batch_number",
+        )
 
     def clean(self):
         """
-        Basic business rules:
-        - If location_type == ISOLATOR: isolator must be set & staff must be OPERATIVE
-        - If location_type == ROOM: isolator must be null & staff must be SUPERVISOR
+        Business rules:
+
+        - If location_type == ISOLATOR:
+            * isolator must be set
+            * staff must be OPERATIVE
+            * batch_number must be 1–8 (not null)
+
+        - If location_type == ROOM:
+            * isolator must be null
+            * staff must be SUPERVISOR
+            * batch_number must be null
         """
         # Isolator consistency
-        if self.location_type == "ISOLATOR" and self.isolator is None:
-            raise ValidationError("Isolator location must have an isolator selected.")
-        if self.location_type == "ROOM" and self.isolator is not None:
-            raise ValidationError("Room assignments must not have an isolator set.")
+        if self.location_type == "ISOLATOR":
+            if self.isolator is None:
+                raise ValidationError("Isolator location must have an isolator selected.")
+            if self.staff.role != "OPERATIVE":
+                raise ValidationError("Only Production Operatives can be assigned to isolators.")
+            if self.batch_number is None:
+                raise ValidationError("Isolator assignments must have a batch number (1–8).")
 
-        # Role rules
-        if self.location_type == "ISOLATOR" and self.staff.role != "OPERATIVE":
-            raise ValidationError("Only Production Operatives can be assigned to isolators.")
-        if self.location_type == "ROOM" and self.staff.role != "SUPERVISOR":
-            raise ValidationError("Only Production Supervisors should be assigned to the room.")
+        # Room consistency
+        if self.location_type == "ROOM":
+            if self.isolator is not None:
+                raise ValidationError("Room assignments must not have an isolator set.")
+            if self.staff.role != "SUPERVISOR":
+                raise ValidationError("Only Production Supervisors should be assigned to the room.")
+            if self.batch_number is not None:
+                raise ValidationError("Room assignments must not have a batch number.")
 
     def __str__(self):
         loc = self.clean_room.name
         if self.isolator:
             loc += f" - {self.isolator.name}"
-        return f"{self.rotaday} {self.shift} | {self.staff} @ {loc}"
+        batch = f" [Batch {self.batch_number}]" if self.batch_number else ""
+        return f"{self.rotaday} {self.shift} | {self.staff} @ {loc}{batch}"

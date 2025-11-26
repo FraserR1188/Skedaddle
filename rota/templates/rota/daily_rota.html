@@ -1,269 +1,305 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Daily Rota – {{ date }}</title>
-    <style>
-      body {
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-          sans-serif;
-        margin: 20px;
-        background: #f4f5f7;
-        color: #222;
-      }
+{% extends "rota/base.html" %} {% block title %}Daily Rota – {{ date }}{%
+endblock %} {% block content %}
+<div class="page-header">
+  <h1>Daily Rota – {{ date }}</h1>
+  <div class="nav-links">
+    <a href="{% url 'monthly_calendar' date.year date.month %}">
+      &larr; Back to month
+    </a>
+  </div>
+</div>
 
-      a {
-        color: #0d6efd;
-        text-decoration: none;
-      }
+{% if not assignments %}
+<div class="info-banner warning">No Assigned Rota for Today.</div>
+{% else %}
+<div class="info-banner info">
+  Showing {{ assignments|length }} assignment{{ assignments|length|pluralize }}
+  for this day.
+</div>
+{% endif %} {# ================= SUITE LAYOUT (CARDS) ================= #}
+<div class="suite-row">
+  {% for block in rooms_grid %}
+  <div class="cleanroom-block">
+    <h2>{{ block.room.name }}</h2>
 
-      a:hover {
-        text-decoration: underline;
-      }
+    <div class="walls">
+      {# LEFT WALL #} {% if block.left_wall %}
+      <div class="wall wall-left">
+        <div class="wall-title">Left wall</div>
+        {% for iso in block.left_wall %}
+        <div class="isolator-box">
+          <div class="isolator-name">{{ iso.name }}</div>
 
-      .page-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1rem;
-      }
-
-      .page-header h1 {
-        margin: 0;
-        font-size: 1.5rem;
-      }
-
-      .nav-links a {
-        margin-left: 0.75rem;
-        font-size: 0.9rem;
-      }
-
-      .info-banner {
-        padding: 0.6rem 0.8rem;
-        border-radius: 4px;
-        margin-bottom: 1rem;
-        font-size: 0.9rem;
-      }
-
-      .info-banner.info {
-        background: #e7f3ff;
-        border: 1px solid #b6daff;
-      }
-
-      .info-banner.warning {
-        background: #fff4e5;
-        border: 1px solid #ffd19b;
-      }
-
-      /* Suite layout */
-      .suite-row {
-        display: flex;
-        gap: 1.5rem;
-        align-items: flex-start;
-        margin-bottom: 1.5rem;
-        flex-wrap: wrap;
-      }
-
-      .cleanroom-block {
-        border: 1px solid #d0d4dc;
-        border-radius: 6px;
-        padding: 0.75rem;
-        min-width: 220px;
-        background: #ffffff;
-        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
-      }
-
-      .cleanroom-block h2 {
-        margin: 0 0 0.5rem 0;
-        font-size: 1rem;
-      }
-
-      .walls {
-        display: flex;
-        justify-content: space-between;
-        gap: 0.75rem;
-      }
-
-      .wall {
-        display: flex;
-        flex-direction: column;
-        gap: 0.4rem;
-        flex: 1;
-      }
-
-      .wall-title {
-        font-size: 0.75rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.03em;
-        color: #6b7280;
-        margin-bottom: 0.25rem;
-      }
-
-      .isolator-box {
-        border: 1px solid #cbd2e1;
-        border-radius: 4px;
-        padding: 0.3rem 0.4rem;
-        font-size: 0.8rem;
-        background: #f9fafb;
-      }
-
-      .isolator-name {
-        font-weight: 600;
-        margin-bottom: 0.15rem;
-      }
-
-      .isolator-empty {
-        font-size: 0.75rem;
-        color: #9ca3af;
-      }
-
-      /* Assignment table */
-      h3 {
-        margin-top: 0;
-        margin-bottom: 0.5rem;
-        font-size: 1.05rem;
-      }
-
-      table.assignments {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 0.5rem;
-        background: #ffffff;
-        border-radius: 6px;
-        overflow: hidden;
-        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
-      }
-
-      table.assignments th,
-      table.assignments td {
-        padding: 0.5rem 0.6rem;
-        border-bottom: 1px solid #e5e7eb;
-        font-size: 0.85rem;
-        text-align: left;
-      }
-
-      table.assignments th {
-        background: #f3f4f6;
-        font-weight: 600;
-      }
-
-      table.assignments tr:last-child td {
-        border-bottom: none;
-      }
-
-      .muted {
-        color: #9ca3af;
-        font-size: 0.85rem;
-      }
-    </style>
-  </head>
-
-  <body>
-    <div class="page-header">
-      <h1>Daily Rota – {{ date }}</h1>
-      <div class="nav-links">
-        <a href="{% url 'monthly_calendar' date.year date.month %}">
-          &larr; Back to month
-        </a>
-      </div>
-    </div>
-
-    {% if not assignments %}
-    <div class="info-banner warning">No Assigned Rota for Today.</div>
-    {% else %}
-    <div class="info-banner info">
-      Showing {{ assignments|length }} assignment{{ assignments|length|pluralize
-      }} for this day.
-    </div>
-    {% endif %}
-
-    <!-- ================= SUITE LAYOUT GRID ================= -->
-    <div class="suite-row">
-      {% for block in rooms_grid %}
-      <div class="cleanroom-block">
-        <h2>{{ block.room.name }}</h2>
-
-        <div class="walls">
-          <!-- LEFT WALL FIRST -->
-          {% if block.left_wall %}
-          <div class="wall wall-left">
-            <div class="wall-title">Left wall</div>
-            {% for iso in block.left_wall %}
-            <div class="isolator-box">
-              <div class="isolator-name">{{ iso.name }}</div>
-              <div class="isolator-empty">
-                No visual assignments shown here (see table below).
-              </div>
-            </div>
-            {% endfor %}
+          {% if iso.has_assignments %}
+          <div class="isolator-empty">
+            Assignments set – click “Edit” to view or change.
+          </div>
+          {% else %}
+          <div class="isolator-empty">
+            No assignments yet – click “Edit” to add.
           </div>
           {% endif %}
 
-          <!-- RIGHT WALL SECOND -->
-          <div class="wall wall-right">
-            <div class="wall-title">Right wall</div>
-            {% if block.right_wall %} {% for iso in block.right_wall %}
-            <div class="isolator-box">
-              <div class="isolator-name">{{ iso.name }}</div>
-              <div class="isolator-empty">
-                No visual assignments shown here (see table below).
-              </div>
-            </div>
-            {% endfor %} {% else %}
-            <div class="isolator-empty">No isolators on this wall.</div>
-            {% endif %}
-          </div>
+          <button
+            type="button"
+            class="btn-pill"
+            data-open-modal="modal-isolator-{{ iso.id }}"
+          >
+            Edit assignments
+          </button>
         </div>
+        {% endfor %}
       </div>
-      {% endfor %}
+      {% endif %} {# RIGHT WALL #}
+      <div class="wall wall-right">
+        <div class="wall-title">Right wall</div>
+        {% if block.right_wall %} {% for iso in block.right_wall %}
+        <div class="isolator-box">
+          <div class="isolator-name">{{ iso.name }}</div>
+
+          {% if iso.has_assignments %}
+          <div class="isolator-empty">
+            Assignments set – click “Edit” to view or change.
+          </div>
+          {% else %}
+          <div class="isolator-empty">
+            No assignments yet – click “Edit” to add.
+          </div>
+          {% endif %}
+
+          <button
+            type="button"
+            class="btn-pill"
+            data-open-modal="modal-isolator-{{ iso.id }}"
+          >
+            Edit assignments
+          </button>
+        </div>
+        {% endfor %} {% else %}
+        <div class="isolator-empty">No isolators on this wall.</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+{# ================= MODALS FOR EACH ISOLATOR ================= #} {% for block
+in rooms_grid %} {# LEFT WALL MODALS #} {% if block.left_wall %} {% for iso in
+block.left_wall %}
+<div class="modal" id="modal-isolator-{{ iso.id }}">
+  <div
+    class="modal-backdrop"
+    data-close-modal="modal-isolator-{{ iso.id }}"
+  ></div>
+
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>Edit assignments – {{ iso.name }} ({{ date }})</h2>
+      <button
+        type="button"
+        class="modal-close"
+        data-close-modal="modal-isolator-{{ iso.id }}"
+      >
+        &times;
+      </button>
     </div>
 
-    <!-- ================= ASSIGNMENT LIST ================= -->
-    <section>
-      <h3>Assignments for {{ date }}</h3>
+    {# Current assignments summary #}
+    <div class="muted" style="margin-bottom: 0.75rem">
+      {% if iso.batch_assignments %}
+      <strong>Current batches:</strong>
+      <ul>
+        {% for a in iso.batch_assignments %}
+        <li>Batch {{ a.batch_number }} – {{ a.staff.full_name }}</li>
+        {% endfor %}
+      </ul>
+      {% else %} No existing assignments for this isolator. {% endif %}
+    </div>
 
-      {% if not assignments %}
-      <p class="muted">There are currently no assignments for this date.</p>
-      {% else %}
-      <table class="assignments">
-        <thead>
-          <tr>
-            <th>Staff Member</th>
-            <th>Role</th>
-            <th>Crew</th>
-            <th>Cleanroom</th>
-            <th>Isolator / Room</th>
-            <th>Shift</th>
-            <th>Notes</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for a in assignments %}
-          <tr>
-            <td>{{ a.staff.full_name }}</td>
-            <td>{{ a.staff.get_role_display }}</td>
-            <td>
-              {% if a.staff.crew %}{{ a.staff.crew.name }}{% else %}-{% endif %}
-            </td>
-            <td>{{ a.clean_room.name }}</td>
-            <td>
-              {% if a.location_type == "ROOM" %} Room (Supervisor) {% elif
-              a.isolator %} {{ a.isolator.name }} {% else %} - {% endif %}
-            </td>
-            <td>
-              {{ a.shift.name }}
-              <br />
-              <span class="muted">
-                {{ a.shift.start_time }}–{{ a.shift.end_time }}
-              </span>
-            </td>
-            <td>{% if a.notes %}{{ a.notes }}{% else %}-{% endif %}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-      {% endif %}
-    </section>
-  </body>
-</html>
+    <form
+      method="post"
+      action="{% url 'daily_rota' date.year date.month date.day %}"
+    >
+      {% csrf_token %}
+      <input type="hidden" name="isolator_id" value="{{ iso.id }}" />
+
+      <h3>Batches</h3>
+      <p class="muted">
+        Select a staff member for each batch (Production Operatives only).
+      </p>
+
+      <div class="batch-grid">
+        {% for n in "12345678" %}
+        <div class="batch-row">
+          <label>Batch {{ n }}</label>
+          <select name="batch_{{ n }}">
+            <option value="">-- None --</option>
+            {% for staff in staff_list %} {% if staff.role == "OPERATIVE" %}
+            <option value="{{ staff.id }}">{{ staff.full_name }}</option>
+            {% endif %} {% endfor %}
+          </select>
+        </div>
+        {% endfor %}
+      </div>
+
+      <hr />
+
+      <h3>Room supervisors</h3>
+      <p class="muted">
+        Select up to 4 staff to act as supervisors for this cleanroom
+        (Production Supervisors only).
+      </p>
+
+      <select name="room_supervisors" multiple size="5">
+        {% for staff in staff_list %} {% if staff.role == "SUPERVISOR" %}
+        <option value="{{ staff.id }}">{{ staff.full_name }}</option>
+        {% endif %} {% endfor %}
+      </select>
+
+      <div class="modal-actions">
+        <button type="submit" class="btn-pill">Save</button>
+        <button
+          type="button"
+          class="btn-pill"
+          data-close-modal="modal-isolator-{{ iso.id }}"
+        >
+          Cancel
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endfor %} {% endif %} {# RIGHT WALL MODALS #} {% if block.right_wall %} {%
+for iso in block.right_wall %}
+<div class="modal" id="modal-isolator-{{ iso.id }}">
+  <div
+    class="modal-backdrop"
+    data-close-modal="modal-isolator-{{ iso.id }}"
+  ></div>
+
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>Edit assignments – {{ iso.name }} ({{ date }})</h2>
+      <button
+        type="button"
+        class="modal-close"
+        data-close-modal="modal-isolator-{{ iso.id }}"
+      >
+        &times;
+      </button>
+    </div>
+
+    {# Current assignments summary #}
+    <div class="muted" style="margin-bottom: 0.75rem">
+      {% if iso.batch_assignments %}
+      <strong>Current batches:</strong>
+      <ul>
+        {% for a in iso.batch_assignments %}
+        <li>Batch {{ a.batch_number }} – {{ a.staff.full_name }}</li>
+        {% endfor %}
+      </ul>
+      {% else %} No existing assignments for this isolator. {% endif %}
+    </div>
+
+    <form
+      method="post"
+      action="{% url 'daily_rota' date.year date.month date.day %}"
+    >
+      {% csrf_token %}
+      <input type="hidden" name="isolator_id" value="{{ iso.id }}" />
+
+      <h3>Batches</h3>
+      <p class="muted">
+        Select a staff member for each batch (Production Operatives only).
+      </p>
+
+      <div class="batch-grid">
+        {% for n in "12345678" %}
+        <div class="batch-row">
+          <label>Batch {{ n }}</label>
+          <select name="batch_{{ n }}">
+            <option value="">-- None --</option>
+            {% for staff in staff_list %} {% if staff.role == "OPERATIVE" %}
+            <option value="{{ staff.id }}">{{ staff.full_name }}</option>
+            {% endif %} {% endfor %}
+          </select>
+        </div>
+        {% endfor %}
+      </div>
+
+      <hr />
+
+      <h3>Room supervisors</h3>
+      <p class="muted">
+        Select up to 4 staff to act as supervisors for this cleanroom
+        (Production Supervisors only).
+      </p>
+
+      <select name="room_supervisors" multiple size="5">
+        {% for staff in staff_list %} {% if staff.role == "SUPERVISOR" %}
+        <option value="{{ staff.id }}">{{ staff.full_name }}</option>
+        {% endif %} {% endfor %}
+      </select>
+
+      <div class="modal-actions">
+        <button type="submit" class="btn-pill">Save</button>
+        <button
+          type="button"
+          class="btn-pill"
+          data-close-modal="modal-isolator-{{ iso.id }}"
+        >
+          Cancel
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endfor %} {% endif %} {% endfor %} {# ================= ASSIGNMENT LIST
+(TABLE) ================= #}
+<section>
+  <h3>Assignments for {{ date }}</h3>
+
+  {% if not assignments %}
+  <p class="muted">There are currently no assignments for this date.</p>
+  {% else %}
+  <table class="assignments">
+    <thead>
+      <tr>
+        <th>Staff Member</th>
+        <th>Role</th>
+        <th>Crew</th>
+        <th>Cleanroom</th>
+        <th>Isolator / Room</th>
+        <th>Shift</th>
+        <th>Notes</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for a in assignments %}
+      <tr>
+        <td>{{ a.staff.full_name }}</td>
+        <td>{{ a.staff.get_role_display }}</td>
+        <td>
+          {% if a.staff.crew %} {{ a.staff.crew.name }} {% else %} - {% endif %}
+        </td>
+        <td>{{ a.clean_room.name }}</td>
+        <td>
+          {% if a.location_type == "ROOM" %} Room (Supervisor) {% elif
+          a.isolator %} {{ a.isolator.name }} {% else %} - {% endif %}
+        </td>
+        <td>
+          {{ a.shift.name }}
+          <br />
+          <span class="muted">
+            {{ a.shift.start_time }}–{{ a.shift.end_time }}
+          </span>
+        </td>
+        <td>{% if a.notes %} {{ a.notes }} {% else %} - {% endif %}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+</section>
+{% endblock %}

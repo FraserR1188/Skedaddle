@@ -1,4 +1,6 @@
-/* ===== Monthly Calendar Styling ===== */
+/* =========================================
+   MONTHLY CALENDAR
+   ========================================= */
 
 .rota-calendar-table {
   border-collapse: collapse;
@@ -43,4 +45,243 @@
 
 .rota-calendar-table a:hover {
   text-decoration: underline;
+}
+
+/* =========================================
+   DAILY ROTA – HEADER & BANNERS
+   ========================================= */
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.page-header h1 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.nav-links a {
+  margin-left: 0.75rem;
+  font-size: 0.9rem;
+}
+
+.info-banner {
+  padding: 0.6rem 0.8rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+.info-banner.info {
+  background: #e7f3ff;
+  border: 1px solid #b6daff;
+}
+
+.info-banner.warning {
+  background: #fff4e5;
+  border: 1px solid #ffd19b;
+}
+
+/* =========================================
+   DAILY ROTA – SUITE LAYOUT CARDS
+   ========================================= */
+
+.suite-row {
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.cleanroom-block {
+  border: 1px solid #d0d4dc;
+  border-radius: 6px;
+  padding: 0.75rem;
+  min-width: 220px;
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+}
+
+.cleanroom-block h2 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1rem;
+}
+
+.walls {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.wall {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  flex: 1;
+}
+
+.wall-title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #6b7280;
+  margin-bottom: 0.25rem;
+}
+
+.isolator-box {
+  border: 1px solid #cbd2e1;
+  border-radius: 4px;
+  padding: 0.4rem 0.45rem;
+  font-size: 0.8rem;
+  background: #f9fafb;
+}
+
+.isolator-name {
+  font-weight: 600;
+  margin-bottom: 0.15rem;
+}
+
+.isolator-empty {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  margin-bottom: 0.25rem;
+}
+
+/* Slight spacing for the edit button in isolator cards */
+.isolator-box .btn-pill {
+  margin-top: 0.15rem;
+  font-size: 0.75rem;
+  padding: 0.15rem 0.6rem;
+}
+
+/* =========================================
+   DAILY ROTA – ASSIGNMENT TABLE
+   ========================================= */
+
+h3 {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  font-size: 1.05rem;
+}
+
+table.assignments {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.5rem;
+  background: #ffffff;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+}
+
+table.assignments th,
+table.assignments td {
+  padding: 0.5rem 0.6rem;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 0.85rem;
+  text-align: left;
+}
+
+table.assignments th {
+  background: #f3f4f6;
+  font-weight: 600;
+}
+
+table.assignments tr:last-child td {
+  border-bottom: none;
+}
+
+.muted {
+  color: #9ca3af;
+  font-size: 0.85rem;
+}
+
+/* =========================================
+   MODALS – ISOLATOR EDITOR
+   ========================================= */
+
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+}
+
+.modal.is-visible {
+  display: block;
+}
+
+.modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+}
+
+.modal-content {
+  position: relative;
+  max-width: 600px;
+  margin: 5vh auto;
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.2);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  cursor: pointer;
+}
+
+/* Batch selector grid */
+.batch-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.batch-row label {
+  display: block;
+  font-size: 0.85rem;
+  margin-bottom: 0.2rem;
+}
+
+.batch-row select {
+  width: 100%;
+  font-size: 0.85rem;
+  padding: 0.25rem 0.35rem;
+}
+
+/* Room supervisors multi-select */
+select[name="room_supervisors"] {
+  width: 100%;
+  font-size: 0.85rem;
+  padding: 0.25rem 0.35rem;
+  margin-top: 0.25rem;
+}
+
+.modal-actions {
+  margin-top: 1rem;
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
 }

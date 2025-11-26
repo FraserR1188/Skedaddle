@@ -1,0 +1,74 @@
+<div class="modal" id="modal-isolator-{{ iso.id }}">
+  <div
+    class="modal-backdrop"
+    data-close-modal="modal-isolator-{{ iso.id }}"
+  ></div>
+
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>Edit assignments – {{ iso.name }} ({{ date }})</h2>
+      <button
+        type="button"
+        class="modal-close"
+        data-close-modal="modal-isolator-{{ iso.id }}"
+      >
+        &times;
+      </button>
+    </div>
+
+    <form
+      method="post"
+      action="{% url 'daily_rota' date.year date.month date.day %}"
+    >
+      {% csrf_token %}
+      <input type="hidden" name="isolator_id" value="{{ iso.id }}" />
+
+      <h3>Batches</h3>
+      <p class="muted">Select a staff member for each batch (optional).</p>
+
+      <div class="batch-grid">
+        {% for batch in "12345678" %} {% with batch_num=batch|add:"0"|int %}
+        <div class="batch-row">
+          <label>Batch {{ batch_num }}</label>
+          <select name="batch_{{ batch_num }}">
+            <option value="">-- None --</option>
+            {% for staff in staff_list %} {# Pre-select if already assigned for
+            this isolator + batch #} {% with assigned=None %} {% for a in
+            iso.batch_assignments %} {% if a.batch_number == batch_num and
+            a.staff_id == staff.id %} {% with assigned=1 %}{% endwith %} {%
+            endif %} {% endfor %} {% endwith %}
+            <option value="{{ staff.id }}" {% if assigned %}selected{% endif %}>
+              {{ staff.full_name }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+        {% endwith %} {% endfor %}
+      </div>
+
+      <hr />
+
+      <h3>Room supervisors</h3>
+      <p class="muted">
+        Select up to 4 staff to act as supervisors for this cleanroom.
+      </p>
+
+      <select name="room_supervisors" multiple size="5">
+        {% for staff in staff_list %}
+        <option value="{{ staff.id }}">{{ staff.full_name }}</option>
+        {% endfor %}
+      </select>
+
+      <div class="modal-actions">
+        <button type="submit" class="btn-pill">Save</button>
+        <button
+          type="button"
+          class="btn-pill"
+          data-close-modal="modal-isolator-{{ iso.id }}"
+        >
+          Cancel
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
