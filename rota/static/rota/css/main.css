@@ -1,0 +1,46 @@
+/* ===== Monthly Calendar Styling ===== */
+
+.rota-calendar-table {
+  border-collapse: collapse;
+  width: 100%;
+  table-layout: fixed;
+  font-size: 0.9rem;
+}
+
+.rota-calendar-table th,
+.rota-calendar-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: center;
+  min-width: 40px;
+}
+
+.rota-calendar-table th {
+  background: #f2f2f2;
+  font-weight: 600;
+}
+
+.rota-calendar-today {
+  background: #ffe6b3;
+}
+
+.rota-calendar-has-rota {
+  background: #d0f0c0;
+}
+
+.rota-calendar-other-month {
+  background: #fafafa;
+  color: #ccc;
+}
+
+.rota-calendar-table a {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.rota-calendar-table a:hover {
+  text-decoration: underline;
+}
