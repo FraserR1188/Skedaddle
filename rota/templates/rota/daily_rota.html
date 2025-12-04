@@ -20,13 +20,12 @@
   </div>
 {% endif %}
 
-{# ================= SUITE LAYOUT (CLEANROOM CARDS) ================= #}
+
 <div class="suite-row">
   {% for block in rooms_grid %}
     <div class="cleanroom-block">
       <h2>{{ block.room.name }}</h2>
 
-      {# ===== ROOM SUPERVISORS BOX ===== #}
       <div class="room-supervisors-box">
         <div class="room-supervisors-title">Room Supervisors</div>
 
@@ -37,16 +36,16 @@
             {% endfor %}
           </ul>
         {% else %}
-          <p class="room-supervisors-empty">
-            No room supervisors assigned yet.
-          </p>
+          <p class="room-supervisors-empty">No room supervisors assigned yet.</p>
         {% endif %}
       </div>
 
+
       <div class="walls">
-        {# ========== RIGHT WALL ========== #}
+
+        {# ========== LEFT WALL (title swapped) ========== #}
         <div class="wall">
-          <div class="wall-title">Right Wall</div>
+          <div class="wall-title">Left Wall</div>
 
           {% if block.right_wall %}
             {% for iso in block.right_wall %}
@@ -60,51 +59,36 @@
                     {% endfor %}
                   </div>
                 {% else %}
-                  <div class="isolator-empty">
-                    No duties assigned yet.
-                  </div>
+                  <div class="isolator-empty">No duties assigned yet.</div>
                 {% endif %}
 
                 <div class="isolator-actions">
-                  {# SHOW DUTIES – available for everyone #}
-                  <button
-                    type="button"
-                    class="btn-pill isolator-btn show-btn"
-                    data-open-modal="modal-duties-{{ iso.id }}"
-                  >
+                  <button class="btn-pill isolator-btn show-btn"
+                          data-open-modal="modal-duties-{{ iso.id }}">
                     Show Duties
                   </button>
 
-                  {# EDIT ASSIGNMENTS – only for rota managers / superusers #}
                   {% if user.is_superuser or perms.rota.rota_manager %}
-                    <button
-                      type="button"
-                      class="btn-pill isolator-btn edit-btn"
-                      data-open-modal="modal-isolator-{{ iso.id }}"
-                    >
+                    <button class="btn-pill isolator-btn edit-btn"
+                            data-open-modal="modal-isolator-{{ iso.id }}">
                       Edit Assignments
                     </button>
                   {% endif %}
                 </div>
 
-                {# Edit modal (assign batches + supervisors) #}
-                {% include "rota/partials/isolator_modal.html" with iso=iso date=date staff_list=staff_list supervisors=supervisors %}
-
-
-                {# Read-only duties modal #}
+                {% include "rota/partials/isolator_modal.html" with iso=iso room=block.room date=date staff_list=staff_list supervisors=supervisors %}
                 {% include "rota/partials/isolator_duties_modal.html" with iso=iso date=date %}
               </div>
             {% endfor %}
           {% else %}
-            <div class="isolator-empty">
-              No isolators on this wall.
-            </div>
+            <div class="isolator-empty">No isolators on this wall.</div>
           {% endif %}
         </div>
 
-        {# ========== LEFT WALL ========== #}
+
+        {# ========== RIGHT WALL (title swapped) ========== #}
         <div class="wall">
-          <div class="wall-title">Left Wall</div>
+          <div class="wall-title">Right Wall</div>
 
           {% if block.left_wall %}
             {% for iso in block.left_wall %}
@@ -118,42 +102,32 @@
                     {% endfor %}
                   </div>
                 {% else %}
-                  <div class="isolator-empty">
-                    No duties assigned yet.
-                  </div>
+                  <div class="isolator-empty">No duties assigned yet.</div>
                 {% endif %}
 
                 <div class="isolator-actions">
-                  <button
-                    type="button"
-                    class="btn-pill isolator-btn show-btn"
-                    data-open-modal="modal-duties-{{ iso.id }}"
-                  >
+                  <button class="btn-pill isolator-btn show-btn"
+                          data-open-modal="modal-duties-{{ iso.id }}">
                     Show Duties
                   </button>
 
                   {% if user.is_superuser or perms.rota.rota_manager %}
-                    <button
-                      type="button"
-                      class="btn-pill isolator-btn edit-btn"
-                      data-open-modal="modal-isolator-{{ iso.id }}"
-                    >
+                    <button class="btn-pill isolator-btn edit-btn"
+                            data-open-modal="modal-isolator-{{ iso.id }}">
                       Edit Assignments
                     </button>
                   {% endif %}
                 </div>
 
-                {% include "rota/partials/isolator_modal.html" with iso=iso date=date staff_list=staff_list supervisors=supervisors %}
-
+                {% include "rota/partials/isolator_modal.html" with iso=iso room=block.room date=date staff_list=staff_list supervisors=supervisors %}
                 {% include "rota/partials/isolator_duties_modal.html" with iso=iso date=date %}
               </div>
             {% endfor %}
           {% else %}
-            <div class="isolator-empty">
-              No isolators on this wall.
-            </div>
+            <div class="isolator-empty">No isolators on this wall.</div>
           {% endif %}
         </div>
+
       </div>
     </div>
   {% endfor %}

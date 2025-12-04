@@ -5,14 +5,16 @@
 
     <div class="modal-header">
       <h2>Edit assignments – {{ iso.name }} ({{ date }})</h2>
-      <button type="button"
-              class="modal-close"
-              data-close-modal="modal-isolator-{{ iso.id }}">
+      <button
+        type="button"
+        class="modal-close"
+        data-close-modal="modal-isolator-{{ iso.id }}"
+      >
         &times;
       </button>
     </div>
 
-    {# ----- CURRENT DUTIES SUMMARY ----- #}
+    {# ----- CURRENT DUTIES (ISOLATOR BATCHES) ----- #}
     {% if iso.batch_assignments %}
       <div class="muted" style="margin-bottom: 1rem;">
         <strong>Current duties:</strong>
@@ -32,9 +34,11 @@
       {% csrf_token %}
       <input type="hidden" name="isolator_id" value="{{ iso.id }}">
 
-      {# ================= BATCHES ================= #}
+      {# ================= BATCH ASSIGNMENTS ================= #}
       <h3>Batches</h3>
-      <p class="muted">Select a staff member for each batch.</p>
+      <p class="muted">
+        Select a Production Operative for each batch (1–8).
+      </p>
 
       <div class="batch-grid">
         {% for batch_num in "12345678"|make_list %}
@@ -44,17 +48,19 @@
             <select name="batch_{{ batch_num }}">
               <option value="">-- None --</option>
 
-              {# all active staff (ops + supervisors) #}
+              {# Only Production Operatives for isolator batches #}
               {% for staff in staff_list %}
-                <option value="{{ staff.id }}"
-                  {% for a in iso.batch_assignments %}
-                    {% if a.batch_number|stringformat:"s" == batch_num and a.staff_id == staff.id %}
-                      selected
-                    {% endif %}
-                  {% endfor %}
-                >
-                  {{ staff.full_name }}
-                </option>
+                {% if staff.role == "OPERATIVE" %}
+                  <option value="{{ staff.id }}"
+                    {% for a in iso.batch_assignments %}
+                      {% if a.batch_number|stringformat:"s" == batch_num and a.staff_id == staff.id %}
+                        selected
+                      {% endif %}
+                    {% endfor %}
+                  >
+                    {{ staff.full_name }}
+                  </option>
+                {% endif %}
               {% endfor %}
             </select>
           </div>
@@ -66,28 +72,32 @@
       {# ================= ROOM SUPERVISORS ================= #}
       <h3>Room supervisors</h3>
       <p class="muted">
-        Select up to 4 Production Supervisors for {{ iso.clean_room.name }}.
+        Select up to 4 Production Supervisors for {{ room.name }}.
+        <br>
+        <span class="muted small">
+          (Hold Ctrl / Cmd to select multiple names.)
+        </span>
       </p>
 
       <select name="room_supervisors" multiple size="5">
-        {% with current_ids=iso.clean_room.room_supervisor_ids %}
-          {% for sup in supervisors %}
-            <option value="{{ sup.id }}"
-              {% if current_ids and sup.id in current_ids %}
-                selected
-              {% endif %}
-            >
-              {{ sup.full_name }}
-            </option>
-          {% endfor %}
-        {% endwith %}
+        {% for staff in supervisors %}
+          <option value="{{ staff.id }}"
+            {% if room.room_supervisor_ids and staff.id in room.room_supervisor_ids %}
+              selected
+            {% endif %}
+          >
+            {{ staff.full_name }}
+          </option>
+        {% endfor %}
       </select>
 
       <div class="modal-actions">
         <button type="submit" class="btn-pill">Save</button>
-        <button type="button"
-                class="btn-pill"
-                data-close-modal="modal-isolator-{{ iso.id }}">
+        <button
+          type="button"
+          class="btn-pill"
+          data-close-modal="modal-isolator-{{ iso.id }}"
+        >
           Cancel
         </button>
       </div>

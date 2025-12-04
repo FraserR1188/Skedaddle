@@ -233,15 +233,17 @@ def daily_rota(request, year, month, day):
 
         # Twin-wall rooms (1 & 3): 8 isolators split into left & right
         if room.number in (1, 3):
-            left_wall = isolators[0:4]
-            right_wall = isolators[4:8]
+            # keep whichever side ordering matches your physical layout
+            right_wall = isolators[0:4]
+            left_wall = isolators[4:8]
         else:
-            # Single-wall rooms (2 & 4, etc.)
-            left_wall = isolators
-            right_wall = []
+            # Single-wall rooms (2 & 4, etc.) → show them on the RIGHT wall
+            right_wall = isolators
+            left_wall = []
 
-        # Attach supervisors to room for display
+        # Attach supervisors to room for display and for pre-selecting in the modal
         room.room_supervisors = room_supervisors_by_room.get(room.id, [])
+        room.room_supervisor_ids = [s.id for s in room.room_supervisors]
 
         # Attach duties to each isolator
         for iso in left_wall + right_wall:
