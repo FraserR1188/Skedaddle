@@ -1,0 +1,42 @@
+<div class="modal" id="modal-duties-{{ iso.id }}">
+  <div
+    class="modal-backdrop"
+    data-close-modal="modal-duties-{{ iso.id }}"
+  ></div>
+
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>Duties – {{ iso.name }} ({{ date }})</h2>
+      <button
+        type="button"
+        class="modal-close"
+        data-close-modal="modal-duties-{{ iso.id }}"
+      >
+        &times;
+      </button>
+    </div>
+
+    {% if iso.batch_assignments %}
+    <ul>
+      {% for a in iso.batch_assignments %}
+      <li>
+        <strong>Batch {{ a.batch_number }}:</strong>
+        {{ a.staff.full_name }} ({{ a.staff.get_role_display }})
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="muted"><strong>No duties assigned yet.</strong></p>
+    {% endif %}
+
+    <div class="modal-actions">
+      <button
+        type="button"
+        class="btn-pill"
+        data-close-modal="modal-duties-{{ iso.id }}"
+      >
+        Close
+      </button>
+    </div>
+  </div>
+</div>

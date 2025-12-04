@@ -107,7 +107,7 @@
 }
 
 .cleanroom-block h2 {
-  margin: 0 0 0.5rem 0;
+  margin: 0 0 0.5rem;
   font-size: 1rem;
 }
 
@@ -128,7 +128,6 @@
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.03em;
   color: #6b7280;
   margin-bottom: 0.25rem;
 }
@@ -136,38 +135,71 @@
 .isolator-box {
   border: 1px solid #cbd2e1;
   border-radius: 4px;
-  padding: 0.4rem 0.45rem;
-  font-size: 0.8rem;
+  padding: 0.6rem;
   background: #f9fafb;
+  font-size: 0.8rem;
 }
 
 .isolator-name {
   font-weight: 600;
+  margin-bottom: 0.3rem;
+}
+
+.isolator-duties ul {
+  margin: 0 0 0.4rem;
+  padding-left: 1rem;
+}
+
+.isolator-duties li {
+  font-size: 0.75rem;
   margin-bottom: 0.15rem;
 }
 
-.isolator-empty {
+.isolator-duties p {
   font-size: 0.75rem;
-  color: #9ca3af;
-  margin-bottom: 0.25rem;
-}
-
-/* Slight spacing for the edit button in isolator cards */
-.isolator-box .btn-pill {
-  margin-top: 0.15rem;
-  font-size: 0.75rem;
-  padding: 0.15rem 0.6rem;
+  margin-bottom: 0.4rem;
 }
 
 /* =========================================
-   DAILY ROTA – ASSIGNMENT TABLE
+   BUTTON STYLING (Show + Edit)
    ========================================= */
 
-h3 {
-  margin-top: 0;
-  margin-bottom: 0.5rem;
-  font-size: 1.05rem;
+.isolator-btn {
+  display: block;
+  width: 100%;
+  margin-top: 0.35rem;
+  font-size: 0.75rem;
+  padding: 0.25rem 0.6rem;
+  text-align: center;
+  border-radius: 9999px;
+  cursor: pointer;
 }
+
+/* Show Duties = grey button */
+.show-btn {
+  background: #e5e7eb;
+  border: 1px solid #9ca3af;
+  color: #111827;
+}
+
+.show-btn:hover {
+  background: #d1d5db;
+}
+
+/* Edit Assignments = green button */
+.edit-btn {
+  background: #d1fae5;
+  border: 1px solid #10b981;
+  color: #065f46;
+}
+
+.edit-btn:hover {
+  background: #a7f3d0;
+}
+
+/* =========================================
+   ASSIGNMENT TABLE
+   ========================================= */
 
 table.assignments {
   width: 100%;
@@ -192,17 +224,13 @@ table.assignments th {
   font-weight: 600;
 }
 
-table.assignments tr:last-child td {
-  border-bottom: none;
-}
-
 .muted {
-  color: #9ca3af;
+  color: #6b7280;
   font-size: 0.85rem;
 }
 
 /* =========================================
-   MODALS – ISOLATOR EDITOR
+   MODALS
    ========================================= */
 
 .modal {
@@ -251,7 +279,7 @@ table.assignments tr:last-child td {
   cursor: pointer;
 }
 
-/* Batch selector grid */
+/* Batch grid */
 .batch-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -271,7 +299,7 @@ table.assignments tr:last-child td {
   padding: 0.25rem 0.35rem;
 }
 
-/* Room supervisors multi-select */
+/* Supervisor select */
 select[name="room_supervisors"] {
   width: 100%;
   font-size: 0.85rem;
@@ -284,4 +312,14 @@ select[name="room_supervisors"] {
   display: flex;
   gap: 0.5rem;
   justify-content: flex-end;
+}
+
+.message.error {
+  background: #ffe5e5;
+  border: 1px solid #ff9b9b;
+  color: #b91c1c;
+  padding: 0.6rem 0.8rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
 }

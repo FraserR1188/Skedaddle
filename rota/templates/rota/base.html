@@ -145,6 +145,10 @@
       </div>
     </header>
 
+    {% if messages %} {% for message in messages %}
+    <div class="message {{ message.tags }}">{{ message }}</div>
+    {% endfor %} {% endif %}
+
     <main class="page-wrapper">
       <div class="flash-messages">
         {% if messages %} {% for message in messages %}
