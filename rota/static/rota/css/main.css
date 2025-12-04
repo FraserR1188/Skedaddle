@@ -323,3 +323,41 @@ select[name="room_supervisors"] {
   margin-bottom: 1rem;
   font-size: 0.9rem;
 }
+
+/* =========================================
+   DAILY ROTA – ROOM SUPERVISORS BOX
+   ========================================= */
+
+.room-supervisors-box {
+  margin: 0.4rem 0 0.8rem;
+  padding: 0.45rem 0.6rem;
+  border-radius: 4px;
+  background: #f9fafb;
+  border: 1px dashed #cbd2e1;
+}
+
+.room-supervisors-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #6b7280;
+  margin: 0 0 0.25rem;
+}
+
+.room-supervisors-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.room-supervisors-list li {
+  font-size: 0.8rem;
+  line-height: 1.3;
+}
+
+.room-supervisors-empty {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #9ca3af;
+}

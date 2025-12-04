@@ -1,4 +1,3 @@
-<!-- prettier-ignore-file -->
 {% extends "rota/base.html" %}
 
 {% block title %}Daily Rota – {{ date }}{% endblock %}
@@ -7,192 +6,157 @@
 <div class="page-header">
   <h1>Daily Rota – {{ date }}</h1>
   <div class="nav-links">
-    <a href="{% url 'monthly_calendar' date.year date.month %}">
-      &larr; Back to month
-    </a>
+    <a href="{% url 'monthly_calendar' date.year date.month %}">&larr; Back to month</a>
   </div>
 </div>
 
 {% if not assignments %}
-  <div class="info-banner warning">No Assigned Rota for Today.</div>
+  <div class="info-banner warning">
+    No Assigned Rota for Today.
+  </div>
 {% else %}
   <div class="info-banner info">
     Showing {{ assignments|length }} assignment{{ assignments|length|pluralize }} for this day.
   </div>
 {% endif %}
 
-{# ================= SUITE LAYOUT (CARDS) ================= #}
+{# ================= SUITE LAYOUT (CLEANROOM CARDS) ================= #}
 <div class="suite-row">
   {% for block in rooms_grid %}
     <div class="cleanroom-block">
       <h2>{{ block.room.name }}</h2>
 
-      <div class="walls">
+      {# ===== ROOM SUPERVISORS BOX ===== #}
+      <div class="room-supervisors-box">
+        <div class="room-supervisors-title">Room Supervisors</div>
 
-        {# LEFT WALL #}
-        {% if block.left_wall %}
-          <div class="wall wall-left">
-            <div class="wall-title">Left wall</div>
-
-            {% for iso in block.left_wall %}
-              <div class="isolator-box">
-                <div class="isolator-name">{{ iso.name }}</div>
-
-                <div class="isolator-duties">
-                  {% if iso.batch_assignments %}
-                    <ul>
-                      {% for a in iso.batch_assignments %}
-                        <li>Batch {{ a.batch_number }} – {{ a.staff.full_name }}</li>
-                      {% endfor %}
-                    </ul>
-                  {% else %}
-                    <p class="muted">No duties assigned yet.</p>
-                  {% endif %}
-                </div>
-
-                <!-- SHOW DUTIES button -->
-                <button
-                  type="button"
-                  class="btn-pill isolator-btn show-btn"
-                  data-open-modal="modal-duties-{{ iso.id }}"
-                >
-                  Show Duties
-                </button>
-
-                <!-- EDIT ASSIGNMENTS button -->
-                {% if user.is_superuser or perms.rota.change_assignment %}
-                  <button
-                    type="button"
-                    class="btn-pill isolator-btn edit-btn"
-                    data-open-modal="modal-isolator-{{ iso.id }}"
-                  >
-                    Edit Assignments
-                  </button>
-                {% endif %}
-              </div>
+        {% if block.room.room_supervisors %}
+          <ul class="room-supervisors-list">
+            {% for sup in block.room.room_supervisors %}
+              <li>{{ sup.full_name }}</li>
             {% endfor %}
-          </div>
+          </ul>
+        {% else %}
+          <p class="room-supervisors-empty">
+            No room supervisors assigned yet.
+          </p>
         {% endif %}
+      </div>
 
-        {# RIGHT WALL #}
-        {% if block.right_wall %}
-          <div class="wall wall-right">
-            <div class="wall-title">Right wall</div>
+      <div class="walls">
+        {# ========== RIGHT WALL ========== #}
+        <div class="wall">
+          <div class="wall-title">Right Wall</div>
 
+          {% if block.right_wall %}
             {% for iso in block.right_wall %}
               <div class="isolator-box">
                 <div class="isolator-name">{{ iso.name }}</div>
 
-                <div class="isolator-duties">
-                  {% if iso.batch_assignments %}
-                    <ul>
-                      {% for a in iso.batch_assignments %}
-                        <li>Batch {{ a.batch_number }} – {{ a.staff.full_name }}</li>
-                      {% endfor %}
-                    </ul>
-                  {% else %}
-                    <p class="muted">No duties assigned yet.</p>
+                {% if iso.has_assignments %}
+                  <div class="isolator-assignees">
+                    {% for a in iso.batch_assignments %}
+                      <div>Batch {{ a.batch_number }} – {{ a.staff.full_name }}</div>
+                    {% endfor %}
+                  </div>
+                {% else %}
+                  <div class="isolator-empty">
+                    No duties assigned yet.
+                  </div>
+                {% endif %}
+
+                <div class="isolator-actions">
+                  {# SHOW DUTIES – available for everyone #}
+                  <button
+                    type="button"
+                    class="btn-pill isolator-btn show-btn"
+                    data-open-modal="modal-duties-{{ iso.id }}"
+                  >
+                    Show Duties
+                  </button>
+
+                  {# EDIT ASSIGNMENTS – only for rota managers / superusers #}
+                  {% if user.is_superuser or perms.rota.rota_manager %}
+                    <button
+                      type="button"
+                      class="btn-pill isolator-btn edit-btn"
+                      data-open-modal="modal-isolator-{{ iso.id }}"
+                    >
+                      Edit Assignments
+                    </button>
                   {% endif %}
                 </div>
 
-                <!-- SHOW DUTIES button -->
-                <button
-                  type="button"
-                  class="btn-pill isolator-btn show-btn"
-                  data-open-modal="modal-duties-{{ iso.id }}"
-                >
-                  Show Duties
-                </button>
+                {# Edit modal (assign batches + supervisors) #}
+                {% include "rota/partials/isolator_modal.html" with iso=iso date=date staff_list=staff_list supervisors=supervisors %}
 
-                <!-- EDIT ASSIGNMENTS button -->
-                {% if user.is_superuser or perms.rota.change_assignment %}
-                  <button
-                    type="button"
-                    class="btn-pill isolator-btn edit-btn"
-                    data-open-modal="modal-isolator-{{ iso.id }}"
-                  >
-                    Edit Assignments
-                  </button>
-                {% endif %}
+
+                {# Read-only duties modal #}
+                {% include "rota/partials/isolator_duties_modal.html" with iso=iso date=date %}
               </div>
             {% endfor %}
-          </div>
-        {% else %}
-          <div class="wall wall-right">
-            <div class="wall-title">Right wall</div>
-            <p class="muted">No isolators on this wall.</p>
-          </div>
-        {% endif %}
+          {% else %}
+            <div class="isolator-empty">
+              No isolators on this wall.
+            </div>
+          {% endif %}
+        </div>
 
+        {# ========== LEFT WALL ========== #}
+        <div class="wall">
+          <div class="wall-title">Left Wall</div>
+
+          {% if block.left_wall %}
+            {% for iso in block.left_wall %}
+              <div class="isolator-box">
+                <div class="isolator-name">{{ iso.name }}</div>
+
+                {% if iso.has_assignments %}
+                  <div class="isolator-assignees">
+                    {% for a in iso.batch_assignments %}
+                      <div>Batch {{ a.batch_number }} – {{ a.staff.full_name }}</div>
+                    {% endfor %}
+                  </div>
+                {% else %}
+                  <div class="isolator-empty">
+                    No duties assigned yet.
+                  </div>
+                {% endif %}
+
+                <div class="isolator-actions">
+                  <button
+                    type="button"
+                    class="btn-pill isolator-btn show-btn"
+                    data-open-modal="modal-duties-{{ iso.id }}"
+                  >
+                    Show Duties
+                  </button>
+
+                  {% if user.is_superuser or perms.rota.rota_manager %}
+                    <button
+                      type="button"
+                      class="btn-pill isolator-btn edit-btn"
+                      data-open-modal="modal-isolator-{{ iso.id }}"
+                    >
+                      Edit Assignments
+                    </button>
+                  {% endif %}
+                </div>
+
+                {% include "rota/partials/isolator_modal.html" with iso=iso date=date staff_list=staff_list supervisors=supervisors %}
+
+                {% include "rota/partials/isolator_duties_modal.html" with iso=iso date=date %}
+              </div>
+            {% endfor %}
+          {% else %}
+            <div class="isolator-empty">
+              No isolators on this wall.
+            </div>
+          {% endif %}
+        </div>
       </div>
     </div>
   {% endfor %}
 </div>
 
-{# ================= MODALS (USING PARTIALS) ================= #}
-{% for block in rooms_grid %}
-
-  {% if block.left_wall %}
-    {% for iso in block.left_wall %}
-      {% include "rota/partials/isolator_modal.html" %}
-      {% include "rota/partials/isolator_duties_modal.html" %}
-    {% endfor %}
-  {% endif %}
-
-  {% if block.right_wall %}
-    {% for iso in block.right_wall %}
-      {% include "rota/partials/isolator_modal.html" %}
-      {% include "rota/partials/isolator_duties_modal.html" %}
-    {% endfor %}
-  {% endif %}
-
-{% endfor %}
-
-{# ================= ASSIGNMENT TABLE ================= #}
-<section>
-  <h3>Assignments for {{ date }}</h3>
-
-  {% if not assignments %}
-    <p class="muted">There are currently no assignments for this date.</p>
-  {% else %}
-    <table class="assignments">
-      <thead>
-        <tr>
-          <th>Staff Member</th>
-          <th>Role</th>
-          <th>Crew</th>
-          <th>Cleanroom</th>
-          <th>Isolator / Room</th>
-          <th>Shift</th>
-          <th>Notes</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for a in assignments %}
-          <tr>
-            <td>{{ a.staff.full_name }}</td>
-            <td>{{ a.staff.get_role_display }}</td>
-            <td>{{ a.staff.crew.name|default:"-" }}</td>
-            <td>{{ a.clean_room.name }}</td>
-            <td>
-              {% if a.location_type == "ROOM" %}
-                Room (Supervisor)
-              {% elif a.isolator %}
-                {{ a.isolator.name }}
-              {% else %}
-                -
-              {% endif %}
-            </td>
-            <td>
-              {{ a.shift.name }}<br>
-              <span class="muted">{{ a.shift.start_time }}–{{ a.shift.end_time }}</span>
-            </td>
-            <td>{{ a.notes|default:"-" }}</td>
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  {% endif %}
-</section>
-
-{% endblock %}
+{% endblock content %}

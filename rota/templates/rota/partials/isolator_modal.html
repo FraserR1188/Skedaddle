@@ -5,15 +5,14 @@
 
     <div class="modal-header">
       <h2>Edit assignments – {{ iso.name }} ({{ date }})</h2>
-      <button
-        type="button"
-        class="modal-close"
-        data-close-modal="modal-isolator-{{ iso.id }}"
-      >
+      <button type="button"
+              class="modal-close"
+              data-close-modal="modal-isolator-{{ iso.id }}">
         &times;
       </button>
     </div>
 
+    {# ----- CURRENT DUTIES SUMMARY ----- #}
     {% if iso.batch_assignments %}
       <div class="muted" style="margin-bottom: 1rem;">
         <strong>Current duties:</strong>
@@ -31,10 +30,9 @@
 
     <form method="post" action="{% url 'daily_rota' date.year date.month date.day %}">
       {% csrf_token %}
-
       <input type="hidden" name="isolator_id" value="{{ iso.id }}">
 
-      <!-- ===================== BATCHES ===================== -->
+      {# ================= BATCHES ================= #}
       <h3>Batches</h3>
       <p class="muted">Select a staff member for each batch.</p>
 
@@ -46,6 +44,7 @@
             <select name="batch_{{ batch_num }}">
               <option value="">-- None --</option>
 
+              {# all active staff (ops + supervisors) #}
               {% for staff in staff_list %}
                 <option value="{{ staff.id }}"
                   {% for a in iso.batch_assignments %}
@@ -58,43 +57,40 @@
                 </option>
               {% endfor %}
             </select>
-
           </div>
         {% endfor %}
       </div>
 
       <hr>
 
-      <!-- ================== ROOM SUPERVISORS ================= -->
+      {# ================= ROOM SUPERVISORS ================= #}
       <h3>Room supervisors</h3>
       <p class="muted">
         Select up to 4 Production Supervisors for {{ iso.clean_room.name }}.
       </p>
 
       <select name="room_supervisors" multiple size="5">
-        {% for staff in supervisors %}
-          <option value="{{ staff.id }}"
-            {% if staff.id in iso.room_supervisor_ids %}
-              selected
-            {% endif %}
-          >
-            {{ staff.full_name }}
-          </option>
-        {% endfor %}
+        {% with current_ids=iso.clean_room.room_supervisor_ids %}
+          {% for sup in supervisors %}
+            <option value="{{ sup.id }}"
+              {% if current_ids and sup.id in current_ids %}
+                selected
+              {% endif %}
+            >
+              {{ sup.full_name }}
+            </option>
+          {% endfor %}
+        {% endwith %}
       </select>
 
       <div class="modal-actions">
         <button type="submit" class="btn-pill">Save</button>
-        <button
-          type="button"
-          class="btn-pill"
-          data-close-modal="modal-isolator-{{ iso.id }}"
-        >
+        <button type="button"
+                class="btn-pill"
+                data-close-modal="modal-isolator-{{ iso.id }}">
           Cancel
         </button>
       </div>
-
     </form>
-
   </div>
 </div>
