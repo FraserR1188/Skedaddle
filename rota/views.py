@@ -106,7 +106,7 @@ def daily_rota(request, year, month, day):
         isolator = get_object_or_404(Isolator, pk=isolator_id)
 
         # ----------------------------------------------------
-        # 1) BATCH ASSIGNMENTS
+        # 1) BATCH ASSIGNMENTS (ISOLATOR)
         # ----------------------------------------------------
         for batch in range(1, 9):
             field_name = f"batch_{batch}"
@@ -147,14 +147,16 @@ def daily_rota(request, year, month, day):
                     return redirect(request.path)
 
             else:
+                # No staff selected → delete any existing assignment for this batch
                 qs.delete()
 
         # ----------------------------------------------------
-        # 2) ROOM SUPERVISORS (max 4)
+        # 2) ROOM SUPERVISORS (max 4, only SUPERVISOR role)
         # ----------------------------------------------------
         supervisor_ids = request.POST.getlist("room_supervisors")
         supervisor_ids = [int(sid) for sid in supervisor_ids if sid.strip()][:4]
 
+        # Remove supervisors no longer selected
         Assignment.objects.filter(
             rotaday=rotaday,
             shift=day_shift,
@@ -164,6 +166,7 @@ def daily_rota(request, year, month, day):
             is_room_supervisor=True,
         ).exclude(staff_id__in=supervisor_ids).delete()
 
+        # Existing supervisors for this clean room
         existing_sup_ids = set(
             Assignment.objects.filter(
                 rotaday=rotaday,
@@ -175,6 +178,7 @@ def daily_rota(request, year, month, day):
             ).values_list("staff_id", flat=True)
         )
 
+        # Add any new supervisors
         for sid in supervisor_ids:
             if sid not in existing_sup_ids:
                 staff = get_object_or_404(StaffMember, pk=sid)
@@ -199,7 +203,7 @@ def daily_rota(request, year, month, day):
         return redirect("daily_rota", year=target_date.year, month=target_date.month, day=target_date.day)
 
     # --------------------------------------------------------
-    # GET — display
+    # GET — build display data
     # --------------------------------------------------------
     assignments = Assignment.objects.filter(rotaday=rotaday).select_related(
         "staff", "staff__crew", "clean_room", "isolator", "shift"
@@ -207,10 +211,22 @@ def daily_rota(request, year, month, day):
 
     cleanrooms = CleanRoom.objects.all().prefetch_related("isolators")
 
+    # Maps for quick lookup
+    isolator_assignments = {}
+    room_supervisor_ids_by_room = {}
+
+    for a in assignments:
+        # Isolator duties
+        if a.isolator_id:
+            isolator_assignments.setdefault(a.isolator_id, []).append(a)
+
+        # Room supervisors (for that clean room)
+        if a.location_type == "ROOM" and a.is_room_supervisor:
+            room_supervisor_ids_by_room.setdefault(a.clean_room_id, set()).add(a.staff_id)
+
     rooms_grid = []
     for room in cleanrooms:
         isolators = list(room.isolators.all())
-
         if room.number in (1, 3):
             right_wall = isolators[0:4]
             left_wall = isolators[4:8]
@@ -218,22 +234,29 @@ def daily_rota(request, year, month, day):
             right_wall = isolators
             left_wall = []
 
+        # Attach supervisor IDs for this room
+        room.room_supervisor_ids = list(room_supervisor_ids_by_room.get(room.id, set()))
+
+        # Attach per-isolator data
+        for iso in right_wall + left_wall:
+            ia = isolator_assignments.get(iso.id, [])
+            iso.has_assignments = bool(ia)
+            iso.batch_assignments = ia
+            # use the room's supervisor IDs (same for all isolators in that room)
+            iso.room_supervisor_ids = room.room_supervisor_ids
+
         rooms_grid.append(
             {"room": room, "right_wall": right_wall, "left_wall": left_wall}
         )
 
-    isolator_assignments = {}
-    for a in assignments:
-        if a.isolator_id:
-            isolator_assignments.setdefault(a.isolator_id, []).append(a)
-
-    for block in rooms_grid:
-        for iso in list(block["right_wall"]) + list(block["left_wall"]):
-            ia = isolator_assignments.get(iso.id, [])
-            iso.has_assignments = bool(ia)
-            iso.batch_assignments = ia
-
+    # All active staff (for batches)
     staff_list = StaffMember.objects.filter(is_active=True).order_by("full_name")
+
+    # Only supervisors (for room supervisors selector)
+    supervisors = StaffMember.objects.filter(
+        is_active=True,
+        role="SUPERVISOR",
+    ).order_by("full_name")
 
     context = {
         "date": target_date,
@@ -242,10 +265,10 @@ def daily_rota(request, year, month, day):
         "assignments": assignments,
         "rooms_grid": rooms_grid,
         "staff_list": staff_list,
+        "supervisors": supervisors,
         "day_shift": day_shift,
     }
     return render(request, "rota/daily_rota.html", context)
-
 
 # ------------------------------------------------------------
 # Helpers / Staff Management

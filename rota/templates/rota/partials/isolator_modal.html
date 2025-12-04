@@ -5,7 +5,11 @@
 
     <div class="modal-header">
       <h2>Edit assignments – {{ iso.name }} ({{ date }})</h2>
-      <button type="button" class="modal-close" data-close-modal="modal-isolator-{{ iso.id }}">
+      <button
+        type="button"
+        class="modal-close"
+        data-close-modal="modal-isolator-{{ iso.id }}"
+      >
         &times;
       </button>
     </div>
@@ -30,6 +34,7 @@
 
       <input type="hidden" name="isolator_id" value="{{ iso.id }}">
 
+      <!-- ===================== BATCHES ===================== -->
       <h3>Batches</h3>
       <p class="muted">Select a staff member for each batch.</p>
 
@@ -60,18 +65,31 @@
 
       <hr>
 
+      <!-- ================== ROOM SUPERVISORS ================= -->
       <h3>Room supervisors</h3>
-      <p class="muted">Select up to 4 staff to supervise the cleanroom.</p>
+      <p class="muted">
+        Select up to 4 Production Supervisors for {{ iso.clean_room.name }}.
+      </p>
 
       <select name="room_supervisors" multiple size="5">
-        {% for staff in staff_list %}
-          <option value="{{ staff.id }}">{{ staff.full_name }}</option>
+        {% for staff in supervisors %}
+          <option value="{{ staff.id }}"
+            {% if staff.id in iso.room_supervisor_ids %}
+              selected
+            {% endif %}
+          >
+            {{ staff.full_name }}
+          </option>
         {% endfor %}
       </select>
 
       <div class="modal-actions">
         <button type="submit" class="btn-pill">Save</button>
-        <button type="button" class="btn-pill" data-close-modal="modal-isolator-{{ iso.id }}">
+        <button
+          type="button"
+          class="btn-pill"
+          data-close-modal="modal-isolator-{{ iso.id }}"
+        >
           Cancel
         </button>
       </div>
