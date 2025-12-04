@@ -104,7 +104,6 @@
       }
     </style>
 
-    <!-- Global app stylesheet (calendar, daily rota, modals, etc.) -->
     <link rel="stylesheet" href="{% static 'rota/css/main.css' %}" />
 
     {% block extra_head %}{% endblock %}
@@ -116,24 +115,32 @@
         <a href="{% url 'home' %}" class="navbar-brand">Skedaddle Rota</a>
       </div>
 
+      <!-- ============================= -->
+      <!--        UPDATED NAVBAR         -->
+      <!-- ============================= -->
       <nav class="navbar-links">
         <a
           href="{% url 'monthly_calendar' year=today.year month=today.month %}"
         >
           Calendar
         </a>
+
         <a
           href="{% url 'daily_rota' year=today.year month=today.month day=today.day %}"
         >
           Today
         </a>
 
-        {% if user.is_authenticated %}
+        {% if perms.rota.rota_viewer %}
+        <!-- NEW: Staff Search tab for ALL rota viewers -->
+        <a href="{% url 'staff_search' %}">Staff Search</a>
+        {% endif %} {% if user.is_authenticated %} {% if user.is_superuser %}
+        <!-- Only superuser sees staff management -->
         <a href="{% url 'staff_list' %}">Staff</a>
-        {% endif %} {% if user.is_superuser %}
         <a href="/admin/">Admin</a>
-        {% endif %}
+        {% endif %} {% endif %}
       </nav>
+      <!-- ============================= -->
 
       <div class="navbar-right">
         {% if user.is_authenticated %}
@@ -153,7 +160,7 @@
       <div class="flash-messages">
         {% if messages %} {% for message in messages %}
         <div
-          class="flash-message {% if message.tags == 'success' %}flash-success{% elif message.tags == 'error' %}flash-error{% endif %}"
+          class="flash-message {% if message.tags == 'success' %}flash-success {% elif message.tags == 'error' %}flash-error {% endif %}"
         >
           {{ message }}
         </div>

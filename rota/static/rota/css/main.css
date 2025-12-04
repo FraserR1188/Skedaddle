@@ -364,3 +364,49 @@ select[name="room_supervisors"] {
   font-size: 0.8rem;
   color: #9ca3af;
 }
+
+/* Optional: add to your rota.css */
+
+.staff-search-form {
+  display: flex;
+  gap: 0.5rem;
+  margin: 1rem 0 1.5rem;
+}
+
+.staff-search-form input[type="text"] {
+  flex: 1;
+  padding: 0.5rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid #d0d7de;
+}
+
+.staff-card {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e3e8ef;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.staff-card-header h2 {
+  margin: 0 0 0.25rem;
+}
+
+.assignments-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  margin-top: 0.75rem;
+}
+
+.assignments-table th,
+.assignments-table td {
+  padding: 0.4rem 0.5rem;
+  border-bottom: 1px solid #edf1f7;
+}
+
+.assignments-table th {
+  text-align: left;
+  font-weight: 600;
+  background: #f7fafc;
+}

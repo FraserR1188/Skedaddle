@@ -7,4 +7,5 @@ urlpatterns = [
     path("day/<int:year>/<int:month>/<int:day>/", views.daily_rota, name="daily_rota"),
     path("staff/", views.staff_list, name="staff_list"),
     path("staff/add/", views.staff_create, name="staff_create"),
+    path("staff/search/", views.staff_search, name="staff_search"),
 ]

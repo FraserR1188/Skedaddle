@@ -1,0 +1,72 @@
+<!-- prettier-ignore-start -->
+{% extends "rota/base.html" %}
+<!-- prettier-ignore-end -->
+
+{% block title %}Staff Search{% endblock %} {% block content %}
+<h1>Staff Search</h1>
+
+<form method="get" action="" class="staff-search-form">
+  <input
+    type="text"
+    name="q"
+    placeholder="Search staff..."
+    value="{{ request.GET.q }}"
+  />
+  <button type="submit" class="btn-pill">Search</button>
+</form>
+
+<hr />
+
+{% if query %}
+<h2>Results for "{{ query }}":</h2>
+
+{% if results %} {% for item in results %}
+
+<div class="staff-card">
+  <div class="staff-card-header">
+    <h2>{{ item.staff.full_name }}</h2>
+    <p class="muted" style="margin: 0">{{ item.staff.get_role_display }}</p>
+  </div>
+
+  {% if item.assignments %}
+  <table class="assignments-table">
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Location</th>
+        <th>Role</th>
+        <th>Details</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for a in item.assignments %}
+      <tr>
+        <td>{{ a.rotaday.date|date:"M j, Y" }}</td>
+        <td>
+          {% if a.isolator %} {{ a.clean_room.name }} – {{ a.isolator.name }} {%
+          else %} {{ a.clean_room.name }} {% endif %}
+        </td>
+        <td>
+          {% if a.is_room_supervisor %} Room Supervisor {% elif a.location_type
+          == "ISOLATOR" %} Batch Operator {% else %} {{
+          a.get_location_type_display }} {% endif %}
+        </td>
+        <td>
+          {% if a.location_type == "ISOLATOR" and a.batch_number %} Batch {{
+          a.batch_number }} {% elif a.is_room_supervisor %} Supervising
+          cleanroom {% else %} {{ a.notes|default:"—" }} {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="muted" style="margin-top: 0.4rem">
+    No upcoming assignments recorded for this staff member.
+  </p>
+  {% endif %}
+</div>
+
+{% endfor %} {% else %}
+<p>No matching staff found.</p>
+{% endif %} {% endif %} {% endblock %}

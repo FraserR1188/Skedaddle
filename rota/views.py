@@ -1,5 +1,6 @@
 import calendar
 from datetime import date, timedelta
+from django.db.models import Q
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import (
@@ -329,3 +330,53 @@ def staff_list(request):
         "rota/staff_list.html",
         {"staff": staff, "today": date.today()},
     )
+
+from django.db.models import Q
+# (you already have other imports above)
+
+
+@login_required
+@permission_required("rota.rota_viewer", raise_exception=True)
+def staff_search(request):
+    """
+    Allow any rota viewer to search for a staff member and see
+    all of their assignments (what, where, and which day).
+    """
+    query = request.GET.get("q", "").strip()
+    results = []
+
+    if query:
+        staff_qs = (
+            StaffMember.objects.filter(
+                is_active=True,
+                full_name__icontains=query,
+            )
+            .order_by("full_name")
+        )
+
+        today = date.today()
+
+        for staff in staff_qs:
+            assns = (
+                staff.assignments.select_related("rotaday", "clean_room", "isolator")
+                .filter(rotaday__date__gte=today)
+                .order_by(
+                    "rotaday__date",
+                    "clean_room__number",
+                    "isolator__order",
+                    "batch_number",
+                )
+            )
+            results.append(
+                {
+                    "staff": staff,
+                    "assignments": assns,
+                }
+            )
+
+    context = {
+        "query": query,
+        "results": results,
+        "today": date.today(),  # used by navbar
+    }
+    return render(request, "rota/staff_search.html", context)
