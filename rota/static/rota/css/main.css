@@ -47,6 +47,16 @@
   text-decoration: underline;
 }
 
+.rota-calendar-past {
+  background-color: #ffb3b3 !important; /* light red background */
+  color: #000 !important; /* keep text black */
+}
+
+.rota-calendar-past a {
+  color: #000 !important; /* keep link text black */
+  text-decoration: none;
+}
+
 /* =========================================
    DAILY ROTA – HEADER & BANNERS
    ========================================= */

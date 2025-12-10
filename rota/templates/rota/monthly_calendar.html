@@ -23,12 +23,6 @@
     </div>
   </div>
 
-  <div class="mb-3 small text-muted">
-    <span class="badge bg-warning text-dark me-2">Today</span>
-    <span class="badge bg-success me-2">Has rota</span>
-    <span class="badge bg-light text-muted border">Other month</span>
-  </div>
-
   <div class="card shadow-sm">
     <div class="card-body p-2 p-sm-3">
       <div class="table-responsive">
@@ -49,17 +43,23 @@
           <tbody>
             {% for week in weeks %}
             <tr>
-              {% for d in week %} {% if d.month != month %}
-              <td class="rota-calendar-other-month"></td>
-              {% else %}
-              <td
-                class="{% if d == today %}rota-calendar-today{% endif %} {% if d in rotadays %} rota-calendar-has-rota{% endif %}"
-              >
-                <a href="{% url 'daily_rota' d.year d.month d.day %}">
-                  {{ d.day }}
-                </a>
-              </td>
-              {% endif %} {% endfor %}
+              {% for d in week %}
+                {% if d.month != month %}
+                  <td class="rota-calendar-other-month"></td>
+                {% else %}
+                  <td
+                    class="
+                      {% if d == today %}rota-calendar-today{% endif %}
+                      {% if d in rotadays %} rota-calendar-has-rota{% endif %}
+                      {% if d < today %} rota-calendar-past{% endif %}
+                    "
+                  >
+                    <a href="{% url 'daily_rota' d.year d.month d.day %}">
+                      {{ d.day }}
+                    </a>
+                  </td>
+                {% endif %}
+              {% endfor %}
             </tr>
             {% endfor %}
           </tbody>
