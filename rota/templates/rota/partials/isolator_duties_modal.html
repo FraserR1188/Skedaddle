@@ -1,8 +1,5 @@
 <div class="modal" id="modal-duties-{{ iso.id }}">
-  <div
-    class="modal-backdrop"
-    data-close-modal="modal-duties-{{ iso.id }}"
-  ></div>
+  <div class="modal-backdrop" data-close-modal="modal-duties-{{ iso.id }}"></div>
 
   <div class="modal-content">
     <div class="modal-header">
@@ -10,31 +7,32 @@
       <button
         type="button"
         class="modal-close"
-        data-close-modal="modal-duties-{{ iso.id }}"
-      >
+        data-close-modal="modal-duties-{{ iso.id }}">
         &times;
       </button>
     </div>
 
-    {% if iso.batch_assignments %}
-    <ul>
-      {% for a in iso.batch_assignments %}
-      <li>
-        <strong>Batch {{ a.batch_number }}:</strong>
-        {{ a.staff.full_name }} ({{ a.staff.get_role_display }})
-      </li>
-      {% endfor %}
-    </ul>
+    {% if iso.operator_assignments %}
+      <ul class="duties-list">
+        {% for a in iso.operator_assignments %}
+          <li>
+            <strong>{{ a.staff.full_name }}</strong>
+            <span class="muted">({{ a.staff.get_role_display }})</span><br>
+            <span class="shift-info">
+              Shift: {{ a.shift.name }} ({{ a.shift.start_time }} – {{ a.shift.end_time }})
+            </span>
+          </li>
+        {% endfor %}
+      </ul>
     {% else %}
-    <p class="muted"><strong>No duties assigned yet.</strong></p>
+      <p class="muted"><strong>No duties assigned yet.</strong></p>
     {% endif %}
 
     <div class="modal-actions">
       <button
         type="button"
         class="btn-pill"
-        data-close-modal="modal-duties-{{ iso.id }}"
-      >
+        data-close-modal="modal-duties-{{ iso.id }}">
         Close
       </button>
     </div>

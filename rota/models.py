@@ -83,11 +83,7 @@ class RotaDay(models.Model):
 class Assignment(models.Model):
     """
     One person on one location (room or isolator) for a given day and shift.
-
-    Business rules:
-    - Production Operators can only work in the isolator making batches.
-      They cannot be supervisors.
-    - Production Supervisors can supervise (room) and also make batches in isolators.
+    Now supports up to 6 operators per isolator, no batch numbers.
     """
 
     LOCATION_TYPES = [
@@ -128,60 +124,48 @@ class Assignment(models.Model):
     )
     notes = models.CharField(max_length=255, blank=True)
 
-    # Batch (1–8) for isolator assignments
-    batch_number = models.PositiveSmallIntegerField(
-        choices=[(i, f"Batch {i}") for i in range(1, 9)],
-        null=True,
-        blank=True,
-    )
-
-    # Flag to mark room supervisor assignments
+    # Supervisors still need this flag
     is_room_supervisor = models.BooleanField(default=False)
 
     class Meta:
-        # Avoid duplicate staff/location/shift/batch rows
-        unique_together = (
-            "rotaday",
-            "staff",
-            "clean_room",
-            "isolator",
-            "shift",
-            "batch_number",
-        )
+        # A staff member cannot be scheduled twice on the same day
+        unique_together = ("rotaday", "staff")
 
     def clean(self):
         """
-        Enforce role + location rules.
-
-        - If location_type == "ISOLATOR":
-            * isolator must be set
-            * batch_number must be 1–8 (not null)
-            * staff.role can be OPERATIVE or SUPERVISOR
-
-        - If location_type == "ROOM":
+        Updated rules (NO batch system):
+        - ROOM:
+            * Must be a supervisor
             * isolator must be null
-            * staff.role must be SUPERVISOR
-            * batch_number must be null
+        - ISOLATOR:
+            * isolator must be set
+            * Can have up to 6 staff assigned
         """
         errors = {}
-
-        # ISOLATOR rules
-        if self.location_type == "ISOLATOR":
-            if self.isolator is None:
-                errors["isolator"] = "Isolator location must have an isolator selected."
-            if self.batch_number is None:
-                errors["batch_number"] = "Isolator assignments must have a batch number (1–8)."
-            # Both OPERATIVE and SUPERVISOR are allowed here,
-            # so no role restriction needed for isolators.
 
         # ROOM rules
         if self.location_type == "ROOM":
             if self.isolator is not None:
-                errors["isolator"] = "Room assignments must not have an isolator set."
+                errors["isolator"] = "Room assignments must not have an isolator."
             if self.staff and self.staff.role != "SUPERVISOR":
-                errors["staff"] = "Only Production Supervisors should be assigned to the room."
-            if self.batch_number is not None:
-                errors["batch_number"] = "Room assignments must not have a batch number."
+                errors["staff"] = "Only supervisors can be assigned to the clean room."
+            self.is_room_supervisor = True
+
+        # ISOLATOR rules
+        if self.location_type == "ISOLATOR":
+            if self.isolator is None:
+                errors["isolator"] = "Isolator assignments must select an isolator."
+
+            # enforce max 6 people per isolator per day
+            existing = Assignment.objects.filter(
+                rotaday=self.rotaday,
+                isolator=self.isolator
+            ).exclude(id=self.id).count()
+
+            if existing >= 6:
+                errors["isolator"] = "This isolator already has 6 assigned operators."
+
+            self.is_room_supervisor = False  # isolator staff are not supervisors here
 
         if errors:
             raise ValidationError(errors)
@@ -190,5 +174,4 @@ class Assignment(models.Model):
         loc = self.clean_room.name
         if self.isolator:
             loc += f" - {self.isolator.name}"
-        batch = f" [Batch {self.batch_number}]" if self.batch_number else ""
-        return f"{self.rotaday} {self.shift} | {self.staff} @ {loc}{batch}"
+        return f"{self.rotaday} {self.shift} | {self.staff} @ {loc}"

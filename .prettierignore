@@ -1,2 +1,3 @@
 # Ignore only daily rota page
 rota/templates/rota/daily_rota.html
+*.html

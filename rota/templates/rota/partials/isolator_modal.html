@@ -4,29 +4,28 @@
   <div class="modal-content">
 
     <div class="modal-header">
-      <h2>Edit assignments – {{ iso.name }} ({{ date }})</h2>
+      <h2>Edit Assignments – {{ iso.name }} ({{ date }})</h2>
       <button
         type="button"
         class="modal-close"
-        data-close-modal="modal-isolator-{{ iso.id }}"
-      >
+        data-close-modal="modal-isolator-{{ iso.id }}">
         &times;
       </button>
     </div>
 
-    {# ----- CURRENT DUTIES (ISOLATOR BATCHES) ----- #}
-    {% if iso.batch_assignments %}
+    {# -------- CURRENT ASSIGNMENTS (READ-ONLY SUMMARY) -------- #}
+    {% if iso.operator_assignments %}
       <div class="muted" style="margin-bottom: 1rem;">
-        <strong>Current duties:</strong>
+        <strong>Current operators:</strong>
         <ul>
-          {% for a in iso.batch_assignments %}
-            <li>Batch {{ a.batch_number }} – {{ a.staff.full_name }}</li>
+          {% for a in iso.operator_assignments %}
+            <li>{{ a.staff.full_name }} – {{ a.shift.name }}</li>
           {% endfor %}
         </ul>
       </div>
     {% else %}
       <div class="muted" style="margin-bottom: 1rem;">
-        <strong>No duties assigned yet.</strong>
+        <strong>No operators assigned yet.</strong>
       </div>
     {% endif %}
 
@@ -34,33 +33,36 @@
       {% csrf_token %}
       <input type="hidden" name="isolator_id" value="{{ iso.id }}">
 
-      {# ================= BATCH ASSIGNMENTS ================= #}
-      <h3>Batches</h3>
-      <p class="muted">
-        Select a Production Operative for each batch (1–8).
-      </p>
+      {# ================= OPERATORS (UP TO 6) ================= #}
+      <h3>Assign Operators (Max 6)</h3>
+      <p class="muted">Choose a staff member and their shift time.</p>
 
-      <div class="batch-grid">
-        {% for batch_num in "12345678"|make_list %}
-          <div class="batch-row">
-            <label>Batch {{ batch_num }}</label>
+      <div class="operator-grid">
+        {% for slot in iso.operator_slots %}
+          <div class="operator-row">
+            <label class="operator-label">Operator {{ forloop.counter }}</label>
 
-            <select name="batch_{{ batch_num }}">
+            {# STAFF SELECT #}
+            <select name="op{{ forloop.counter }}_staff">
               <option value="">-- None --</option>
-
-              {# Only Production Operatives for isolator batches #}
               {% for staff in staff_list %}
-                {% if staff.role == "OPERATIVE" %}
+                {% if staff.role == "OPERATIVE" or staff.role == "SUPERVISOR" %}
                   <option value="{{ staff.id }}"
-                    {% for a in iso.batch_assignments %}
-                      {% if a.batch_number|stringformat:"s" == batch_num and a.staff_id == staff.id %}
-                        selected
-                      {% endif %}
-                    {% endfor %}
-                  >
+                    {% if slot and slot.staff.id == staff.id %}selected{% endif %}>
                     {{ staff.full_name }}
                   </option>
                 {% endif %}
+              {% endfor %}
+            </select>
+
+            {# SHIFT SELECT #}
+            <select name="op{{ forloop.counter }}_shift">
+              <option value="">-- Shift --</option>
+              {% for shift in shift_templates %}
+                <option value="{{ shift.id }}"
+                  {% if slot and slot.shift.id == shift.id %}selected{% endif %}>
+                  {{ shift.name }} ({{ shift.start_time }}–{{ shift.end_time }})
+                </option>
               {% endfor %}
             </select>
           </div>
@@ -70,13 +72,10 @@
       <hr>
 
       {# ================= ROOM SUPERVISORS ================= #}
-      <h3>Room supervisors</h3>
+      <h3>Room Supervisors</h3>
       <p class="muted">
-        Select up to 4 Production Supervisors for {{ room.name }}.
-        <br>
-        <span class="muted small">
-          (Hold Ctrl / Cmd to select multiple names.)
-        </span>
+        Select up to 4 Production Supervisors for {{ room.name }}.<br>
+        <span class="muted small">(Hold Ctrl/Cmd to select multiple.)</span>
       </p>
 
       <select name="room_supervisors" multiple size="5">
@@ -84,8 +83,7 @@
           <option value="{{ staff.id }}"
             {% if room.room_supervisor_ids and staff.id in room.room_supervisor_ids %}
               selected
-            {% endif %}
-          >
+            {% endif %}>
             {{ staff.full_name }}
           </option>
         {% endfor %}
@@ -96,8 +94,7 @@
         <button
           type="button"
           class="btn-pill"
-          data-close-modal="modal-isolator-{{ iso.id }}"
-        >
+          data-close-modal="modal-isolator-{{ iso.id }}">
           Cancel
         </button>
       </div>

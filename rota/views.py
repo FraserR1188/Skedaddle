@@ -81,22 +81,21 @@ def monthly_calendar(request, year, month):
     return render(request, "rota/monthly_calendar.html", context)
 
 
-# ------------------------------------------------------------
-# DAILY ROTA (GET + POST)
-# ------------------------------------------------------------
 @login_required
 @permission_required("rota.rota_viewer", raise_exception=True)
 def daily_rota(request, year, month, day):
+
     target_date = date(year=int(year), month=int(month), day=int(day))
     rotaday, _ = RotaDay.objects.get_or_create(date=target_date)
 
-    day_shift = ShiftTemplate.objects.first()
-    if day_shift is None:
-        messages.error(request, "No shift templates have been configured.")
+    # All shift templates (Early, Core, Late)
+    shift_templates = list(ShiftTemplate.objects.all().order_by("start_time"))
+    if not shift_templates:
+        messages.error(request, "No shift templates configured.")
         return redirect("current_month_redirect")
 
     # --------------------------------------------------------
-    # POST — update assignments
+    # POST — save isolator assignments & supervisors
     # --------------------------------------------------------
     if request.method == "POST":
 
@@ -106,71 +105,67 @@ def daily_rota(request, year, month, day):
         isolator_id = request.POST.get("isolator_id")
         isolator = get_object_or_404(Isolator, pk=isolator_id)
 
-        # ----------------------------------------------------
-        # 1) BATCH ASSIGNMENTS
-        # ----------------------------------------------------
-        for batch in range(1, 9):
-            field_name = f"batch_{batch}"
-            staff_id = request.POST.get(field_name) or None
+        #
+        # DELETE existing ISOLATOR assignments for this isolator/day
+        #
+        Assignment.objects.filter(
+            rotaday=rotaday,
+            isolator=isolator,
+            location_type="ISOLATOR"
+        ).delete()
 
-            qs = Assignment.objects.filter(
+        #
+        # CREATE NEW assignments (up to 6)
+        #
+        for i in range(1, 7):
+
+            staff_id = request.POST.get(f"op{i}_staff") or None
+            shift_id = request.POST.get(f"op{i}_shift") or None
+
+            if not staff_id:
+                continue
+            if not shift_id:
+                continue
+
+            staff = get_object_or_404(StaffMember, pk=staff_id)
+            shift = get_object_or_404(ShiftTemplate, pk=shift_id)
+
+            assn = Assignment(
                 rotaday=rotaday,
-                shift=day_shift,
-                isolator=isolator,
+                staff=staff,
                 clean_room=isolator.clean_room,
+                isolator=isolator,
+                shift=shift,
                 location_type="ISOLATOR",
-                batch_number=batch,
+                is_room_supervisor=False,
             )
 
-            if staff_id:
-                staff = get_object_or_404(StaffMember, pk=staff_id)
+            try:
+                assn.full_clean()
+                assn.save()
+            except ValidationError as e:
+                messages.error(request, "; ".join(e.messages))
+                return redirect(request.path)
 
-                if qs.exists():
-                    assn = qs.first()
-                    assn.staff = staff
-                else:
-                    assn = Assignment(
-                        rotaday=rotaday,
-                        staff=staff,
-                        clean_room=isolator.clean_room,
-                        isolator=isolator,
-                        shift=day_shift,
-                        location_type="ISOLATOR",
-                        batch_number=batch,
-                        is_room_supervisor=False,
-                    )
-
-                try:
-                    assn.full_clean()
-                    assn.save()
-                except ValidationError as e:
-                    messages.error(request, e.messages[0])
-                    return redirect(request.path)
-
-            else:
-                # No staff selected → delete any existing row for this batch
-                qs.delete()
-
-        # ----------------------------------------------------
-        # 2) ROOM SUPERVISORS (max 4)
-        # ----------------------------------------------------
+        #
+        # SUPERVISORS (unchanged, except batch removed)
+        #
         supervisor_ids = request.POST.getlist("room_supervisors")
         supervisor_ids = [int(sid) for sid in supervisor_ids if sid.strip()][:4]
 
-        # Remove supervisors for this room that are no longer selected
+        # Remove unselected supervisors
         Assignment.objects.filter(
             rotaday=rotaday,
-            shift=day_shift,
             clean_room=isolator.clean_room,
             isolator__isnull=True,
             location_type="ROOM",
             is_room_supervisor=True,
         ).exclude(staff_id__in=supervisor_ids).delete()
 
+        # Keep existing IDs
         existing_sup_ids = set(
             Assignment.objects.filter(
                 rotaday=rotaday,
-                shift=day_shift,
                 clean_room=isolator.clean_room,
                 isolator__isnull=True,
                 location_type="ROOM",
@@ -178,6 +173,7 @@ def daily_rota(request, year, month, day):
             ).values_list("staff_id", flat=True)
         )
 
+        # Add missing ones
         for sid in supervisor_ids:
             if sid not in existing_sup_ids:
                 staff = get_object_or_404(StaffMember, pk=sid)
@@ -186,27 +182,25 @@ def daily_rota(request, year, month, day):
                     staff=staff,
                     clean_room=isolator.clean_room,
                     isolator=None,
-                    shift=day_shift,
+                    shift=shift_templates[0],  # default shift, used only for date grouping
                     location_type="ROOM",
-                    batch_number=None,
                     is_room_supervisor=True,
                 )
                 try:
                     assn.full_clean()
                     assn.save()
                 except ValidationError as e:
-                    messages.error(request, e.messages[0])
+                    messages.error(request, "; ".join(e.messages))
                     return redirect(request.path)
 
         messages.success(request, f"Assignments updated for {isolator.name}.")
         return redirect("daily_rota", year=target_date.year, month=target_date.month, day=target_date.day)
 
     # --------------------------------------------------------
-    # GET — build display data (rooms, duties, supervisors)
+    # GET — Display data
     # --------------------------------------------------------
     assignments_qs = Assignment.objects.filter(
         rotaday=rotaday,
-        shift=day_shift,
     ).select_related(
         "staff",
         "staff__crew",
@@ -215,9 +209,8 @@ def daily_rota(request, year, month, day):
         "shift",
     )
 
-    # Map: isolator → list of batch assignments
+    # Build maps: isolator → assignments (no batches)
     isolator_assignments = {}
-    # Map: clean_room_id → list of supervisor StaffMember objects
     room_supervisors_by_room = {}
 
     for a in assignments_qs:
@@ -229,43 +222,42 @@ def daily_rota(request, year, month, day):
     cleanrooms = CleanRoom.objects.all().prefetch_related("isolators")
 
     rooms_grid = []
+
     for room in cleanrooms:
         isolators = list(room.isolators.all())
 
-        # Twin-wall rooms (1 & 3): 8 isolators split into left & right
+        # Split into left/right wall (unchanged)
         if room.number in (1, 3):
-            # keep whichever side ordering matches your physical layout
             right_wall = isolators[0:4]
             left_wall = isolators[4:8]
         else:
-            # Single-wall rooms (2 & 4, etc.) → show them on the RIGHT wall
             right_wall = isolators
             left_wall = []
 
-        # Attach supervisors to room for display and for pre-selecting in the modal
         room.room_supervisors = room_supervisors_by_room.get(room.id, [])
         room.room_supervisor_ids = [s.id for s in room.room_supervisors]
 
-        # Attach duties to each isolator
+        # Attach isolator assignments (up to 6 operator slots)
         for iso in left_wall + right_wall:
-            ia = sorted(
+            ops = sorted(
                 isolator_assignments.get(iso.id, []),
-                key=lambda x: x.batch_number or 0,
+                key=lambda x: x.staff.full_name.lower(),
             )
-            iso.batch_assignments = ia
-            iso.has_assignments = bool(ia)
+            iso.operator_assignments = ops
+            iso.operator_slots = []
+            for idx in range(6):
+                iso.operator_slots.append(ops[idx] if idx < len(ops) else None)
+            iso.has_assignments = bool(ops)
 
-        rooms_grid.append(
-            {
-                "room": room,
-                "right_wall": right_wall,
-                "left_wall": left_wall,
-            }
-        )
+        rooms_grid.append({
+            "room": room,
+            "right_wall": right_wall,
+            "left_wall": left_wall,
+        })
+
 
     staff_list = StaffMember.objects.filter(is_active=True).order_by("full_name")
 
-    # Split by role for UI
     operators = staff_list.filter(role="OPERATIVE")
     supervisors = staff_list.filter(role="SUPERVISOR")
 
@@ -277,10 +269,11 @@ def daily_rota(request, year, month, day):
         "staff_list": staff_list,
         "operators": operators,
         "supervisors": supervisors,
-        "day_shift": day_shift,
+        "shift_templates": shift_templates,   # <-- ADDED
         "assignments": assignments_qs,
     }
     return render(request, "rota/daily_rota.html", context)
+
 
 # ------------------------------------------------------------
 # Helpers / Staff Management
@@ -341,6 +334,7 @@ def staff_search(request):
     """
     Allow any rota viewer to search for a staff member and see
     all of their assignments (what, where, and which day).
+    Now shows shift-based assignments (no batches).
     """
     query = request.GET.get("q", "").strip()
     results = []
@@ -358,13 +352,18 @@ def staff_search(request):
 
         for staff in staff_qs:
             assns = (
-                staff.assignments.select_related("rotaday", "clean_room", "isolator")
+                staff.assignments.select_related(
+                    "rotaday",
+                    "clean_room",
+                    "isolator",
+                    "shift",
+                )
                 .filter(rotaday__date__gte=today)
                 .order_by(
                     "rotaday__date",
                     "clean_room__number",
                     "isolator__order",
-                    "batch_number",
+                    "shift__start_time",
                 )
             )
             results.append(
@@ -380,3 +379,4 @@ def staff_search(request):
         "today": date.today(),  # used by navbar
     }
     return render(request, "rota/staff_search.html", context)
+

@@ -54,8 +54,8 @@
 
                 {% if iso.has_assignments %}
                   <div class="isolator-assignees">
-                    {% for a in iso.batch_assignments %}
-                      <div>Batch {{ a.batch_number }} – {{ a.staff.full_name }}</div>
+                    {% for a in iso.operator_assignments %}
+                      <div>{{ a.staff.full_name }} – {{ a.shift.name }}</div>
                     {% endfor %}
                   </div>
                 {% else %}
@@ -97,8 +97,8 @@
 
                 {% if iso.has_assignments %}
                   <div class="isolator-assignees">
-                    {% for a in iso.batch_assignments %}
-                      <div>Batch {{ a.batch_number }} – {{ a.staff.full_name }}</div>
+                    {% for a in iso.operator_assignments %}
+                      <div>{{ a.staff.full_name }} – {{ a.shift.name }}</div>
                     {% endfor %}
                   </div>
                 {% else %}
