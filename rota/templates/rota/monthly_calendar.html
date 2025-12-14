@@ -1,71 +1,82 @@
-<!-- prettier-ignore-start -->
 {% extends "rota/base.html" %}
-<!-- prettier-ignore-end -->
 
-{% block title %}{{ month_name }} {{ year }} – Monthly Rota {% endblock %}
-{%block content %}
-<div class="container mt-4">
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <h1 class="h4 mb-0">Monthly rota – {{ month_name }} {{ year }}</h1>
-    <div>
-      <a
-        href="{% url 'monthly_calendar' prev_year prev_month %}"
-        class="btn btn-outline-secondary btn-sm me-1"
-      >
+{% block title %}Monthly rota – {{ month_name }} {{ year }}{% endblock %}
+
+{% block content %}
+<div class="monthly-wrapper">
+
+  <div class="page-header">
+    <h1>Monthly rota – {{ month_name }} {{ year }}</h1>
+    <div class="nav-links">
+      <a href="{% url 'monthly_calendar' prev_year prev_month %}">
         &larr; Previous
       </a>
-      <a
-        href="{% url 'monthly_calendar' next_year next_month %}"
-        class="btn btn-outline-secondary btn-sm"
-      >
+      <a href="{% url 'monthly_calendar' next_year next_month %}">
         Next &rarr;
       </a>
     </div>
   </div>
 
-  <div class="card shadow-sm">
-    <div class="card-body p-2 p-sm-3">
-      <div class="table-responsive">
-        <table
-          class="rota-calendar-table table table-bordered text-center align-middle mb-0"
-        >
-          <thead>
-            <tr>
-              <th>Mon</th>
-              <th>Tue</th>
-              <th>Wed</th>
-              <th>Thu</th>
-              <th>Fri</th>
-              <th>Sat</th>
-              <th>Sun</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for week in weeks %}
-            <tr>
-              {% for d in week %}
-                {% if d.month != month %}
-                  <td class="rota-calendar-other-month"></td>
-                {% else %}
-                  <td
-                    class="
-                      {% if d == today %}rota-calendar-today{% endif %}
-                      {% if d in rotadays %} rota-calendar-has-rota{% endif %}
-                      {% if d < today %} rota-calendar-past{% endif %}
-                    "
-                  >
-                    <a href="{% url 'daily_rota' d.year d.month d.day %}">
-                      {{ d.day }}
-                    </a>
-                  </td>
-                {% endif %}
-              {% endfor %}
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
+  <div class="calendar-legend">
+    <div class="legend-item">
+      <span class="legend-swatch legend-today"></span>
+      <span>Today</span>
     </div>
+    <div class="legend-item">
+      <span class="legend-swatch legend-has-rota"></span>
+      <span>Has rota</span>
+    </div>
+    <div class="legend-item">
+      <span class="legend-swatch legend-other-month"></span>
+      <span>Other month</span>
+    </div>
+    <div class="legend-item">
+      <span class="legend-swatch legend-past"></span>
+      <span>Past days</span>
+    </div>
+  </div>
+  
+  <div class="p-6 m-6 text-white bg-black text-3xl rounded-xl">
+  Tailwind is working ✅
+  </div>
+
+  <div class="calendar-card">
+    <table class="rota-calendar-table">
+      <thead>
+        <tr>
+          <th>Mon</th>
+          <th>Tue</th>
+          <th>Wed</th>
+          <th>Thu</th>
+          <th>Fri</th>
+          <th>Sat</th>
+          <th>Sun</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for week in weeks %}
+          <tr>
+            {% for d in week %}
+              {% if d.month != month %}
+                <td class="rota-calendar-other-month"></td>
+              {% else %}
+                <td
+                  class="
+                    {% if d == today %}rota-calendar-today{% endif %}
+                    {% if d in rotadays %} rota-calendar-has-rota{% endif %}
+                    {% if d < today %} rota-calendar-past{% endif %}
+                  "
+                >
+                  <a href="{% url 'daily_rota' d.year d.month d.day %}">
+                    {{ d.day }}
+                  </a>
+                </td>
+              {% endif %}
+            {% endfor %}
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
   </div>
 </div>
 {% endblock %}
