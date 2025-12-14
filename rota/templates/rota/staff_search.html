@@ -3,96 +3,136 @@
 {% block title %}Staff Search{% endblock %}
 
 {% block content %}
-<h1>Staff Search</h1>
+<div class="max-w-7xl mx-auto px-4 py-6 space-y-6">
 
-<form method="get" action="" class="staff-search-form">
-  <input
-    type="text"
-    name="q"
-    placeholder="Search staff..."
-    value="{{ request.GET.q }}"
-  >
-  <button type="submit" class="btn-pill">Search</button>
-</form>
+  <!-- PAGE HEADER -->
+  <div>
+    <h1 class="text-2xl font-semibold tracking-tight">Staff Search</h1>
+    <p class="mt-1 text-sm text-slate-500">
+      Search for staff and view upcoming rota assignments.
+    </p>
+  </div>
 
-<hr>
+  <!-- SEARCH FORM -->
+  <form method="get" action="" class="flex flex-col sm:flex-row gap-3">
+    <input
+      type="text"
+      name="q"
+      placeholder="Search staff…"
+      value="{{ request.GET.q }}"
+      class="flex-1 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm
+             focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+    >
+    <button
+      type="submit"
+      class="inline-flex items-center justify-center rounded-lg px-5 py-2 text-sm font-semibold
+             bg-emerald-600 text-white hover:bg-emerald-700 transition"
+    >
+      Search
+    </button>
+  </form>
 
-{% if query %}
-  <h2>Results for "{{ query }}":</h2>
+  {% if query %}
+    <hr class="border-slate-200">
 
-  {% if results %}
-    {% for item in results %}
-      <div class="staff-card">
-        <div class="staff-card-header">
-          <h2>{{ item.staff.full_name }}</h2>
-          <p class="muted" style="margin: 0;">
-            {{ item.staff.get_role_display }}
-          </p>
-        </div>
+    <h2 class="text-lg font-semibold">
+      Results for “{{ query }}”
+    </h2>
 
-        {% if item.assignments %}
-          <table class="assignments-table">
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Location</th>
-                <th>Role</th>
-                <th>Shift</th>
-                <th>Details</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for a in item.assignments %}
-                <tr>
-                  <td>{{ a.rotaday.date|date:"M j, Y" }}</td>
+    {% if results %}
+      <div class="space-y-6">
+        {% for item in results %}
+          <section class="rounded-2xl bg-white shadow ring-1 ring-slate-200 overflow-hidden">
 
-                  <td>
-                    {% if a.isolator %}
-                      {{ a.clean_room.name }} – {{ a.isolator.name }}
-                    {% else %}
-                      {{ a.clean_room.name }}
-                    {% endif %}
-                  </td>
+            <!-- STAFF HEADER -->
+            <div class="flex items-center justify-between gap-4 p-5 border-b border-slate-200">
+              <div>
+                <h3 class="text-lg font-semibold text-slate-900">
+                  {{ item.staff.full_name }}
+                </h3>
+                <p class="text-sm text-slate-500">
+                  {{ item.staff.get_role_display }}
+                </p>
+              </div>
+            </div>
 
-                  <td>
-                    {% if a.is_room_supervisor %}
-                      Room Supervisor
-                    {% elif a.location_type == "ISOLATOR" %}
-                      Isolator Operator
-                    {% else %}
-                      {{ a.get_location_type_display }}
-                    {% endif %}
-                  </td>
+            <!-- ASSIGNMENTS -->
+            {% if item.assignments %}
+              <div class="overflow-x-auto">
+                <table class="w-full border-collapse text-sm">
+                  <thead class="bg-slate-50 text-slate-600">
+                    <tr>
+                      <th class="p-3 text-left font-medium">Date</th>
+                      <th class="p-3 text-left font-medium">Location</th>
+                      <th class="p-3 text-left font-medium">Role</th>
+                      <th class="p-3 text-left font-medium">Shift</th>
+                      <th class="p-3 text-left font-medium">Details</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for a in item.assignments %}
+                      <tr class="border-t border-slate-200 hover:bg-slate-50">
+                        <td class="p-3">
+                          {{ a.rotaday.date|date:"M j, Y" }}
+                        </td>
 
-                  <td>
-                    {{ a.shift.name }}
-                    <br>
-                    <span class="muted small">
-                      {{ a.shift.start_time }} – {{ a.shift.end_time }}
-                    </span>
-                  </td>
+                        <td class="p-3">
+                          {% if a.isolator %}
+                            {{ a.clean_room.name }} – {{ a.isolator.name }}
+                          {% else %}
+                            {{ a.clean_room.name }}
+                          {% endif %}
+                        </td>
 
-                  <td>
-                    {% if a.notes %}
-                      {{ a.notes }}
-                    {% else %}
-                      —
-                    {% endif %}
-                  </td>
-                </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        {% else %}
-          <p class="muted" style="margin-top: 0.4rem;">
-            No upcoming assignments recorded for this staff member.
-          </p>
-        {% endif %}
+                        <td class="p-3">
+                          {% if a.is_room_supervisor %}
+                            <span class="inline-flex rounded-full bg-emerald-100 px-2 py-1 text-xs font-semibold text-emerald-800">
+                              Room Supervisor
+                            </span>
+                          {% elif a.location_type == "ISOLATOR" %}
+                            <span class="inline-flex rounded-full bg-sky-100 px-2 py-1 text-xs font-semibold text-sky-800">
+                              Isolator Operator
+                            </span>
+                          {% else %}
+                            {{ a.get_location_type_display }}
+                          {% endif %}
+                        </td>
+
+                        <td class="p-3">
+                          <div class="font-medium text-slate-800">
+                            {{ a.shift.name }}
+                          </div>
+                          <div class="text-xs text-slate-500">
+                            {{ a.shift.start_time }} – {{ a.shift.end_time }}
+                          </div>
+                        </td>
+
+                        <td class="p-3 text-slate-600">
+                          {% if a.notes %}
+                            {{ a.notes }}
+                          {% else %}
+                            —
+                          {% endif %}
+                        </td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            {% else %}
+              <div class="p-5 text-sm text-slate-500">
+                No upcoming assignments recorded for this staff member.
+              </div>
+            {% endif %}
+          </section>
+        {% endfor %}
       </div>
-    {% endfor %}
-
-  {% else %}
-    <p>No matching staff found.</p>
+    {% else %}
+      <div class="rounded-xl bg-slate-50 ring-1 ring-slate-200 p-4 text-sm text-slate-600">
+        No matching staff found.
+      </div>
+    {% endif %}
   {% endif %}
-{% endif %}
+
+</div>
 {% endblock %}
