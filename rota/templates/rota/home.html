@@ -2,139 +2,132 @@
 {% extends "rota/base.html" %}
 <!-- prettier-ignore-end -->
 
-{% block title %} Home – Skedaddle Rota {%endblock %} {% block content %}
-<h1>Rota Dashboard</h1>
-<p style="color: #4b5563; font-size: 0.95rem">
-  Welcome to the aseptic rota system.
-</p>
+{% block title %}Home – Skedaddle Rota{% endblock %}
 
-<div
-  style="
-    margin-top: 1.25rem;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 1rem;
-  "
->
-  <!-- ROTA CALENDAR -->
-  <div
-    style="
-      border-radius: 8px;
-      background: #ffffff;
-      padding: 1rem;
-      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
-      border: 1px solid #e5e7eb;
-    "
-  >
-    <h2 style="margin-top: 0; font-size: 1.05rem">Rota calendar</h2>
-    <p style="font-size: 0.9rem; color: #6b7280">
-      Open the monthly rota and drill down into a specific day.
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 py-8 space-y-8">
+
+  <!-- HERO / INTRO -->
+  <div class="rounded-3xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white p-8 shadow">
+    <h1 class="text-3xl font-semibold tracking-tight">
+      Rota Dashboard
+    </h1>
+    <p class="mt-2 max-w-2xl text-emerald-50">
+      Welcome to Skedaddle — the aseptic rota management system designed for clarity,
+      safety, and speed in cleanroom environments.
     </p>
-    <a
-      href="{% url 'monthly_calendar' year=today.year month=today.month %}"
-      style="
-        display: inline-block;
-        margin-top: 0.5rem;
-        padding: 0.4rem 0.75rem;
-        border-radius: 999px;
-        background: #2563eb;
-        color: #ffffff;
-        text-decoration: none;
-        font-size: 0.9rem;
-      "
-    >
-      Open monthly calendar
-    </a>
   </div>
 
-  <!-- TODAY’S ROTA -->
-  <div
-    style="
-      border-radius: 8px;
-      background: #ffffff;
-      padding: 1rem;
-      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
-      border: 1px solid #e5e7eb;
-    "
-  >
-    <h2 style="margin-top: 0; font-size: 1.05rem">Today’s rota</h2>
-    <p style="font-size: 0.9rem; color: #6b7280">
-      Jump straight to today’s cleanroom and isolator layout.
-    </p>
-    <a
-      href="{% url 'daily_rota' year=today.year month=today.month day=today.day %}"
-      style="
-        display: inline-block;
-        margin-top: 0.5rem;
-        padding: 0.4rem 0.75rem;
-        border-radius: 999px;
-        background: #0d9488;
-        color: #ffffff;
-        text-decoration: none;
-        font-size: 0.9rem;
-      "
-    >
-      View today’s rota
-    </a>
-  </div>
+  <!-- QUICK ACTION CARDS -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
 
-  <!-- STAFF MANAGEMENT -->
-  <div
-    style="
-      border-radius: 8px;
-      background: #ffffff;
-      padding: 1rem;
-      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
-      border: 1px solid #e5e7eb;
-    "
-  >
-    <h2 style="margin-top: 0; font-size: 1.05rem">Staff &amp; permissions</h2>
+    <!-- ROTA CALENDAR -->
+    <div class="group rounded-2xl bg-white shadow ring-1 ring-slate-200 p-6 transition hover:shadow-lg">
+      <div class="flex items-center justify-between">
+        <h2 class="text-lg font-semibold text-slate-900">
+          Rota Calendar
+        </h2>
+        <span class="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800">
+          Planning
+        </span>
+      </div>
 
-    {% if is_manager or user.is_superuser %}
-    <p style="font-size: 0.9rem; color: #6b7280">
-      You have rota manager access. You can add staff and configure who is a
-      Rota Manager or Viewer.
-    </p>
-    <div
-      style="margin-top: 0.5rem; display: flex; gap: 0.5rem; flex-wrap: wrap"
-    >
+      <p class="mt-2 text-sm text-slate-600">
+        View the monthly rota and drill down into daily cleanroom and isolator assignments.
+      </p>
+
       <a
-        href="{% url 'staff_create' %}"
-        style="
-          display: inline-block;
-          padding: 0.4rem 0.75rem;
-          border-radius: 999px;
-          background: #16a34a;
-          color: #ffffff;
-          text-decoration: none;
-          font-size: 0.9rem;
-        "
+        href="{% url 'monthly_calendar' year=today.year month=today.month %}"
+        class="mt-4 inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold
+               bg-emerald-600 text-white hover:bg-emerald-700 transition"
       >
-        Add staff member
-      </a>
-      <a
-        href="{% url 'staff_list' %}"
-        style="
-          display: inline-block;
-          padding: 0.4rem 0.75rem;
-          border-radius: 999px;
-          background: #f3f4f6;
-          color: #111827;
-          text-decoration: none;
-          font-size: 0.9rem;
-          border: 1px solid #e5e7eb;
-        "
-      >
-        View all staff
+        Open monthly calendar →
       </a>
     </div>
-    {% else %}
-    <p style="font-size: 0.9rem; color: #6b7280">
-      You currently have viewer access. You can browse the rota but not edit
-      staff or assignments.
-    </p>
-    {% endif %}
-  </div>
-</div>
 
+    <!-- TODAY’S ROTA -->
+    <div class="group rounded-2xl bg-white shadow ring-1 ring-slate-200 p-6 transition hover:shadow-lg">
+      <div class="flex items-center justify-between">
+        <h2 class="text-lg font-semibold text-slate-900">
+          Today’s Rota
+        </h2>
+        <span class="rounded-full bg-teal-100 px-3 py-1 text-xs font-semibold text-teal-800">
+          Live
+        </span>
+      </div>
+
+      <p class="mt-2 text-sm text-slate-600">
+        Jump straight to today’s cleanroom layout and see who is assigned where.
+      </p>
+
+      <a
+        href="{% url 'daily_rota' year=today.year month=today.month day=today.day %}"
+        class="mt-4 inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold
+               bg-teal-600 text-white hover:bg-teal-700 transition"
+      >
+        View today’s rota →
+      </a>
+    </div>
+
+    <!-- STAFF & PERMISSIONS -->
+    <div class="group rounded-2xl bg-white shadow ring-1 ring-slate-200 p-6 transition hover:shadow-lg">
+      <div class="flex items-center justify-between">
+        <h2 class="text-lg font-semibold text-slate-900">
+          Staff & Permissions
+        </h2>
+        {% if is_manager or user.is_superuser %}
+          <span class="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800">
+            Manager
+          </span>
+        {% else %}
+          <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
+            Viewer
+          </span>
+        {% endif %}
+      </div>
+
+      {% if is_manager or user.is_superuser %}
+        <p class="mt-2 text-sm text-slate-600">
+          You have rota manager access. Manage staff, permissions, and assignments
+          to keep the suite running smoothly.
+        </p>
+
+        <div class="mt-4 flex flex-wrap gap-2">
+          <a
+            href="{% url 'staff_create' %}"
+            class="inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold
+                   bg-emerald-600 text-white hover:bg-emerald-700 transition"
+          >
+            Add staff member
+          </a>
+          <a
+            href="{% url 'staff_list' %}"
+            class="inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold
+                   bg-white ring-1 ring-slate-200 hover:bg-slate-50 transition"
+          >
+            View all staff
+          </a>
+        </div>
+      {% else %}
+        <p class="mt-2 text-sm text-slate-600">
+          You currently have viewer access. You can browse the rota but cannot
+          modify staff or assignments.
+        </p>
+      {% endif %}
+    </div>
+
+  </div>
+
+  <!-- FUTURE EXPANSION (OPTIONAL) -->
+  <div class="rounded-2xl bg-slate-50 ring-1 ring-slate-200 p-6">
+    <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-600">
+      Coming soon
+    </h3>
+    <p class="mt-1 text-sm text-slate-600">
+      Performance dashboards, rota validation checks, and audit-ready exports
+      are planned future enhancements.
+    </p>
+  </div>
+
+</div>
 {% endblock %}
