@@ -3,71 +3,90 @@
 {% block title %}Monthly rota – {{ month_name }} {{ year }}{% endblock %}
 
 {% block content %}
-<div class="monthly-wrapper">
+<div class="max-w-7xl mx-auto px-4 py-6 space-y-6">
 
-  <div class="page-header">
-    <h1>Monthly rota – {{ month_name }} {{ year }}</h1>
-    <div class="nav-links">
-      <a href="{% url 'monthly_calendar' prev_year prev_month %}">
-        &larr; Previous
+  <!-- PAGE HEADER -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <h1 class="text-2xl font-semibold tracking-tight">
+      Monthly rota – {{ month_name }} {{ year }}
+    </h1>
+
+    <div class="flex gap-4 text-sm font-medium">
+      <a
+        href="{% url 'monthly_calendar' prev_year prev_month %}"
+        class="text-emerald-700 hover:text-emerald-900 transition"
+      >
+        ← Previous
       </a>
-      <a href="{% url 'monthly_calendar' next_year next_month %}">
-        Next &rarr;
+      <a
+        href="{% url 'monthly_calendar' next_year next_month %}"
+        class="text-emerald-700 hover:text-emerald-900 transition"
+      >
+        Next →
       </a>
     </div>
   </div>
 
-  <div class="calendar-legend">
-    <div class="legend-item">
-      <span class="legend-swatch legend-today"></span>
+  <!-- LEGEND -->
+  <div class="flex flex-wrap gap-4 text-sm">
+    <div class="flex items-center gap-2">
+      <span class="w-3 h-3 rounded bg-emerald-600"></span>
       <span>Today</span>
     </div>
-    <div class="legend-item">
-      <span class="legend-swatch legend-has-rota"></span>
+    <div class="flex items-center gap-2">
+      <span class="w-3 h-3 rounded bg-emerald-200"></span>
       <span>Has rota</span>
     </div>
-    <div class="legend-item">
-      <span class="legend-swatch legend-other-month"></span>
+    <div class="flex items-center gap-2">
+      <span class="w-3 h-3 rounded bg-slate-200"></span>
       <span>Other month</span>
     </div>
-    <div class="legend-item">
-      <span class="legend-swatch legend-past"></span>
+    <div class="flex items-center gap-2">
+      <span class="w-3 h-3 rounded bg-slate-100"></span>
       <span>Past days</span>
     </div>
   </div>
-  
-  <div class="p-6 m-6 text-white bg-black text-3xl rounded-xl">
-  Tailwind is working ✅
-  </div>
 
-  <div class="calendar-card">
-    <table class="rota-calendar-table">
-      <thead>
-        <tr>
-          <th>Mon</th>
-          <th>Tue</th>
-          <th>Wed</th>
-          <th>Thu</th>
-          <th>Fri</th>
-          <th>Sat</th>
-          <th>Sun</th>
+  <!-- CALENDAR CARD -->
+  <div class="overflow-x-auto rounded-xl bg-white shadow ring-1 ring-slate-200">
+    <table class="w-full border-collapse text-center text-sm">
+      <thead class="bg-slate-50">
+        <tr class="text-slate-600 font-medium">
+          <th class="p-3">Mon</th>
+          <th class="p-3">Tue</th>
+          <th class="p-3">Wed</th>
+          <th class="p-3">Thu</th>
+          <th class="p-3">Fri</th>
+          <th class="p-3">Sat</th>
+          <th class="p-3">Sun</th>
         </tr>
       </thead>
+
       <tbody>
         {% for week in weeks %}
-          <tr>
+          <tr class="border-t border-slate-200">
             {% for d in week %}
               {% if d.month != month %}
-                <td class="rota-calendar-other-month"></td>
+                <td class="p-3 bg-slate-100 text-slate-400">
+                  {{ d.day }}
+                </td>
               {% else %}
-                <td
-                  class="
-                    {% if d == today %}rota-calendar-today{% endif %}
-                    {% if d in rotadays %} rota-calendar-has-rota{% endif %}
-                    {% if d < today %} rota-calendar-past{% endif %}
-                  "
-                >
-                  <a href="{% url 'daily_rota' d.year d.month d.day %}">
+                <td class="p-3">
+                  <a
+                    href="{% url 'daily_rota' d.year d.month d.day %}"
+                    class="
+                      block rounded-lg p-2 transition
+                      {% if d == today %}
+                        bg-emerald-600 text-white font-semibold
+                      {% elif d in rotadays %}
+                        bg-emerald-100 text-emerald-900 hover:bg-emerald-200
+                      {% elif d < today %}
+                        text-slate-400
+                      {% else %}
+                        hover:bg-slate-100
+                      {% endif %}
+                    "
+                  >
                     {{ d.day }}
                   </a>
                 </td>
@@ -78,5 +97,6 @@
       </tbody>
     </table>
   </div>
+
 </div>
 {% endblock %}
