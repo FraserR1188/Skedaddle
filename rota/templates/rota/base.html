@@ -74,31 +74,46 @@
     </main>
 
     <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        document
-          .querySelectorAll("[data-open-modal]")
-          .forEach(function (button) {
-            button.addEventListener("click", function () {
-              var id = this.getAttribute("data-open-modal");
-              var modal = document.getElementById(id);
-              if (modal) {
-                modal.classList.add("is-visible");
-              }
-            });
-          });
+      (function () {
+        function openModal(id) {
+          const modal = document.getElementById(id);
+          if (!modal) return;
+          modal.classList.remove("hidden");
+          modal.setAttribute("aria-hidden", "false");
+          document.documentElement.classList.add("overflow-hidden");
+        }
 
-        document
-          .querySelectorAll("[data-close-modal]")
-          .forEach(function (button) {
-            button.addEventListener("click", function () {
-              var id = this.getAttribute("data-close-modal");
-              var modal = document.getElementById(id);
-              if (modal) {
-                modal.classList.remove("is-visible");
-              }
-            });
-          });
-      });
+        function closeModal(modal) {
+          modal.classList.add("hidden");
+          modal.setAttribute("aria-hidden", "true");
+          document.documentElement.classList.remove("overflow-hidden");
+        }
+
+        // Open: any element with data-open-modal="modal-id"
+        document.addEventListener("click", (e) => {
+          const opener = e.target.closest("[data-open-modal]");
+          if (opener) {
+            e.preventDefault();
+            openModal(opener.getAttribute("data-open-modal"));
+            return;
+          }
+
+          // Close: click anything with data-close-modal inside a modal
+          const closer = e.target.closest("[data-close-modal]");
+          if (closer) {
+            const modal = e.target.closest(".fixed.inset-0.z-50");
+            if (modal) closeModal(modal);
+          }
+        });
+
+        // Close on Escape
+        document.addEventListener("keydown", (e) => {
+          if (e.key !== "Escape") return;
+          const openModalEl = document.querySelector(".fixed.inset-0.z-50:not(.hidden)");
+          if (openModalEl) closeModal(openModalEl);
+        });
+      })();
     </script>
+
   </body>
 </html>

@@ -1,103 +1,182 @@
-<div class="modal" id="modal-isolator-{{ iso.id }}">
-  <div class="modal-backdrop" data-close-modal="modal-isolator-{{ iso.id }}"></div>
+{# rota/partials/isolator_modal.html #}
 
-  <div class="modal-content">
+<div
+  id="modal-isolator-{{ iso.id }}"
+  class="fixed inset-0 z-50 hidden"
+  aria-hidden="true"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="modal-isolator-title-{{ iso.id }}"
+>
+  <!-- Backdrop -->
+  <div class="absolute inset-0 bg-slate-900/60" data-close-modal></div>
 
-    <div class="modal-header">
-      <h2>Edit Assignments – {{ iso.name }} ({{ date }})</h2>
-      <button
-        type="button"
-        class="modal-close"
-        data-close-modal="modal-isolator-{{ iso.id }}">
-        &times;
-      </button>
-    </div>
+  <!-- Dialog wrapper -->
+  <div class="relative mx-auto w-full max-w-3xl px-4 py-10">
+    <div class="rounded-2xl bg-white shadow-xl ring-1 ring-slate-200 overflow-hidden">
 
-    {# -------- CURRENT ASSIGNMENTS (READ-ONLY SUMMARY) -------- #}
-    {% if iso.operator_assignments %}
-      <div class="muted" style="margin-bottom: 1rem;">
-        <strong>Current operators:</strong>
-        <ul>
-          {% for a in iso.operator_assignments %}
-            <li>{{ a.staff.full_name }} – {{ a.shift.name }}</li>
-          {% endfor %}
-        </ul>
+      <!-- Header -->
+      <div class="flex items-start justify-between gap-4 p-5 border-b border-slate-200">
+        <div>
+          <h2
+            id="modal-isolator-title-{{ iso.id }}"
+            class="text-lg font-semibold text-slate-900"
+          >
+            Edit Assignments – {{ iso.name }}
+          </h2>
+          <p class="mt-1 text-sm text-slate-500">{{ date }}</p>
+        </div>
+
+        <button
+          type="button"
+          class="inline-flex items-center justify-center rounded-lg px-3 py-2 text-sm font-semibold
+                 bg-slate-100 hover:bg-slate-200 transition"
+          data-close-modal
+          aria-label="Close"
+        >
+          ✕
+        </button>
       </div>
-    {% else %}
-      <div class="muted" style="margin-bottom: 1rem;">
-        <strong>No operators assigned yet.</strong>
-      </div>
-    {% endif %}
 
-    <form method="post" action="{% url 'daily_rota' date.year date.month date.day %}">
-      {% csrf_token %}
-      <input type="hidden" name="isolator_id" value="{{ iso.id }}">
+      <!-- Body -->
+      <div class="p-5 space-y-6">
 
-      {# ================= OPERATORS (UP TO 6) ================= #}
-      <h3>Assign Operators (Max 6)</h3>
-      <p class="muted">Choose a staff member and their shift time.</p>
-
-      <div class="operator-grid">
-        {% for slot in iso.operator_slots %}
-          <div class="operator-row">
-            <label class="operator-label">Operator {{ forloop.counter }}</label>
-
-            {# STAFF SELECT #}
-            <select name="op{{ forloop.counter }}_staff">
-              <option value="">-- None --</option>
-              {% for staff in staff_list %}
-                {% if staff.role == "OPERATIVE" or staff.role == "SUPERVISOR" %}
-                  <option value="{{ staff.id }}"
-                    {% if slot and slot.staff.id == staff.id %}selected{% endif %}>
-                    {{ staff.full_name }}
-                  </option>
-                {% endif %}
+        {# -------- CURRENT ASSIGNMENTS (READ-ONLY SUMMARY) -------- #}
+        <div class="rounded-xl bg-slate-50 ring-1 ring-slate-200 p-4">
+          {% if iso.operator_assignments %}
+            <p class="text-sm text-slate-700">
+              <span class="font-semibold text-slate-900">Current operators:</span>
+            </p>
+            <ul class="mt-2 space-y-1 text-sm text-slate-700">
+              {% for a in iso.operator_assignments %}
+                <li class="flex flex-wrap gap-x-2">
+                  <span class="font-medium">{{ a.staff.full_name }}</span>
+                  <span class="text-slate-400">–</span>
+                  <span class="text-slate-600">{{ a.shift.name }}</span>
+                </li>
               {% endfor %}
-            </select>
+            </ul>
+          {% else %}
+            <p class="text-sm text-slate-700">
+              <span class="font-semibold text-slate-900">No operators assigned yet.</span>
+            </p>
+          {% endif %}
+        </div>
 
-            {# SHIFT SELECT #}
-            <select name="op{{ forloop.counter }}_shift">
-              <option value="">-- Shift --</option>
-              {% for shift in shift_templates %}
-                <option value="{{ shift.id }}"
-                  {% if slot and slot.shift.id == shift.id %}selected{% endif %}>
-                  {{ shift.name }} ({{ shift.start_time }}–{{ shift.end_time }})
+        <form method="post" action="{% url 'daily_rota' date.year date.month date.day %}" class="space-y-6">
+          {% csrf_token %}
+          <input type="hidden" name="isolator_id" value="{{ iso.id }}">
+
+          {# ================= OPERATORS (UP TO 6) ================= #}
+          <div>
+            <h3 class="text-sm font-semibold text-slate-900">Assign Operators (Max 6)</h3>
+            <p class="mt-1 text-sm text-slate-500">Choose a staff member and their shift time.</p>
+
+            <div class="mt-4 space-y-3">
+              {% for slot in iso.operator_slots %}
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-start rounded-xl bg-white ring-1 ring-slate-200 p-4">
+                  <div class="md:col-span-3">
+                    <label class="block text-xs font-semibold uppercase tracking-wide text-slate-600">
+                      Operator {{ forloop.counter }}
+                    </label>
+                  </div>
+
+                  <!-- STAFF SELECT -->
+                  <div class="md:col-span-5">
+                    <label class="sr-only">Operator {{ forloop.counter }} staff</label>
+                    <select
+                      name="op{{ forloop.counter }}_staff"
+                      class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm
+                             focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                    >
+                      <option value="">-- None --</option>
+                      {% for staff in staff_list %}
+                        {% if staff.role == "OPERATIVE" or staff.role == "SUPERVISOR" %}
+                          <option
+                            value="{{ staff.id }}"
+                            {% if slot and slot.staff.id == staff.id %}selected{% endif %}
+                          >
+                            {{ staff.full_name }}
+                          </option>
+                        {% endif %}
+                      {% endfor %}
+                    </select>
+                  </div>
+
+                  <!-- SHIFT SELECT -->
+                  <div class="md:col-span-4">
+                    <label class="sr-only">Operator {{ forloop.counter }} shift</label>
+                    <select
+                      name="op{{ forloop.counter }}_shift"
+                      class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm
+                             focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                    >
+                      <option value="">-- Shift --</option>
+                      {% for shift in shift_templates %}
+                        <option
+                          value="{{ shift.id }}"
+                          {% if slot and slot.shift.id == shift.id %}selected{% endif %}
+                        >
+                          {{ shift.name }} ({{ shift.start_time }}–{{ shift.end_time }})
+                        </option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+
+          <hr class="border-slate-200">
+
+          {# ================= ROOM SUPERVISORS ================= #}
+          <div>
+            <h3 class="text-sm font-semibold text-slate-900">Room Supervisors</h3>
+            <p class="mt-1 text-sm text-slate-500">
+              Select up to 4 Production Supervisors for {{ room.name }}.
+              <span class="block text-xs text-slate-500">(Hold Ctrl/Cmd to select multiple.)</span>
+            </p>
+
+            <select
+              name="room_supervisors"
+              multiple
+              size="5"
+              class="mt-3 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm
+                     focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+            >
+              {% for staff in supervisors %}
+                <option
+                  value="{{ staff.id }}"
+                  {% if room.room_supervisor_ids and staff.id in room.room_supervisor_ids %}selected{% endif %}
+                >
+                  {{ staff.full_name }}
                 </option>
               {% endfor %}
             </select>
           </div>
-        {% endfor %}
+
+          <!-- Actions -->
+          <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-2">
+            <button
+              type="button"
+              class="inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold
+                     bg-white ring-1 ring-slate-200 hover:bg-slate-50 transition"
+              data-close-modal
+            >
+              Cancel
+            </button>
+
+            <button
+              type="submit"
+              class="inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold
+                     bg-emerald-600 text-white hover:bg-emerald-700 transition"
+            >
+              Save
+            </button>
+          </div>
+
+        </form>
       </div>
-
-      <hr>
-
-      {# ================= ROOM SUPERVISORS ================= #}
-      <h3>Room Supervisors</h3>
-      <p class="muted">
-        Select up to 4 Production Supervisors for {{ room.name }}.<br>
-        <span class="muted small">(Hold Ctrl/Cmd to select multiple.)</span>
-      </p>
-
-      <select name="room_supervisors" multiple size="5">
-        {% for staff in supervisors %}
-          <option value="{{ staff.id }}"
-            {% if room.room_supervisor_ids and staff.id in room.room_supervisor_ids %}
-              selected
-            {% endif %}>
-            {{ staff.full_name }}
-          </option>
-        {% endfor %}
-      </select>
-
-      <div class="modal-actions">
-        <button type="submit" class="btn-pill">Save</button>
-        <button
-          type="button"
-          class="btn-pill"
-          data-close-modal="modal-isolator-{{ iso.id }}">
-          Cancel
-        </button>
-      </div>
-    </form>
+    </div>
   </div>
 </div>
