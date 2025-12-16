@@ -1,10 +1,12 @@
 from django.db import models
 from django.core.exceptions import ValidationError
+from django.conf import settings
+from django.utils import timezone
 
 
 class CleanRoom(models.Model):
     number = models.PositiveSmallIntegerField(unique=True)
-    name = models.CharField(max_length=50)  # "Cleanroom 1" etc.
+    name = models.CharField(max_length=50)
 
     def __str__(self):
         return self.name
@@ -16,7 +18,7 @@ class Isolator(models.Model):
         on_delete=models.CASCADE,
         related_name="isolators",
     )
-    name = models.CharField(max_length=50)  # "Isolator 1", "Isolator 2"
+    name = models.CharField(max_length=50)
     order = models.PositiveSmallIntegerField(default=0)
 
     class Meta:
@@ -28,7 +30,7 @@ class Isolator(models.Model):
 
 
 class Crew(models.Model):
-    name = models.CharField(max_length=20, unique=True)  # "Crew A", "Crew B", "Crew C"
+    name = models.CharField(max_length=20, unique=True)
 
     def __str__(self):
         return self.name
@@ -65,7 +67,7 @@ class StaffMember(models.Model):
 
 
 class ShiftTemplate(models.Model):
-    name = models.CharField(max_length=50)  # "Early", "Core", "Late"
+    name = models.CharField(max_length=50)
     start_time = models.TimeField()
     end_time = models.TimeField()
 
@@ -74,16 +76,101 @@ class ShiftTemplate(models.Model):
 
 
 class RotaDay(models.Model):
+    """
+    Represents a single calendar day for rota planning.
+    """
+
+    DRAFT = "DRAFT"
+    PUBLISHED = "PUBLISHED"
+
+    STATUS_CHOICES = [
+        (DRAFT, "Draft"),
+        (PUBLISHED, "Published"),
+    ]
+
     date = models.DateField(unique=True)
+    status = models.CharField(
+        max_length=12,
+        choices=STATUS_CHOICES,
+        default=DRAFT,
+    )
+    published_at = models.DateTimeField(null=True, blank=True)
+    published_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="published_rotadays",
+    )
+    publish_version = models.PositiveIntegerField(default=0)
+
+    def mark_published(self, user):
+        """
+        Marks the rota as published or republished.
+        """
+        if self.status != self.PUBLISHED:
+            self.status = self.PUBLISHED
+            self.publish_version = 1
+        else:
+            self.publish_version += 1
+
+        self.published_at = timezone.now()
+        self.published_by = user
 
     def __str__(self):
         return self.date.isoformat()
 
 
+class RotaDayAuditEvent(models.Model):
+    """
+    Immutable audit trail for a single rota day.
+    """
+
+    ASSIGNMENT_CREATED = "ASSIGNMENT_CREATED"
+    ASSIGNMENT_UPDATED = "ASSIGNMENT_UPDATED"
+    ASSIGNMENT_DELETED = "ASSIGNMENT_DELETED"
+    PUBLISHED = "PUBLISHED"
+    REPUBLISHED = "REPUBLISHED"
+
+    EVENT_CHOICES = [
+        (ASSIGNMENT_CREATED, "Assignment created"),
+        (ASSIGNMENT_UPDATED, "Assignment updated"),
+        (ASSIGNMENT_DELETED, "Assignment deleted"),
+        (PUBLISHED, "Published"),
+        (REPUBLISHED, "Republished"),
+    ]
+
+    rotaday = models.ForeignKey(
+        RotaDay,
+        on_delete=models.CASCADE,
+        related_name="audit_events",
+    )
+    event_type = models.CharField(max_length=32, choices=EVENT_CHOICES)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    actor = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="rota_audit_events",
+    )
+    summary = models.CharField(max_length=255)
+
+    # Optional structured snapshots (safe for future diffing)
+    before_json = models.JSONField(null=True, blank=True)
+    after_json = models.JSONField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["-timestamp"]
+
+    def __str__(self):
+        return f"{self.rotaday} | {self.get_event_type_display()} | {self.timestamp}"
+
+
 class Assignment(models.Model):
     """
     One person on one location (room or isolator) for a given day and shift.
-    Now supports up to 6 operators per isolator, no batch numbers.
+    Supports up to 6 operators per isolator.
     """
 
     LOCATION_TYPES = [
@@ -124,23 +211,12 @@ class Assignment(models.Model):
     )
     notes = models.CharField(max_length=255, blank=True)
 
-    # Supervisors still need this flag
     is_room_supervisor = models.BooleanField(default=False)
 
     class Meta:
-        # A staff member cannot be scheduled twice on the same day
         unique_together = ("rotaday", "staff")
 
     def clean(self):
-        """
-        Updated rules (NO batch system):
-        - ROOM:
-            * Must be a supervisor
-            * isolator must be null
-        - ISOLATOR:
-            * isolator must be set
-            * Can have up to 6 staff assigned
-        """
         errors = {}
 
         # ROOM rules
@@ -156,16 +232,15 @@ class Assignment(models.Model):
             if self.isolator is None:
                 errors["isolator"] = "Isolator assignments must select an isolator."
 
-            # enforce max 6 people per isolator per day
             existing = Assignment.objects.filter(
                 rotaday=self.rotaday,
-                isolator=self.isolator
+                isolator=self.isolator,
             ).exclude(id=self.id).count()
 
             if existing >= 6:
                 errors["isolator"] = "This isolator already has 6 assigned operators."
 
-            self.is_room_supervisor = False  # isolator staff are not supervisors here
+            self.is_room_supervisor = False
 
         if errors:
             raise ValidationError(errors)
