@@ -386,21 +386,19 @@ def staff_search(request):
     return render(request, "rota/staff_search.html", context)
 
 def is_rota_manager(user):
-    # Adapt to your existing permissions/groups logic
-    return user.is_superuser or user.groups.filter(name="Rota Managers").exists()
+    # Keep it consistent with the rest of your codebase
+    return user.is_superuser or user.has_perm("rota.rota_manager")
 
 
 @login_required
 def publish_rota_day(request, rotaday_id):
+    if request.method != "POST":
+        raise PermissionDenied("Publish endpoint only accepts POST.")
+
     if not is_rota_manager(request.user):
-        messages.error(request, "You do not have permission to publish rotas.")
-        return redirect("daily_rota")  # adjust
+        raise PermissionDenied("You do not have permission to publish rotas.")
 
     rotaday = get_object_or_404(RotaDay, pk=rotaday_id)
-
-    if request.method != "POST":
-        return redirect("daily_rota_by_id", rotaday_id=rotaday.id)  # adjust
-
     reason = (request.POST.get("reason") or "").strip()
 
     with transaction.atomic():
@@ -410,47 +408,60 @@ def publish_rota_day(request, rotaday_id):
         rotaday.save()
 
         RotaDayAuditEvent.objects.create(
-            rota_day=rotaday,
-            event_type=RotaDayAuditEvent.REPUBLISHED if already_published else RotaDayAuditEvent.PUBLISHED,
+            rotaday=rotaday,
+            event_type=(
+                RotaDayAuditEvent.REPUBLISHED
+                if already_published
+                else RotaDayAuditEvent.PUBLISHED
+            ),
             actor=request.user,
-            summary=("Republished rota" + (f": {reason}" if reason else "")) if already_published else "Published rota",
+            summary=(
+                ("Republished rota" + (f": {reason}" if reason else ""))
+                if already_published
+                else "Published rota"
+            ),
             after_json={
                 "publish_version": rotaday.publish_version,
                 "published_at": rotaday.published_at.isoformat() if rotaday.published_at else None,
             },
         )
 
-    # Send email *after* commit (simple version; good enough for now)
+    # Send email after commit (fine for now)
     _send_rota_publish_email(rotaday, reason=reason, is_update=already_published)
 
     if already_published:
-        messages.success(request, f"Rota republished (v{rotaday.publish_version}) and email sent.")
+        messages.success(
+            request, f"Rota republished (v{rotaday.publish_version}) and email sent."
+        )
     else:
         messages.success(request, "Rota published and email sent.")
 
-    return redirect("daily_rota_by_id", rotaday_id=rotaday.id)  # adjust
+    return redirect(
+        "daily_rota",
+        year=rotaday.date.year,
+        month=rotaday.date.month,
+        day=rotaday.date.day,
+    )
 
 
 def _send_rota_publish_email(rotaday: RotaDay, reason: str, is_update: bool):
-    assignments = Assignment.objects.filter(rota_day=rotaday).select_related(
-        "staff_member", "cleanroom", "isolator", "shift_template"
+    assignments = (
+        Assignment.objects.filter(rotaday=rotaday)
+        .select_related("staff", "clean_room", "isolator", "shift")
+        .order_by("clean_room__number", "isolator__order", "shift__start_time", "staff__full_name")
     )
 
-    # Choose recipients: only staff assigned that day
-    recipients = []
-    for a in assignments:
-        email = getattr(a.staff_member, "email", None)
-        if email:
-            recipients.append(email)
-    recipients = sorted(set(recipients))
-
+    # Recipients: only staff assigned that day (with an email)
+    recipients = sorted(
+        {a.staff.email for a in assignments if getattr(a.staff, "email", "").strip()}
+    )
     if not recipients:
         return
 
     subject = (
-        f"UPDATED rota published – {rotaday}"
+        f"UPDATED rota published – {rotaday.date.isoformat()}"
         if is_update
-        else f"Daily rota published – {rotaday}"
+        else f"Daily rota published – {rotaday.date.isoformat()}"
     )
 
     body = render_to_string(

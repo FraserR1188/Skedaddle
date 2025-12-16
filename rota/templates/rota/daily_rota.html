@@ -25,6 +25,94 @@
     </a>
   </div>
 
+  {# ================= PUBLISH / STATUS BAR ================= #}
+  {% if rotaday %}
+    {% if rotaday.status == "PUBLISHED" %}
+      <div class="rounded-xl bg-sky-50 p-4 ring-1 ring-sky-200 text-sky-900">
+        <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+          <div class="flex items-start gap-3">
+            <div class="mt-1 h-2.5 w-2.5 rounded-full bg-sky-500"></div>
+            <div>
+              <p class="font-semibold">
+                Published v{{ rotaday.publish_version }}
+              </p>
+              <p class="text-sm text-sky-800/90">
+                {% if rotaday.published_at %}Published at {{ rotaday.published_at }}{% endif %}
+                {% if rotaday.published_by %} by {{ rotaday.published_by }}{% endif %}
+              </p>
+            </div>
+          </div>
+
+          {% if user.is_superuser or perms.rota.rota_manager %}
+            <form
+              method="post"
+              action="{% url 'publish_rota_day' rotaday.id %}"
+              class="w-full md:w-auto"
+            >
+              {% csrf_token %}
+              <div class="flex flex-col sm:flex-row gap-2 sm:items-center sm:justify-end">
+                <input
+                  type="text"
+                  name="reason"
+                  placeholder="Reason for update (optional)"
+                  class="w-full sm:w-80 rounded-lg px-3 py-2 text-sm bg-white ring-1 ring-sky-200
+                         placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-300"
+                />
+                <button
+                  type="submit"
+                  class="inline-flex w-full sm:w-auto items-center justify-center
+                         rounded-lg px-4 py-2 text-sm font-semibold
+                         bg-sky-900 text-white hover:bg-sky-800 transition"
+                >
+                  Republish update
+                </button>
+              </div>
+              <p class="mt-2 text-xs text-sky-800/80">
+                Republish will send an updated email notification to assigned staff.
+              </p>
+            </form>
+          {% endif %}
+        </div>
+      </div>
+    {% else %}
+      <div class="rounded-xl bg-amber-50 p-4 ring-1 ring-amber-200 text-amber-900">
+        <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+          <div class="flex items-start gap-3">
+            <div class="mt-1 h-2.5 w-2.5 rounded-full bg-amber-500"></div>
+            <div>
+              <p class="font-semibold">Draft — not published</p>
+              <p class="text-sm text-amber-800/90">
+                Changes are saved, but staff won’t be notified until published.
+              </p>
+            </div>
+          </div>
+
+          {% if user.is_superuser or perms.rota.rota_manager %}
+            <form
+              method="post"
+              action="{% url 'publish_rota_day' rotaday.id %}"
+              class="w-full md:w-auto"
+            >
+              {% csrf_token %}
+              <button
+                type="submit"
+                class="inline-flex w-full md:w-auto items-center justify-center
+                       rounded-lg px-4 py-2 text-sm font-semibold
+                       bg-emerald-600 text-white hover:bg-emerald-700 transition"
+              >
+                Publish rota
+              </button>
+              <p class="mt-2 text-xs text-amber-800/80">
+                Publishing will email assigned staff for this day.
+              </p>
+            </form>
+          {% endif %}
+        </div>
+      </div>
+    {% endif %}
+  {% endif %}
+  {# ================= END PUBLISH / STATUS BAR ================= #}
+
   <!-- INFO BANNER -->
   {% if not assignments %}
     <div class="rounded-xl bg-amber-50 p-4 ring-1 ring-amber-200 text-amber-900">
@@ -244,6 +332,48 @@
     {% endfor %}
 
   </div>
+
+  {# ================= CHANGE LOG / AUDIT TRAIL ================= #}
+  {% if rotaday %}
+    <section class="rounded-2xl bg-white shadow ring-1 ring-slate-200 overflow-hidden">
+      <div class="p-5 border-b border-slate-200">
+        <h2 class="text-lg font-semibold text-slate-900">Change history</h2>
+        <p class="text-sm text-slate-500">
+          Logged actions for this rota day (latest first).
+        </p>
+      </div>
+
+      <div class="p-5">
+        {% if rotaday.audit_events.all %}
+          <ol class="space-y-3">
+            {% for e in rotaday.audit_events.all %}
+              <li class="flex items-start gap-3">
+                <span class="mt-2 h-2 w-2 rounded-full bg-slate-400"></span>
+                <div class="min-w-0">
+                  <p class="text-sm text-slate-900">
+                    <span class="font-semibold">{{ e.timestamp }}</span>
+                    <span class="text-slate-500">—</span>
+                    {{ e.summary }}
+                    {% if e.actor %}
+                      <span class="text-slate-500">({{ e.actor }})</span>
+                    {% endif %}
+                  </p>
+                  <p class="text-xs text-slate-500">
+                    {{ e.get_event_type_display }}
+                  </p>
+                </div>
+              </li>
+            {% endfor %}
+          </ol>
+        {% else %}
+          <div class="rounded-xl bg-slate-50 ring-1 ring-slate-200 p-4 text-sm text-slate-600">
+            No changes logged yet.
+          </div>
+        {% endif %}
+      </div>
+    </section>
+  {% endif %}
+  {# ================= END CHANGE LOG ================= #}
 
 </div>
 {% endblock content %}

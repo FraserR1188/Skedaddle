@@ -7,14 +7,14 @@ from .models import Assignment, RotaDayAuditEvent
 
 def _assignment_snapshot(a: Assignment) -> dict:
     return {
-        "staff_id": a.staff_member_id,
-        "staff_name": getattr(a.staff_member, "name", str(a.staff_member)) if a.staff_member_id else None,
-        "room_id": a.cleanroom_id,
-        "room_name": getattr(a.cleanroom, "name", str(a.cleanroom)) if a.cleanroom_id else None,
+        "staff_id": a.staff_id,
+        "staff_name": a.staff.full_name if a.staff_id else None,
+        "room_id": a.clean_room_id,
+        "room_name": a.clean_room.name if a.clean_room_id else None,
         "isolator_id": a.isolator_id,
-        "isolator_name": getattr(a.isolator, "name", str(a.isolator)) if a.isolator_id else None,
-        "shift_id": a.shift_template_id,
-        "shift_name": getattr(a.shift_template, "name", str(a.shift_template)) if a.shift_template_id else None,
+        "isolator_name": a.isolator.name if a.isolator_id else None,
+        "shift_id": a.shift_id,
+        "shift_name": a.shift.name if a.shift_id else None,
     }
 
 
@@ -26,7 +26,7 @@ def assignment_pre_save(sender, instance: Assignment, **kwargs):
 
     try:
         old = Assignment.objects.select_related(
-            "staff_member", "cleanroom", "isolator", "shift_template"
+            "staff", "clean_room", "isolator", "shift"
         ).get(pk=instance.pk)
         instance._before_snapshot = _assignment_snapshot(old)
     except Assignment.DoesNotExist:
@@ -35,7 +35,8 @@ def assignment_pre_save(sender, instance: Assignment, **kwargs):
 
 @receiver(post_save, sender=Assignment)
 def assignment_post_save(sender, instance: Assignment, created: bool, **kwargs):
-    rota_day = instance.rota_day  # adjust if your FK is named differently
+    rotaday = instance.rotaday  # correct FK name in your model
+
     after = _assignment_snapshot(instance)
     before = getattr(instance, "_before_snapshot", None)
 
@@ -46,21 +47,20 @@ def assignment_post_save(sender, instance: Assignment, created: bool, **kwargs):
             f"{' (' + after['shift_name'] + ')' if after['shift_name'] else ''}"
         )
         RotaDayAuditEvent.objects.create(
-            rota_day=rota_day,
+            rotaday=rotaday,
             event_type=RotaDayAuditEvent.ASSIGNMENT_CREATED,
-            actor=None,  # set later if you want request.user (see note below)
+            actor=None,
             summary=summary,
             after_json=after,
         )
     else:
-        # Only log if meaningful change
         if before != after:
             summary = (
                 f"Updated assignment for {after['staff_name']} "
                 f"({before.get('room_name') if before else 'unknown'} → {after['room_name']})"
             )
             RotaDayAuditEvent.objects.create(
-                rota_day=rota_day,
+                rotaday=rotaday,
                 event_type=RotaDayAuditEvent.ASSIGNMENT_UPDATED,
                 actor=None,
                 summary=summary,
@@ -71,11 +71,12 @@ def assignment_post_save(sender, instance: Assignment, created: bool, **kwargs):
 
 @receiver(post_delete, sender=Assignment)
 def assignment_post_delete(sender, instance: Assignment, **kwargs):
-    rota_day = instance.rota_day
+    rotaday = instance.rotaday
     before = _assignment_snapshot(instance)
+
     summary = f"Removed assignment for {before['staff_name']} from {before['room_name']}"
     RotaDayAuditEvent.objects.create(
-        rota_day=rota_day,
+        rotaday=rotaday,
         event_type=RotaDayAuditEvent.ASSIGNMENT_DELETED,
         actor=None,
         summary=summary,
