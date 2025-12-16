@@ -1,0 +1,12 @@
+{% if is_update %}UPDATED{% else %}PUBLISHED{% endif %} DAILY ROTA – {{ rotaday }}
+
+{% if is_update and reason %}
+Update reason: {{ reason }}
+{% endif %}
+
+Assignments:
+{% for a in assignments %}
+- {{ a.staff_member }} | {{ a.cleanroom }}{% if a.isolator %} – {{ a.isolator }}{% endif %}{% if a.shift_template %} ({{ a.shift_template }}){% endif %}
+{% endfor %}
+
+Please check Skedaddle for live details.

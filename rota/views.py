@@ -10,6 +10,10 @@ from django.contrib.auth.decorators import (
 )
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied, ValidationError
+from django.core.mail import send_mail
+from django.db import transaction
+from django.template.loader import render_to_string
+from django.utils import timezone
 from django import forms
 
 from .models import (
@@ -19,6 +23,7 @@ from .models import (
     StaffMember,
     Isolator,
     ShiftTemplate,
+    RotaDayAuditEvent,
 )
 
 
@@ -380,3 +385,88 @@ def staff_search(request):
     }
     return render(request, "rota/staff_search.html", context)
 
+def is_rota_manager(user):
+    # Adapt to your existing permissions/groups logic
+    return user.is_superuser or user.groups.filter(name="Rota Managers").exists()
+
+
+@login_required
+def publish_rota_day(request, rotaday_id):
+    if not is_rota_manager(request.user):
+        messages.error(request, "You do not have permission to publish rotas.")
+        return redirect("daily_rota")  # adjust
+
+    rotaday = get_object_or_404(RotaDay, pk=rotaday_id)
+
+    if request.method != "POST":
+        return redirect("daily_rota_by_id", rotaday_id=rotaday.id)  # adjust
+
+    reason = (request.POST.get("reason") or "").strip()
+
+    with transaction.atomic():
+        already_published = (rotaday.status == RotaDay.PUBLISHED)
+
+        rotaday.mark_published(request.user)
+        rotaday.save()
+
+        RotaDayAuditEvent.objects.create(
+            rota_day=rotaday,
+            event_type=RotaDayAuditEvent.REPUBLISHED if already_published else RotaDayAuditEvent.PUBLISHED,
+            actor=request.user,
+            summary=("Republished rota" + (f": {reason}" if reason else "")) if already_published else "Published rota",
+            after_json={
+                "publish_version": rotaday.publish_version,
+                "published_at": rotaday.published_at.isoformat() if rotaday.published_at else None,
+            },
+        )
+
+    # Send email *after* commit (simple version; good enough for now)
+    _send_rota_publish_email(rotaday, reason=reason, is_update=already_published)
+
+    if already_published:
+        messages.success(request, f"Rota republished (v{rotaday.publish_version}) and email sent.")
+    else:
+        messages.success(request, "Rota published and email sent.")
+
+    return redirect("daily_rota_by_id", rotaday_id=rotaday.id)  # adjust
+
+
+def _send_rota_publish_email(rotaday: RotaDay, reason: str, is_update: bool):
+    assignments = Assignment.objects.filter(rota_day=rotaday).select_related(
+        "staff_member", "cleanroom", "isolator", "shift_template"
+    )
+
+    # Choose recipients: only staff assigned that day
+    recipients = []
+    for a in assignments:
+        email = getattr(a.staff_member, "email", None)
+        if email:
+            recipients.append(email)
+    recipients = sorted(set(recipients))
+
+    if not recipients:
+        return
+
+    subject = (
+        f"UPDATED rota published – {rotaday}"
+        if is_update
+        else f"Daily rota published – {rotaday}"
+    )
+
+    body = render_to_string(
+        "rota/emails/rota_published.txt",
+        {
+            "rotaday": rotaday,
+            "assignments": assignments,
+            "is_update": is_update,
+            "reason": reason,
+        },
+    )
+
+    send_mail(
+        subject=subject,
+        message=body,
+        from_email=None,  # uses DEFAULT_FROM_EMAIL
+        recipient_list=recipients,
+        fail_silently=False,
+    )
