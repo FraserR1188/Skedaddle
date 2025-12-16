@@ -1,0 +1,22 @@
+{% if is_update %}
+UPDATED DAILY ROTA – {{ rotaday.date }}
+{% else %}
+DAILY ROTA PUBLISHED – {{ rotaday.date }}
+{% endif %}
+
+{% if is_update and reason %}
+Update reason:
+{{ reason }}
+
+{% endif %}
+Assignments for {{ rotaday.date }}:
+
+{% for a in assignments %}
+- {{ a.staff.full_name }}
+  {{ a.clean_room.name }}{% if a.isolator %} – {{ a.isolator.name }}{% endif %}
+  Shift: {{ a.shift.name }} ({{ a.shift.start_time }}–{{ a.shift.end_time }})
+{% endfor %}
+
+Please check Skedaddle for the live rota.
+
+— Skedaddle
