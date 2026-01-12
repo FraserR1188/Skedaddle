@@ -14,6 +14,7 @@ from django.db import transaction
 from django.template.loader import render_to_string
 from django.utils import timezone
 from django.db.models import Q
+from collections import defaultdict
 
 from .forms import StaffMemberForm
 from .models import (
@@ -92,7 +93,9 @@ def daily_rota(request, year, month, day):
     )
     if not shift_templates:
         messages.error(request, "No shift templates configured.")
-        return redirect("current_month_redirect")
+        today = date.today()
+        return redirect("monthly_calendar", year=today.year, month=today.month)
+
 
     # -------------------------
     # POST — save assignments
@@ -182,12 +185,16 @@ def daily_rota(request, year, month, day):
     rooms_grid = []
 
     for room in cleanrooms:
-        isolators = list(room.isolators.all())
+        # Order isolators predictably from admin "order" then name
+        isolators = list(room.isolators.all().order_by("order", "name"))
 
+        # Force EXACTLY 2 per wall (max 4 rendered)
         if room.number in (1, 3):
-            right_wall, left_wall = isolators[:4], isolators[4:8]
+            right_wall = isolators[:2]
+            left_wall = isolators[2:4]
         else:
-            right_wall, left_wall = isolators, []
+            right_wall = isolators[:2]
+            left_wall = isolators[2:4]
 
         for iso in left_wall + right_wall:
             ops = sorted(
@@ -203,6 +210,7 @@ def daily_rota(request, year, month, day):
             "left_wall": left_wall,
             "room_supervisors": room_supervisors_by_room.get(room.id, []),
         })
+
 
     staff = StaffMember.objects.select_related("crew").order_by(
         "crew__sort_order", "first_name", "last_name"
@@ -255,13 +263,25 @@ def staff_create(request):
 @login_required
 @user_passes_test(is_superuser)
 def staff_list(request):
-    staff = StaffMember.objects.select_related("crew").order_by(
-        "crew__sort_order", "first_name", "last_name"
+    staff_qs = (
+        StaffMember.objects
+        .select_related("crew")
+        .order_by("crew__name", "first_name", "last_name")
     )
+
+    crews_map = defaultdict(list)
+
+    for s in staff_qs:
+        crew_name = s.crew.name if s.crew else "No Crew"
+        crews_map[crew_name].append(s)
+
+    # keep order stable (Crew A, Crew B, Crew C, then No Crew)
+    crew_cards = [{"crew": name, "staff": crews_map[name]} for name in crews_map.keys()]
+
     return render(
         request,
         "rota/staff_list.html",
-        {"staff": staff, "today": date.today()},
+        {"crew_cards": crew_cards, "today": date.today()},
     )
 
 
