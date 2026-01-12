@@ -12,9 +12,9 @@
   <div class="absolute inset-0 bg-slate-900/60" data-close-modal></div>
 
   <!-- Dialog wrapper -->
-  <div class="relative mx-auto w-full max-w-3xl px-4 py-10">
-    <div class="rounded-2xl bg-white shadow-xl ring-1 ring-slate-200 overflow-hidden text-slate-900">
-
+  <div class="relative mx-auto w-full max-w-3xl px-4 py-6">
+    <div class="rounded-2xl bg-white shadow-xl ring-1 ring-slate-200 text-slate-900
+            max-h-[85vh] flex flex-col overflow-hidden">
       <!-- Header -->
       <div class="flex items-start justify-between gap-4 p-5 border-b border-slate-200">
         <div>
@@ -39,8 +39,7 @@
       </div>
 
       <!-- Body -->
-      <div class="p-5 space-y-6 text-slate-900">
-
+      <div class="p-5 space-y-6 text-slate-900 overflow-y-auto">
         {# -------- CURRENT ASSIGNMENTS (READ-ONLY SUMMARY) -------- #}
         <div class="rounded-xl bg-slate-50 ring-1 ring-slate-200 p-4 text-slate-900">
           {% if iso.operator_assignments %}
@@ -74,9 +73,10 @@
 
             <div class="mt-4 space-y-3">
               {% for slot in iso.operator_slots %}
-                <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-start rounded-xl bg-white ring-1 ring-slate-200 p-4 text-slate-900">
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-2 items-center rounded-lg
+                            bg-slate-50 ring-1 ring-slate-200 px-3 py-2">
                   <div class="md:col-span-3">
-                    <label class="block text-xs font-semibold uppercase tracking-wide text-slate-700">
+                    <label class="block text-[11px] font-medium uppercase tracking-wide text-slate-600">
                       Operator {{ forloop.counter }}
                     </label>
                   </div>
