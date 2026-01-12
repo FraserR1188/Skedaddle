@@ -31,6 +31,11 @@ class Isolator(models.Model):
 
 class Crew(models.Model):
     name = models.CharField(max_length=20, unique=True)
+    # Allows enforced ordering: Crew A, Crew B, Crew C etc.
+    sort_order = models.PositiveSmallIntegerField(default=0)
+
+    class Meta:
+        ordering = ["sort_order", "name"]
 
     def __str__(self):
         return self.name
@@ -42,7 +47,9 @@ class StaffMember(models.Model):
         ("SUPERVISOR", "Production Supervisor"),
     ]
 
-    full_name = models.CharField(max_length=100)
+    first_name = models.CharField(max_length=50)
+    last_name = models.CharField(max_length=50)
+
     email = models.EmailField(blank=True)
     mobile_number = models.CharField(max_length=20, blank=True)
     role = models.CharField(max_length=20, choices=ROLE_CHOICES)
@@ -55,6 +62,10 @@ class StaffMember(models.Model):
     )
     is_active = models.BooleanField(default=True)
 
+    @property
+    def full_name(self) -> str:
+        return f"{self.first_name} {self.last_name}".strip()
+
     def __str__(self):
         crew = f" ({self.crew})" if self.crew else ""
         return f"{self.full_name} - {self.get_role_display()}{crew}"
@@ -64,6 +75,8 @@ class StaffMember(models.Model):
             ("rota_manager", "Can manage rota (create/update/delete)"),
             ("rota_viewer", "Can view rota"),
         ]
+        # Default ordering for admin + list views etc.
+        ordering = ["crew__sort_order", "crew__name", "first_name", "last_name"]
 
 
 class ShiftTemplate(models.Model):
@@ -156,7 +169,6 @@ class RotaDayAuditEvent(models.Model):
     )
     summary = models.CharField(max_length=255)
 
-    # Optional structured snapshots (safe for future diffing)
     before_json = models.JSONField(null=True, blank=True)
     after_json = models.JSONField(null=True, blank=True)
 
@@ -219,7 +231,6 @@ class Assignment(models.Model):
     def clean(self):
         errors = {}
 
-        # ROOM rules
         if self.location_type == "ROOM":
             if self.isolator is not None:
                 errors["isolator"] = "Room assignments must not have an isolator."
@@ -227,7 +238,6 @@ class Assignment(models.Model):
                 errors["staff"] = "Only supervisors can be assigned to the clean room."
             self.is_room_supervisor = True
 
-        # ISOLATOR rules
         if self.location_type == "ISOLATOR":
             if self.isolator is None:
                 errors["isolator"] = "Isolator assignments must select an isolator."

@@ -16,6 +16,9 @@ from django.template.loader import render_to_string
 from django.utils import timezone
 from django import forms
 
+from .forms import StaffMemberForm
+
+
 from .models import (
     RotaDay,
     Assignment,
@@ -260,8 +263,7 @@ def daily_rota(request, year, month, day):
             "left_wall": left_wall,
         })
 
-
-    staff_list = StaffMember.objects.filter(is_active=True).order_by("full_name")
+    staff = StaffMember.objects.select_related("crew").order_by("crew__name", "first_name", "last_name")
 
     operators = staff_list.filter(role="OPERATIVE")
     supervisors = staff_list.filter(role="SUPERVISOR")
