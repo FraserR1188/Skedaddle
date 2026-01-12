@@ -13,7 +13,7 @@
 
   <!-- Dialog wrapper -->
   <div class="relative mx-auto w-full max-w-3xl px-4 py-10">
-    <div class="rounded-2xl bg-white shadow-xl ring-1 ring-slate-200 overflow-hidden">
+    <div class="rounded-2xl bg-white shadow-xl ring-1 ring-slate-200 overflow-hidden text-slate-900">
 
       <!-- Header -->
       <div class="flex items-start justify-between gap-4 p-5 border-b border-slate-200">
@@ -24,13 +24,13 @@
           >
             Edit Assignments – {{ iso.name }}
           </h2>
-          <p class="mt-1 text-sm text-slate-500">{{ date }}</p>
+          <p class="mt-1 text-sm text-slate-700">{{ date }}</p>
         </div>
 
         <button
           type="button"
           class="inline-flex items-center justify-center rounded-lg px-3 py-2 text-sm font-semibold
-                 bg-slate-100 hover:bg-slate-200 transition"
+                 bg-slate-100 hover:bg-slate-200 transition text-slate-900"
           data-close-modal
           aria-label="Close"
         >
@@ -39,25 +39,25 @@
       </div>
 
       <!-- Body -->
-      <div class="p-5 space-y-6">
+      <div class="p-5 space-y-6 text-slate-900">
 
         {# -------- CURRENT ASSIGNMENTS (READ-ONLY SUMMARY) -------- #}
-        <div class="rounded-xl bg-slate-50 ring-1 ring-slate-200 p-4">
+        <div class="rounded-xl bg-slate-50 ring-1 ring-slate-200 p-4 text-slate-900">
           {% if iso.operator_assignments %}
-            <p class="text-sm text-slate-700">
+            <p class="text-sm text-slate-900">
               <span class="font-semibold text-slate-900">Current operators:</span>
             </p>
-            <ul class="mt-2 space-y-1 text-sm text-slate-700">
+            <ul class="mt-2 space-y-1 text-sm text-slate-900">
               {% for a in iso.operator_assignments %}
                 <li class="flex flex-wrap gap-x-2">
                   <span class="font-medium">{{ a.staff.full_name }}</span>
-                  <span class="text-slate-400">–</span>
-                  <span class="text-slate-600">{{ a.shift.name }}</span>
+                  <span class="text-slate-500">–</span>
+                  <span class="text-slate-700">{{ a.shift.name }}</span>
                 </li>
               {% endfor %}
             </ul>
           {% else %}
-            <p class="text-sm text-slate-700">
+            <p class="text-sm text-slate-900">
               <span class="font-semibold text-slate-900">No operators assigned yet.</span>
             </p>
           {% endif %}
@@ -70,13 +70,13 @@
           {# ================= OPERATORS (UP TO 6) ================= #}
           <div>
             <h3 class="text-sm font-semibold text-slate-900">Assign Operators (Max 6)</h3>
-            <p class="mt-1 text-sm text-slate-500">Choose a staff member and their shift time.</p>
+            <p class="mt-1 text-sm text-slate-700">Choose a staff member and their shift time.</p>
 
             <div class="mt-4 space-y-3">
               {% for slot in iso.operator_slots %}
-                <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-start rounded-xl bg-white ring-1 ring-slate-200 p-4">
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-start rounded-xl bg-white ring-1 ring-slate-200 p-4 text-slate-900">
                   <div class="md:col-span-3">
-                    <label class="block text-xs font-semibold uppercase tracking-wide text-slate-600">
+                    <label class="block text-xs font-semibold uppercase tracking-wide text-slate-700">
                       Operator {{ forloop.counter }}
                     </label>
                   </div>
@@ -86,7 +86,7 @@
                     <label class="sr-only">Operator {{ forloop.counter }} staff</label>
                     <select
                       name="op{{ forloop.counter }}_staff"
-                      class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm
+                      class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900
                              focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                     >
                       <option value="">-- None --</option>
@@ -96,7 +96,7 @@
                             value="{{ staff.id }}"
                             {% if slot and slot.staff.id == staff.id %}selected{% endif %}
                           >
-                            {{ staff.full_name }}
+                            {{ staff.full_name }}{% if staff.crew %} — {{ staff.crew.name }}{% endif %}
                           </option>
                         {% endif %}
                       {% endfor %}
@@ -108,7 +108,7 @@
                     <label class="sr-only">Operator {{ forloop.counter }} shift</label>
                     <select
                       name="op{{ forloop.counter }}_shift"
-                      class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm
+                      class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900
                              focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                     >
                       <option value="">-- Shift --</option>
@@ -132,16 +132,16 @@
           {# ================= ROOM SUPERVISORS ================= #}
           <div>
             <h3 class="text-sm font-semibold text-slate-900">Room Supervisors</h3>
-            <p class="mt-1 text-sm text-slate-500">
+            <p class="mt-1 text-sm text-slate-700">
               Select up to 4 Production Supervisors for {{ room.name }}.
-              <span class="block text-xs text-slate-500">(Hold Ctrl/Cmd to select multiple.)</span>
+              <span class="block text-xs text-slate-700">(Hold Ctrl/Cmd to select multiple.)</span>
             </p>
 
             <select
               name="room_supervisors"
               multiple
               size="5"
-              class="mt-3 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm
+              class="mt-3 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900
                      focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
             >
               {% for staff in supervisors %}
@@ -160,7 +160,7 @@
             <button
               type="button"
               class="inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold
-                     bg-white ring-1 ring-slate-200 hover:bg-slate-50 transition"
+                     bg-white ring-1 ring-slate-200 hover:bg-slate-50 transition text-slate-900"
               data-close-modal
             >
               Cancel
