@@ -183,6 +183,17 @@ class Assignment(models.Model):
     One person on one location (room or isolator) for a given day and shift.
     Supports up to 6 operators per isolator.
     """
+    class ShiftBlock(models.TextChoices):
+        AM = "AM", "AM"
+        PM = "PM", "PM"
+        # Later: CORE = "CORE", "Core"; EVE = "EVE", "Evening"
+
+    shift_block = models.CharField(
+        max_length=8,
+        choices=ShiftBlock.choices,
+        default=ShiftBlock.AM,
+        db_index=True,
+    )
 
     LOCATION_TYPES = [
         ("ROOM", "Room (Supervisor)"),
