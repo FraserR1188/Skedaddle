@@ -35,7 +35,7 @@
       {% endif %}
 
       {% if perms.rota.rota_manager %}
-        <a href="{% url 'validation:matrix' %}">APS</a>
+        <a href="{% url 'validation:validation_cards' %}">APS</a>
       {% endif %}
 
       {% if user.is_authenticated and user.is_superuser %}

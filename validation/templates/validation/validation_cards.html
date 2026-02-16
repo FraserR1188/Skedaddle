@@ -1,0 +1,243 @@
+{% extends "rota/base.html" %}
+{% load common_extras %}
+
+{% block content %}
+<h1>APS / Validation</h1>
+
+<form method="get" class="val-toolbar" style="display:flex; gap:0.5rem; align-items:center; margin: 0.75rem 0;">
+  <input type="text" name="q" value="{{ q }}" placeholder="Search staff..." />
+
+  <label style="display:flex; gap:0.25rem; align-items:center;">
+    <input type="checkbox" name="active" value="1" {% if active_only %}checked{% endif %}>
+    Active only
+  </label>
+
+  <button type="submit">Filter</button>
+</form>
+
+<style>
+  .val-grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap:16px; }
+  .val-card {
+    background:#fff; color:#0f172a; border:1px solid #dbe3ee; border-radius:12px;
+    padding:14px; box-shadow:0 1px 3px rgba(15,23,42,.06);
+  }
+  .val-card__top { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; }
+  .val-card h3 { margin:0; font-size:1.02rem; }
+
+  .val-meta { margin-top:8px; font-size:.82rem; color:#475569; display:grid; gap:6px; }
+  .pill { display:inline-block; padding:2px 8px; border-radius:999px; font-size:.72rem; background:#eaf2ff; color:#1d4ed8; width:fit-content; }
+
+  .val-sections { margin-top:10px; display:grid; gap:8px; }
+
+  /* One row per IsolatorSection ("Isolator 1 R", etc.) */
+  .iso-row {
+    display:grid;
+    grid-template-columns: 1fr 120px;
+    align-items:center;
+    gap:10px;
+  }
+
+  .iso-label {
+    font-size:0.78rem;
+    font-weight:700;
+    color:#64748b;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+
+  .sec-btn {
+    width:100%;
+    border:1px solid #cbd5e1; background:#e5e7eb; color:#0f172a;
+    padding:8px 10px; border-radius:6px; font-size:.78rem; cursor:pointer;
+    line-height:1.1;
+  }
+  .sec-btn.is-valid { background:#d1fae5; border-color:#10b981; color:#065f46; }
+  .sec-btn:hover { filter:brightness(0.98); }
+  .sec-btn[disabled] { opacity:.45; cursor:not-allowed; }
+
+  .modal { position:fixed; inset:0; display:none; z-index:1000; }
+  .modal.is-open { display:block; }
+  .modal__backdrop { position:absolute; inset:0; background:rgba(2,6,23,.55); }
+  .modal__panel {
+    position:relative; max-width:720px; margin:10vh auto; background:#fff; color:#0f172a;
+    border-radius:14px; padding:22px; box-shadow:0 20px 50px rgba(0,0,0,.25);
+  }
+  .modal__title { margin:0 0 10px; font-size:1.35rem; }
+  .modal__row { display:grid; gap:10px; margin-top:10px; }
+  .modal__line { font-size:1rem; }
+  .modal__status { font-weight:700; }
+  .modal__status.ok { color:#059669; }
+  .modal__status.bad { color:#dc2626; }
+  .modal__box { margin-top:14px; background:#f1f5f9; border-radius:10px; padding:14px; border:1px solid #e2e8f0; }
+  .modal__actions { margin-top:18px; display:flex; justify-content:flex-end; gap:10px; flex-wrap:wrap; }
+  .btn { padding:10px 14px; border-radius:10px; border:1px solid #cbd5e1; background:#fff; cursor:pointer; font-weight:600; }
+  .btn-primary { background:#059669; border-color:#059669; color:#fff; }
+  .btn-danger { background:#f1f5f9; border-color:#cbd5e1; color:#0f172a; }
+  .btn:hover { filter:brightness(.98); }
+
+  .modal select, .modal input[type="date"] { color:#000; background:#fff; }
+</style>
+
+<div class="val-grid">
+  {% for person in staff %}
+    {% with row=vmap|get_item:person.id %}
+      <div class="val-card">
+        <div class="val-card__top">
+          <div>
+            <h3>{{ person.full_name }}</h3>
+            <div class="val-meta">
+              <div>ID: {{ person.operator_id|default:person.id }}</div>
+              {% if person.crew %}<span class="pill">{{ person.crew }}</span>{% endif %}
+              <div>
+                Validated:
+                <strong>{{ valid_counts|get_item:person.id|default:"0" }}/{{ total_sides }}</strong>
+                sides
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="val-sections">
+          {% for s in sections %}
+            {% with ov=row|get_item:s.id %}
+              <div class="iso-row">
+                <div class="iso-label">
+                  {{ s.isolator.clean_room.name }} — {{ s.isolator.name }}
+                </div>
+
+                <button
+                  type="button"
+                  class="sec-btn {% if ov and ov.status == status_valid_value %}is-valid{% endif %}"
+                  data-person-id="{{ person.id }}"
+                  data-person-name="{{ person.full_name }}"
+                  data-person-code="{{ person.operator_id|default:person.id }}"
+                  data-section-id="{{ s.id }}"
+                  data-section-label="{{ s.isolator.name }}"
+                  data-current-status="{% if ov %}{{ ov.get_status_display }}{% else %}Not Validated{% endif %}"
+                  data-is-valid="{% if ov and ov.status == status_valid_value %}1{% else %}0{% endif %}"
+                  data-expiry="{% if ov and ov.expires_on %}{{ ov.expires_on|date:'Y-m-d' }}{% endif %}"
+                  onclick="openValidationModal(this)"
+                  title="Validate {{ s.isolator.name }}"
+                >
+                  Validate
+                </button>
+              </div>
+            {% endwith %}
+          {% endfor %}
+        </div>
+
+      </div>
+    {% endwith %}
+  {% empty %}
+    <p>No staff found.</p>
+  {% endfor %}
+</div>
+
+<div id="valModal" class="modal" aria-hidden="true">
+  <div class="modal__backdrop" onclick="closeValidationModal()"></div>
+
+  <div class="modal__panel" role="dialog" aria-modal="true" aria-labelledby="valModalTitle">
+    <h2 id="valModalTitle" class="modal__title">Validation Details</h2>
+
+    <div class="modal__row">
+      <div class="modal__line">
+        <strong>Staff Member:</strong>
+        <span id="mStaff"></span>
+      </div>
+      <div class="modal__line">
+        <strong>Isolator:</strong>
+        <span id="mSection"></span>
+      </div>
+      <div class="modal__line">
+        <strong>Current Status:</strong>
+        <span id="mStatus" class="modal__status"></span>
+      </div>
+    </div>
+
+    <form id="valForm" method="post" action="{% url 'validation:validation_quick_update' %}">
+      {% csrf_token %}
+      <input type="hidden" name="operator_id" id="mOperatorId">
+      <input type="hidden" name="section_id" id="mSectionId">
+
+      <div class="modal__box">
+        <div style="font-weight:700; margin-bottom:8px;">Set Expiry Date (6 months default)</div>
+        <input
+          type="date"
+          name="expires_on"
+          id="mExpiry"
+          value="{{ default_expiry|date:'Y-m-d' }}"
+          data-default="{{ default_expiry|date:'Y-m-d' }}"
+          style="padding:10px 12px; border-radius:10px; border:1px solid #cbd5e1; width:100%; max-width:420px;"
+        >
+      </div>
+
+      <div class="modal__actions">
+        <button type="button" class="btn" onclick="closeValidationModal()">Cancel</button>
+
+        <button type="submit" class="btn btn-primary" name="action" value="validate">
+          ✓ Validate
+        </button>
+
+        <button type="submit" class="btn btn-danger" name="action" value="remove" id="mRemoveBtn">
+          ✕ Remove Validation
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function openValidationModal(btn) {
+    const modal = document.getElementById('valModal');
+
+    const personId = btn.dataset.personId;
+    const personName = btn.dataset.personName;
+    const personCode = btn.dataset.personCode;
+
+    const sectionId = btn.dataset.sectionId;
+    const sectionLabel = btn.dataset.sectionLabel;
+
+    const currentStatus = btn.dataset.currentStatus;
+    const isValid = btn.dataset.isValid === "1";
+    const expiry = btn.dataset.expiry;
+
+    document.getElementById('mStaff').textContent = `${personName} (${personCode})`;
+    document.getElementById('mSection').textContent = sectionLabel;
+
+    const statusEl = document.getElementById('mStatus');
+    statusEl.textContent = isValid ? `✓ ${currentStatus}` : `✕ ${currentStatus}`;
+    statusEl.classList.toggle('ok', isValid);
+    statusEl.classList.toggle('bad', !isValid);
+
+    document.getElementById('mOperatorId').value = personId;
+    document.getElementById('mSectionId').value = sectionId;
+
+    const expiryEl = document.getElementById('mExpiry');
+    if (expiry) {
+      expiryEl.value = expiry;
+    } else {
+      expiryEl.value = expiryEl.dataset.default;
+    }
+
+    document.getElementById('mRemoveBtn').style.display = isValid ? 'inline-block' : 'none';
+
+    modal.classList.add('is-open');
+    modal.setAttribute('aria-hidden', 'false');
+
+    document.addEventListener('keydown', escCloseOnce);
+  }
+
+  function escCloseOnce(e) {
+    if (e.key === 'Escape') closeValidationModal();
+  }
+
+  function closeValidationModal() {
+    const modal = document.getElementById('valModal');
+    modal.classList.remove('is-open');
+    modal.setAttribute('aria-hidden', 'true');
+    document.removeEventListener('keydown', escCloseOnce);
+  }
+</script>
+
+{% endblock %}

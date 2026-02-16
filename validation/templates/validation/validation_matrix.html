@@ -15,84 +15,85 @@
   <button type="submit">Filter</button>
 </form>
 
-<div style="overflow:auto; border:1px solid rgba(255,255,255,0.15); border-radius:10px;">
-  <table style="min-width: 1200px; width:100%; border-collapse: collapse;">
-    <thead>
-      <tr>
-        <th style="position:sticky; left:0; z-index:2; background:#0b1220; padding:10px; text-align:left; border-bottom:1px solid rgba(255,255,255,0.15);">
-          Staff
-        </th>
+<div class="validation-matrix" style="overflow:auto; border:1px solid #ccc; border-radius:10px;">
+    <div style="overflow:auto; border:1px solid rgba(255,255,255,0.15); border-radius:10px;">
+    <table style="min-width: 1200px; width:100%; border-collapse: collapse;">
+        <thead>
+        <tr>
+            <th style="position:sticky; left:0; z-index:2; background:#0b1220; padding:10px; text-align:left; border-bottom:1px solid rgba(255,255,255,0.15);">
+            Staff
+            </th>
 
-        {% for s in sections %}
-          <th style="background:#0b1220; padding:10px; text-align:left; border-bottom:1px solid rgba(255,255,255,0.15); white-space:nowrap;">
-            {{ s.isolator.name }} {{ s.get_section_display }}
-          </th>
+            {% for s in sections %}
+            <th style="background:#0b1220; padding:10px; text-align:left; border-bottom:1px solid rgba(255,255,255,0.15); white-space:nowrap;">
+                {{ s.isolator.name }} {{ s.get_section_display }}
+            </th>
+            {% endfor %}
+        </tr>
+        </thead>
+
+        <tbody>
+        {% for person in staff %}
+            <tr>
+            <td style="position:sticky; left:0; z-index:1; background:#0b1220; padding:10px; border-bottom:1px solid rgba(255,255,255,0.08); white-space:nowrap;">
+                <strong>{{ person.full_name }}</strong>
+                {% if person.crew %}<span style="opacity:0.7;">({{ person.crew }})</span>{% endif %}
+            </td>
+
+            {% for s in sections %}
+                {# row is the dict of {section_id: OperatorValidation} for this person #}
+                {% with row=vmap|get_item:person.id %}
+                {# ov is the OperatorValidation object for this specific section (or None) #}
+                {% with ov=row|get_item:s.id %}
+                    <td style="padding:10px; border-bottom:1px solid rgba(255,255,255,0.08); vertical-align:top; white-space:nowrap;">
+
+                    <div style="margin-bottom:6px; opacity:0.85;">
+                        Current:
+                        <strong>
+                        {% if ov %}{{ ov.get_status_display }}{% else %}—{% endif %}
+                        </strong>
+                        {% if ov and ov.expires_on %}
+                        <span style="opacity:0.7;">(exp {{ ov.expires_on }})</span>
+                        {% endif %}
+                    </div>
+
+                    <form method="post" style="display:flex; gap:6px; align-items:center;">
+                        {% csrf_token %}
+                        <input type="hidden" name="operator_id" value="{{ person.id }}">
+                        <input type="hidden" name="section_id" value="{{ s.id }}">
+
+                        <select name="status">
+                        {% for key, label in status_choices %}
+                            <option value="{{ key }}" {% if ov and ov.status == key %}selected{% endif %}>
+                            {{ label }}
+                            </option>
+                        {% endfor %}
+                        </select>
+
+                        <input
+                        type="date"
+                        name="expires_on"
+                        value="{% if ov and ov.expires_on %}{{ ov.expires_on|date:'Y-m-d' }}{% endif %}"
+                        title="Expiry (optional)"
+                        />
+
+                        <button type="submit">Save</button>
+                    </form>
+
+                    </td>
+                {% endwith %}
+                {% endwith %}
+            {% endfor %}
+            </tr>
+        {% empty %}
+            <tr>
+            <td colspan="{{ sections|length|add:1 }}" style="padding:10px;">
+                No staff found.
+            </td>
+            </tr>
         {% endfor %}
-      </tr>
-    </thead>
-
-    <tbody>
-      {% for person in staff %}
-        <tr>
-          <td style="position:sticky; left:0; z-index:1; background:#0b1220; padding:10px; border-bottom:1px solid rgba(255,255,255,0.08); white-space:nowrap;">
-            <strong>{{ person.full_name }}</strong>
-            {% if person.crew %}<span style="opacity:0.7;">({{ person.crew }})</span>{% endif %}
-          </td>
-
-          {% for s in sections %}
-            {# row is the dict of {section_id: OperatorValidation} for this person #}
-            {% with row=vmap|get_item:person.id %}
-              {# ov is the OperatorValidation object for this specific section (or None) #}
-              {% with ov=row|get_item:s.id %}
-                <td style="padding:10px; border-bottom:1px solid rgba(255,255,255,0.08); vertical-align:top; white-space:nowrap;">
-
-                  <div style="margin-bottom:6px; opacity:0.85;">
-                    Current:
-                    <strong>
-                      {% if ov %}{{ ov.get_status_display }}{% else %}—{% endif %}
-                    </strong>
-                    {% if ov and ov.expires_on %}
-                      <span style="opacity:0.7;">(exp {{ ov.expires_on }})</span>
-                    {% endif %}
-                  </div>
-
-                  <form method="post" style="display:flex; gap:6px; align-items:center;">
-                    {% csrf_token %}
-                    <input type="hidden" name="operator_id" value="{{ person.id }}">
-                    <input type="hidden" name="section_id" value="{{ s.id }}">
-
-                    <select name="status">
-                      {% for key, label in status_choices %}
-                        <option value="{{ key }}" {% if ov and ov.status == key %}selected{% endif %}>
-                          {{ label }}
-                        </option>
-                      {% endfor %}
-                    </select>
-
-                    <input
-                      type="date"
-                      name="expires_on"
-                      value="{% if ov and ov.expires_on %}{{ ov.expires_on|date:'Y-m-d' }}{% endif %}"
-                      title="Expiry (optional)"
-                    />
-
-                    <button type="submit">Save</button>
-                  </form>
-
-                </td>
-              {% endwith %}
-            {% endwith %}
-          {% endfor %}
-        </tr>
-      {% empty %}
-        <tr>
-          <td colspan="{{ sections|length|add:1 }}" style="padding:10px;">
-            No staff found.
-          </td>
-        </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+        </tbody>
+    </table>
+    </div>
 </div>
-
 {% endblock %}

@@ -3,7 +3,11 @@
    ========================================= */
 
 body {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
     sans-serif;
   margin: 0;
   background: #020617; /* dark slate */
@@ -59,6 +63,7 @@ body {
   font-size: 0.8rem;
   background: #020617;
   border-bottom: 1px solid #1e293b;
+}
 
 a {
   color: inherit;
@@ -78,7 +83,9 @@ a:hover {
   font-size: 0.8rem;
   cursor: pointer;
   text-decoration: none;
-  transition: background 0.15s ease, border-color 0.15s ease,
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
     transform 0.1s ease;
 }
 .btn-pill:hover {
@@ -557,4 +564,46 @@ select[name="room_supervisors"] {
   text-align: left;
   font-weight: 600;
   background: #f7fafc;
+}
+/* Validation matrix inputs */
+.validation-matrix select,
+.validation-matrix input[type="date"] {
+  background-color: #ffffff;
+  color: #000000;
+  border: 1px solid #cbd5e1;
+}
+
+/* Ensure date text stays black */
+.validation-matrix input[type="date"] {
+  color: #000000;
+}
+
+.val-sections {
+  margin-top: 12px;
+  display: grid;
+  gap: 10px;
+}
+
+.iso-row {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  align-items: center;
+  gap: 10px;
+}
+
+.iso-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #64748b;
+  white-space: nowrap;
+}
+
+.iso-buttons {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.sec-btn {
+  width: 100%;
 }
