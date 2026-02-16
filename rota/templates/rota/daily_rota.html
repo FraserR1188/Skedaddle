@@ -159,26 +159,57 @@
             </p>
           </div>
 
-          <!-- ROOM SUPERVISORS -->
+          <!-- ROOM SUPERVISORS (AM/PM) -->
           <div class="rounded-xl bg-slate-50 ring-1 ring-slate-200 p-4 min-w-[260px]">
             <div class="text-xs font-semibold uppercase tracking-wide text-slate-600">
               Room Supervisors
             </div>
 
-            {% if block.room.room_supervisors %}
-              <ul class="mt-2 space-y-1 text-sm text-slate-800">
-                {% for sup in block.room.room_supervisors %}
-                  <li class="flex items-center gap-2">
-                    <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
-                    {{ sup.full_name }}
-                  </li>
-                {% endfor %}
-              </ul>
-            {% else %}
-              <p class="mt-2 text-sm text-slate-500">
-                No room supervisors assigned yet.
-              </p>
-            {% endif %}
+            <div class="mt-3 grid grid-cols-1 gap-3">
+              <!-- AM -->
+              <div class="rounded-lg bg-white ring-1 ring-slate-200 p-3">
+                <div class="text-[11px] font-semibold uppercase tracking-wide text-slate-600">
+                  Room Supervisors — AM
+                </div>
+
+                {% if block.room.room_supervisors_am %}
+                  <ul class="mt-2 space-y-1 text-sm text-slate-800">
+                    {% for sup in block.room.room_supervisors_am %}
+                      <li class="flex items-center gap-2">
+                        <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                        {{ sup.full_name }}
+                      </li>
+                    {% endfor %}
+                  </ul>
+                {% else %}
+                  <p class="mt-2 text-sm text-slate-500">
+                    None assigned (AM).
+                  </p>
+                {% endif %}
+              </div>
+
+              <!-- PM -->
+              <div class="rounded-lg bg-white ring-1 ring-slate-200 p-3">
+                <div class="text-[11px] font-semibold uppercase tracking-wide text-slate-600">
+                  Room Supervisors — PM
+                </div>
+
+                {% if block.room.room_supervisors_pm %}
+                  <ul class="mt-2 space-y-1 text-sm text-slate-800">
+                    {% for sup in block.room.room_supervisors_pm %}
+                      <li class="flex items-center gap-2">
+                        <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                        {{ sup.full_name }}
+                      </li>
+                    {% endfor %}
+                  </ul>
+                {% else %}
+                  <p class="mt-2 text-sm text-slate-500">
+                    None assigned (PM).
+                  </p>
+                {% endif %}
+              </div>
+            </div>
           </div>
         </div>
 
@@ -204,14 +235,48 @@
                         </div>
 
                         {% if iso.has_assignments %}
-                          <div class="mt-2 space-y-1 text-sm text-slate-700">
-                            {% for a in iso.operator_assignments %}
-                              <div class="flex flex-wrap gap-x-2">
-                                <span class="font-medium">{{ a.staff.full_name }}</span>
-                                <span class="text-slate-400">–</span>
-                                <span class="text-slate-600">{{ a.shift.name }}</span>
+                          <div class="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                            <!-- AM list -->
+                            <div class="rounded-lg bg-slate-50 ring-1 ring-slate-200 p-3">
+                              <div class="text-[11px] font-semibold uppercase tracking-wide text-slate-600">
+                                AM
                               </div>
-                            {% endfor %}
+
+                              {% if iso.operator_assignments_am %}
+                                <div class="mt-2 space-y-1 text-slate-700">
+                                  {% for a in iso.operator_assignments_am %}
+                                    <div class="flex flex-wrap gap-x-2">
+                                      <span class="font-medium">{{ a.staff.full_name }}</span>
+                                      <span class="text-slate-400">–</span>
+                                      <span class="text-slate-600">{{ a.shift.name }}</span>
+                                    </div>
+                                  {% endfor %}
+                                </div>
+                              {% else %}
+                                <p class="mt-2 text-sm text-slate-500">No AM duties.</p>
+                              {% endif %}
+                            </div>
+
+                            <!-- PM list -->
+                            <div class="rounded-lg bg-slate-50 ring-1 ring-slate-200 p-3">
+                              <div class="text-[11px] font-semibold uppercase tracking-wide text-slate-600">
+                                PM
+                              </div>
+
+                              {% if iso.operator_assignments_pm %}
+                                <div class="mt-2 space-y-1 text-slate-700">
+                                  {% for a in iso.operator_assignments_pm %}
+                                    <div class="flex flex-wrap gap-x-2">
+                                      <span class="font-medium">{{ a.staff.full_name }}</span>
+                                      <span class="text-slate-400">–</span>
+                                      <span class="text-slate-600">{{ a.shift.name }}</span>
+                                    </div>
+                                  {% endfor %}
+                                </div>
+                              {% else %}
+                                <p class="mt-2 text-sm text-slate-500">No PM duties.</p>
+                              {% endif %}
+                            </div>
                           </div>
                         {% else %}
                           <div class="mt-2 text-sm text-slate-500">
@@ -275,14 +340,48 @@
                         </div>
 
                         {% if iso.has_assignments %}
-                          <div class="mt-2 space-y-1 text-sm text-slate-700">
-                            {% for a in iso.operator_assignments %}
-                              <div class="flex flex-wrap gap-x-2">
-                                <span class="font-medium">{{ a.staff.full_name }}</span>
-                                <span class="text-slate-400">–</span>
-                                <span class="text-slate-600">{{ a.shift.name }}</span>
+                          <div class="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                            <!-- AM list -->
+                            <div class="rounded-lg bg-slate-50 ring-1 ring-slate-200 p-3">
+                              <div class="text-[11px] font-semibold uppercase tracking-wide text-slate-600">
+                                AM
                               </div>
-                            {% endfor %}
+
+                              {% if iso.operator_assignments_am %}
+                                <div class="mt-2 space-y-1 text-slate-700">
+                                  {% for a in iso.operator_assignments_am %}
+                                    <div class="flex flex-wrap gap-x-2">
+                                      <span class="font-medium">{{ a.staff.full_name }}</span>
+                                      <span class="text-slate-400">–</span>
+                                      <span class="text-slate-600">{{ a.shift.name }}</span>
+                                    </div>
+                                  {% endfor %}
+                                </div>
+                              {% else %}
+                                <p class="mt-2 text-sm text-slate-500">No AM duties.</p>
+                              {% endif %}
+                            </div>
+
+                            <!-- PM list -->
+                            <div class="rounded-lg bg-slate-50 ring-1 ring-slate-200 p-3">
+                              <div class="text-[11px] font-semibold uppercase tracking-wide text-slate-600">
+                                PM
+                              </div>
+
+                              {% if iso.operator_assignments_pm %}
+                                <div class="mt-2 space-y-1 text-slate-700">
+                                  {% for a in iso.operator_assignments_pm %}
+                                    <div class="flex flex-wrap gap-x-2">
+                                      <span class="font-medium">{{ a.staff.full_name }}</span>
+                                      <span class="text-slate-400">–</span>
+                                      <span class="text-slate-600">{{ a.shift.name }}</span>
+                                    </div>
+                                  {% endfor %}
+                                </div>
+                              {% else %}
+                                <p class="mt-2 text-sm text-slate-500">No PM duties.</p>
+                              {% endif %}
+                            </div>
                           </div>
                         {% else %}
                           <div class="mt-2 text-sm text-slate-500">
