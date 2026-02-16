@@ -14,7 +14,8 @@
   <!-- Dialog wrapper -->
   <div class="relative mx-auto w-full max-w-3xl px-4 py-6">
     <div class="rounded-2xl bg-white shadow-xl ring-1 ring-slate-200 text-slate-900
-            max-h-[85vh] flex flex-col overflow-hidden">
+                max-h-[85vh] flex flex-col overflow-hidden">
+
       <!-- Header -->
       <div class="flex items-start justify-between gap-4 p-5 border-b border-slate-200">
         <div>
@@ -40,113 +41,102 @@
 
       <!-- Body -->
       <div class="p-5 space-y-6 text-slate-900 overflow-y-auto">
-        {# -------- CURRENT ASSIGNMENTS (READ-ONLY SUMMARY) -------- #}
+
+        {# ================= CURRENT ASSIGNMENTS SUMMARY ================= #}
         <div class="rounded-xl bg-slate-50 ring-1 ring-slate-200 p-4 text-slate-900">
 
-          {# Prefer AM/PM lists if provided by view; fall back to old list #}
           {% if iso.operator_assignments_am or iso.operator_assignments_pm %}
-            <p class="text-sm text-slate-900">
-              <span class="font-semibold text-slate-900">Current operators:</span>
-            </p>
+            <p class="text-sm font-semibold">Current operators:</p>
 
             <div class="mt-3 grid grid-cols-1 md:grid-cols-2 gap-4">
+
+              <!-- AM -->
               <div class="rounded-lg bg-white ring-1 ring-slate-200 p-3">
                 <div class="text-xs font-semibold uppercase tracking-wide text-slate-600">
                   AM
                 </div>
 
                 {% if iso.operator_assignments_am %}
-                  <ul class="mt-2 space-y-1 text-sm text-slate-900">
+                  <ul class="mt-2 space-y-1 text-sm">
                     {% for a in iso.operator_assignments_am %}
-                      <li class="flex flex-wrap gap-x-2">
-                        <span class="font-medium">{{ a.staff.full_name }}</span>
-                        <span class="text-slate-500">–</span>
-                        <span class="text-slate-700">{{ a.shift.name }}</span>
-                      </li>
+                      <li>{{ a.staff.full_name }}</li>
                     {% endfor %}
                   </ul>
                 {% else %}
-                  <p class="mt-2 text-sm text-slate-500">No AM operators assigned.</p>
+                  <p class="mt-2 text-sm text-slate-500">
+                    No AM operators assigned.
+                  </p>
                 {% endif %}
               </div>
 
+              <!-- PM -->
               <div class="rounded-lg bg-white ring-1 ring-slate-200 p-3">
                 <div class="text-xs font-semibold uppercase tracking-wide text-slate-600">
                   PM
                 </div>
 
                 {% if iso.operator_assignments_pm %}
-                  <ul class="mt-2 space-y-1 text-sm text-slate-900">
+                  <ul class="mt-2 space-y-1 text-sm">
                     {% for a in iso.operator_assignments_pm %}
-                      <li class="flex flex-wrap gap-x-2">
-                        <span class="font-medium">{{ a.staff.full_name }}</span>
-                        <span class="text-slate-500">–</span>
-                        <span class="text-slate-700">{{ a.shift.name }}</span>
-                      </li>
+                      <li>{{ a.staff.full_name }}</li>
                     {% endfor %}
                   </ul>
                 {% else %}
-                  <p class="mt-2 text-sm text-slate-500">No PM operators assigned.</p>
+                  <p class="mt-2 text-sm text-slate-500">
+                    No PM operators assigned.
+                  </p>
                 {% endif %}
               </div>
+
             </div>
 
-          {% elif iso.operator_assignments %}
-            <p class="text-sm text-slate-900">
-              <span class="font-semibold text-slate-900">Current operators:</span>
-            </p>
-            <ul class="mt-2 space-y-1 text-sm text-slate-900">
-              {% for a in iso.operator_assignments %}
-                <li class="flex flex-wrap gap-x-2">
-                  <span class="font-medium">{{ a.staff.full_name }}</span>
-                  <span class="text-slate-500">–</span>
-                  <span class="text-slate-700">{{ a.shift.name }}</span>
-                </li>
-              {% endfor %}
-            </ul>
           {% else %}
-            <p class="text-sm text-slate-900">
-              <span class="font-semibold text-slate-900">No operators assigned yet.</span>
+            <p class="text-sm font-semibold">
+              No operators assigned yet.
             </p>
           {% endif %}
         </div>
 
-        <form method="post" action="{% url 'daily_rota' date.year date.month date.day %}" class="space-y-6">
+
+        <form method="post"
+              action="{% url 'daily_rota' date.year date.month date.day %}"
+              class="space-y-6">
+
           {% csrf_token %}
           <input type="hidden" name="isolator_id" value="{{ iso.id }}">
 
-          {# ================= OPERATORS (UP TO 6) ================= #}
+          {# ================= OPERATORS ================= #}
           <div>
-            <h3 class="text-sm font-semibold text-slate-900">Assign Operators (Max 6 total per isolator)</h3>
+            <h3 class="text-sm font-semibold text-slate-900">
+              Assign Operators (Max 6 per isolator)
+            </h3>
             <p class="mt-1 text-sm text-slate-700">
-              Choose a staff member, AM/PM block, and their shift time.
+              Choose a staff member and AM/PM block.
             </p>
 
             <div class="mt-4 space-y-3">
               {% for slot in iso.operator_slots %}
-                <div class="grid grid-cols-1 md:grid-cols-12 gap-2 items-center rounded-lg
-                            bg-slate-50 ring-1 ring-slate-200 px-3 py-2">
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-2 items-center
+                            rounded-lg bg-slate-50 ring-1 ring-slate-200 px-3 py-2">
+
                   <div class="md:col-span-2">
                     <label class="block text-[11px] font-medium uppercase tracking-wide text-slate-600">
                       Operator {{ forloop.counter }}
                     </label>
                   </div>
 
-                  {# STAFF SELECT #}
-                  <div class="md:col-span-5">
-                    <label class="sr-only">Operator {{ forloop.counter }} staff</label>
+                  <!-- Staff -->
+                  <div class="md:col-span-7">
                     <select
                       name="op{{ forloop.counter }}_staff"
-                      class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900
+                      class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm
                              focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                     >
                       <option value="">-- None --</option>
                       {% for staff in staff_list %}
                         {% if staff.role == "OPERATIVE" or staff.role == "SUPERVISOR" %}
-                          <option
-                            value="{{ staff.id }}"
-                            {% if slot and slot.staff.id == staff.id %}selected{% endif %}
-                          >
+                          <option value="{{ staff.id }}"
+                            {% if slot and slot.staff.id == staff.id %}selected{% endif %}>
                             {{ staff.full_name }}{% if staff.crew %} — {{ staff.crew.name }}{% endif %}
                           </option>
                         {% endif %}
@@ -154,79 +144,63 @@
                     </select>
                   </div>
 
-                  {# AM/PM BLOCK SELECT #}
-                  <div class="md:col-span-2">
-                    <label class="sr-only">Operator {{ forloop.counter }} AM/PM</label>
+                  <!-- AM/PM -->
+                  <div class="md:col-span-3">
                     <select
                       name="op{{ forloop.counter }}_block"
-                      class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900
+                      class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm
                              focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                     >
                       <option value="">-- Block --</option>
-                      <option value="AM" {% if slot and slot.shift_block == "AM" %}selected{% endif %}>AM</option>
-                      <option value="PM" {% if slot and slot.shift_block == "PM" %}selected{% endif %}>PM</option>
+                      <option value="AM"
+                        {% if slot and slot.shift_block == "AM" %}selected{% endif %}>
+                        AM
+                      </option>
+                      <option value="PM"
+                        {% if slot and slot.shift_block == "PM" %}selected{% endif %}>
+                        PM
+                      </option>
                     </select>
                   </div>
 
-                  {# SHIFT SELECT #}
-                  <div class="md:col-span-3">
-                    <label class="sr-only">Operator {{ forloop.counter }} shift</label>
-                    <select
-                      name="op{{ forloop.counter }}_shift"
-                      class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900
-                             focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                    >
-                      <option value="">-- Shift --</option>
-                      {% for shift in shift_templates %}
-                        <option
-                          value="{{ shift.id }}"
-                          {% if slot and slot.shift.id == shift.id %}selected{% endif %}
-                        >
-                          {{ shift.name }} ({{ shift.start_time }}–{{ shift.end_time }})
-                        </option>
-                      {% endfor %}
-                    </select>
-                  </div>
-
-                  {# Helpful hint line when staff chosen but block/shift missing #}
-                  <div class="md:col-span-12">
-                    <p class="text-[11px] text-slate-500">
-                      Tip: If you select a staff member, you must also select AM/PM and a shift.
-                    </p>
-                  </div>
                 </div>
               {% endfor %}
             </div>
           </div>
 
+
           <hr class="border-slate-200">
 
-          {# ================= ROOM SUPERVISORS (AM + PM) ================= #}
+
+          {# ================= ROOM SUPERVISORS ================= #}
           <div>
-            <h3 class="text-sm font-semibold text-slate-900">Room Supervisors – {{ room.name }}</h3>
+            <h3 class="text-sm font-semibold text-slate-900">
+              Room Supervisors – {{ room.name }}
+            </h3>
             <p class="mt-1 text-sm text-slate-700">
-              Select up to 4 Production Supervisors for AM and up to 4 for PM.
-              <span class="block text-xs text-slate-700">(Hold Ctrl/Cmd to select multiple.)</span>
+              Select up to 4 supervisors for AM and up to 4 for PM.
             </p>
 
             <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-              {# AM supervisors #}
+
+              <!-- AM Supervisors -->
               <div class="rounded-xl bg-slate-50 ring-1 ring-slate-200 p-4">
                 <div class="text-xs font-semibold uppercase tracking-wide text-slate-600">
-                  AM supervisors
+                  AM
                 </div>
 
                 <select
                   name="room_supervisors_am"
                   multiple
                   size="5"
-                  class="mt-3 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900
+                  class="mt-3 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm
                          focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                 >
                   {% for staff in supervisors %}
-                    <option
-                      value="{{ staff.id }}"
-                      {% if room.room_supervisor_ids_am and staff.id in room.room_supervisor_ids_am %}selected{% endif %}
+                    <option value="{{ staff.id }}"
+                      {% if room.room_supervisor_ids_am and staff.id in room.room_supervisor_ids_am %}
+                        selected
+                      {% endif %}
                     >
                       {{ staff.full_name }}
                     </option>
@@ -234,42 +208,41 @@
                 </select>
               </div>
 
-              {# PM supervisors #}
+              <!-- PM Supervisors -->
               <div class="rounded-xl bg-slate-50 ring-1 ring-slate-200 p-4">
                 <div class="text-xs font-semibold uppercase tracking-wide text-slate-600">
-                  PM supervisors
+                  PM
                 </div>
 
                 <select
                   name="room_supervisors_pm"
                   multiple
                   size="5"
-                  class="mt-3 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900
+                  class="mt-3 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm
                          focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                 >
                   {% for staff in supervisors %}
-                    <option
-                      value="{{ staff.id }}"
-                      {% if room.room_supervisor_ids_pm and staff.id in room.room_supervisor_ids_pm %}selected{% endif %}
+                    <option value="{{ staff.id }}"
+                      {% if room.room_supervisor_ids_pm and staff.id in room.room_supervisor_ids_pm %}
+                        selected
+                      {% endif %}
                     >
                       {{ staff.full_name }}
                     </option>
                   {% endfor %}
                 </select>
               </div>
-            </div>
 
-            <p class="mt-3 text-xs text-slate-600">
-              Note: A supervisor may appear in AM and PM (different blocks) if required.
-            </p>
+            </div>
           </div>
+
 
           <!-- Actions -->
           <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-2">
             <button
               type="button"
               class="inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold
-                     bg-white ring-1 ring-slate-200 hover:bg-slate-50 transition text-slate-900"
+                     bg-white ring-1 ring-slate-200 hover:bg-slate-50 transition"
               data-close-modal
             >
               Cancel
@@ -285,6 +258,7 @@
           </div>
 
         </form>
+
       </div>
     </div>
   </div>

@@ -13,7 +13,6 @@ from django.core.exceptions import PermissionDenied
 from django.core.mail import send_mail
 from django.db import transaction, models, IntegrityError
 from django.template.loader import render_to_string
-from django.utils import timezone
 from django.db.models import Q
 from django.urls import reverse
 from django.utils.http import urlencode
@@ -96,6 +95,26 @@ def daily_rota(request, year, month, day):
         today = date.today()
         return redirect("monthly_calendar", year=today.year, month=today.month)
 
+    # Map AM/PM -> ShiftTemplate (keeps DB happy even if UI hides shift choice)
+    def _shift_for_block(block: str) -> ShiftTemplate:
+        block = (block or "").upper().strip()
+
+        # Prefer name-based matches if you keep Early/Late templates around
+        if block == "AM":
+            for s in shift_templates:
+                if "early" in s.name.lower():
+                    return s
+            return shift_templates[0]  # earliest start_time
+
+        if block == "PM":
+            for s in reversed(shift_templates):
+                if "late" in s.name.lower():
+                    return s
+            return shift_templates[-1]  # latest start_time
+
+        # fallback
+        return shift_templates[0]
+
     # -------------------------
     # POST — save assignments
     # -------------------------
@@ -107,19 +126,19 @@ def daily_rota(request, year, month, day):
 
         # -------------------------
         # Collect selected operators (dedupe by staff+block)
+        # UI now posts: op{i}_staff + op{i}_block ONLY
         # -------------------------
         chosen_ops = []
         for i in range(1, 7):
             staff_id = request.POST.get(f"op{i}_staff")
-            shift_id = request.POST.get(f"op{i}_shift")
             block = request.POST.get(f"op{i}_block")  # AM/PM
-            if staff_id and shift_id and block:
-                chosen_ops.append((int(staff_id), int(shift_id), block))
+            if staff_id and block:
+                chosen_ops.append((int(staff_id), block.strip().upper()))
 
         seen = set()
         chosen_ops = [
             t for t in chosen_ops
-            if not ((t[0], t[2]) in seen or seen.add((t[0], t[2])))
+            if not ((t[0], t[1]) in seen or seen.add((t[0], t[1])))
         ]
 
         # -------------------------
@@ -136,7 +155,7 @@ def daily_rota(request, year, month, day):
         # Build selected (staff_id, shift_block) pairs for conflict checking
         # -------------------------
         selected_pairs = set()
-        for staff_id, _, block in chosen_ops:
+        for staff_id, block in chosen_ops:
             selected_pairs.add((staff_id, block))
         for sid in supervisor_ids_am:
             selected_pairs.add((sid, "AM"))
@@ -207,13 +226,13 @@ def daily_rota(request, year, month, day):
                     location_type="ISOLATOR",
                 ).delete()
 
-                for staff_id, shift_id, block in chosen_ops:
+                for staff_id, block in chosen_ops:
                     assn = Assignment(
                         rotaday=rotaday,
                         staff_id=staff_id,
                         clean_room=isolator.clean_room,
                         isolator=isolator,
-                        shift_id=shift_id,
+                        shift=_shift_for_block(block),
                         location_type="ISOLATOR",
                         shift_block=block,
                     )
@@ -234,7 +253,7 @@ def daily_rota(request, year, month, day):
                         rotaday=rotaday,
                         staff_id=sid,
                         clean_room=isolator.clean_room,
-                        shift=shift_templates[0],
+                        shift=_shift_for_block("AM"),
                         location_type="ROOM",
                         is_room_supervisor=True,
                         shift_block="AM",
@@ -245,14 +264,13 @@ def daily_rota(request, year, month, day):
                         rotaday=rotaday,
                         staff_id=sid,
                         clean_room=isolator.clean_room,
-                        shift=shift_templates[0],
+                        shift=_shift_for_block("PM"),
                         location_type="ROOM",
                         is_room_supervisor=True,
                         shift_block="PM",
                     )
 
         except IntegrityError:
-            # DB-level safety net for uniq(rotaday, staff, shift_block)
             messages.error(
                 request,
                 "Conflict detected while saving: one or more people are already assigned in that AM/PM block.",
@@ -289,7 +307,6 @@ def daily_rota(request, year, month, day):
     for room in cleanrooms:
         isolators = list(room.isolators.all().order_by("order", "name"))
 
-        # Force EXACTLY 2 per wall (max 4 rendered)
         if room.number in (1, 3):
             right_wall = isolators[:2]
             left_wall = isolators[2:4]
@@ -303,16 +320,12 @@ def daily_rota(request, year, month, day):
                 key=lambda x: (x.staff.first_name.lower(), x.staff.last_name.lower()),
             )
 
-            # Split for display (and for your updated modal summary)
             iso.operator_assignments_am = [a for a in ops if a.shift_block == "AM"]
             iso.operator_assignments_pm = [a for a in ops if a.shift_block == "PM"]
 
-            # Keep legacy list if any other templates still reference it
+            # legacy / modal expectations
             iso.operator_assignments = ops
-
-            # Modal still expects 6 "slots" (mixture of AM/PM rows is fine)
             iso.operator_slots = ops + [None] * (6 - len(ops))
-
             iso.has_assignments = bool(ops)
 
         sup_bucket = room_supervisors_by_room.get(room.id, {"AM": [], "PM": []})
@@ -322,7 +335,7 @@ def daily_rota(request, year, month, day):
         room.room_supervisor_ids_am = [s.id for s in room.room_supervisors_am]
         room.room_supervisor_ids_pm = [s.id for s in room.room_supervisors_pm]
 
-        # Keep legacy fields (if daily_rota.html still uses them)
+        # legacy fields
         room.room_supervisors = room.room_supervisors_am + room.room_supervisors_pm
         room.room_supervisor_ids = room.room_supervisor_ids_am + room.room_supervisor_ids_pm
 
@@ -351,7 +364,7 @@ def daily_rota(request, year, month, day):
         "staff_list": staff_list,
         "operators": operators,
         "supervisors": supervisors,
-        "shift_templates": shift_templates,
+        "shift_templates": shift_templates,  # still used elsewhere (emails/search)
         "assignments": assignments_qs,
     }
     return render(request, "rota/daily_rota.html", context)
@@ -397,7 +410,6 @@ def staff_list(request):
     )
 
     crews_map = defaultdict(list)
-
     for s in staff_qs:
         crew_name = s.crew.name if s.crew else "No Crew"
         crews_map[crew_name].append(s)
@@ -480,4 +492,67 @@ def publish_rota_day(request, rotaday_id):
                 else "Published rota"
             ),
             after_json={
-                "publish_version": rotaday.publish_
+                "publish_version": rotaday.publish_version,
+                "published_at": rotaday.published_at.isoformat() if rotaday.published_at else None,
+            },
+        )
+
+    _send_rota_publish_email(rotaday, reason=reason, is_update=already_published)
+
+    if already_published:
+        messages.success(
+            request, f"Rota republished (v{rotaday.publish_version}) and email sent."
+        )
+    else:
+        messages.success(request, "Rota published and email sent.")
+
+    return redirect(
+        "daily_rota",
+        year=rotaday.date.year,
+        month=rotaday.date.month,
+        day=rotaday.date.day,
+    )
+
+
+def _send_rota_publish_email(rotaday: RotaDay, reason: str, is_update: bool):
+    assignments = (
+        Assignment.objects.filter(rotaday=rotaday)
+        .select_related("staff", "clean_room", "isolator", "shift")
+        .order_by(
+            "clean_room__number",
+            "isolator__order",
+            "shift__start_time",
+            "staff__first_name",
+            "staff__last_name",
+        )
+    )
+
+    recipients = sorted(
+        {a.staff.email for a in assignments if getattr(a.staff, "email", "").strip()}
+    )
+    if not recipients:
+        return
+
+    subject = (
+        f"UPDATED rota published – {rotaday.date.isoformat()}"
+        if is_update
+        else f"Daily rota published – {rotaday.date.isoformat()}"
+    )
+
+    body = render_to_string(
+        "rota/emails/rota_published.txt",
+        {
+            "rotaday": rotaday,
+            "assignments": assignments,
+            "is_update": is_update,
+            "reason": reason,
+        },
+    )
+
+    send_mail(
+        subject=subject,
+        message=body,
+        from_email=None,
+        recipient_list=recipients,
+        fail_silently=False,
+    )
