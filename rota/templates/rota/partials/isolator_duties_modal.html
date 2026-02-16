@@ -39,31 +39,80 @@
       </div>
 
       <!-- Body -->
-      <div class="p-5">
+      <div class="p-5 space-y-6">
 
-        {% if iso.operator_assignments %}
-          <ul class="space-y-3">
-            {% for a in iso.operator_assignments %}
-              <li class="rounded-xl bg-slate-50 ring-1 ring-slate-200 p-4">
-                <div class="text-sm text-slate-900 font-semibold">
-                  {{ a.staff.full_name }}
-                  <span class="ml-1 text-xs font-normal text-slate-500">
-                    ({{ a.staff.get_role_display }})
-                  </span>
-                </div>
+        {% if iso.operator_assignments_am or iso.operator_assignments_pm %}
 
-                <div class="mt-1 text-sm text-slate-600">
-                  Shift:
-                  <span class="font-medium text-slate-700">
-                    {{ a.shift.name }}
-                  </span>
-                  <span class="text-slate-400">
-                    ({{ a.shift.start_time }} – {{ a.shift.end_time }})
-                  </span>
-                </div>
-              </li>
-            {% endfor %}
-          </ul>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+            <!-- AM -->
+            <div class="rounded-xl bg-slate-50 ring-1 ring-slate-200 p-4">
+              <div class="text-xs font-semibold uppercase tracking-wide text-slate-600">
+                AM
+              </div>
+
+              {% if iso.operator_assignments_am %}
+                <ul class="mt-3 space-y-3">
+                  {% for a in iso.operator_assignments_am %}
+                    <li class="rounded-lg bg-white ring-1 ring-slate-200 p-3">
+                      <div class="text-sm font-semibold text-slate-900">
+                        {{ a.staff.full_name }}
+                        <span class="ml-1 text-xs font-normal text-slate-500">
+                          ({{ a.staff.get_role_display }})
+                        </span>
+                      </div>
+
+                      <div class="mt-1 text-sm text-slate-600">
+                        Block:
+                        <span class="font-medium text-slate-800">
+                          {{ a.shift_block }}
+                        </span>
+                      </div>
+                    </li>
+                  {% endfor %}
+                </ul>
+              {% else %}
+                <p class="mt-3 text-sm text-slate-500">
+                  No AM duties assigned.
+                </p>
+              {% endif %}
+            </div>
+
+            <!-- PM -->
+            <div class="rounded-xl bg-slate-50 ring-1 ring-slate-200 p-4">
+              <div class="text-xs font-semibold uppercase tracking-wide text-slate-600">
+                PM
+              </div>
+
+              {% if iso.operator_assignments_pm %}
+                <ul class="mt-3 space-y-3">
+                  {% for a in iso.operator_assignments_pm %}
+                    <li class="rounded-lg bg-white ring-1 ring-slate-200 p-3">
+                      <div class="text-sm font-semibold text-slate-900">
+                        {{ a.staff.full_name }}
+                        <span class="ml-1 text-xs font-normal text-slate-500">
+                          ({{ a.staff.get_role_display }})
+                        </span>
+                      </div>
+
+                      <div class="mt-1 text-sm text-slate-600">
+                        Block:
+                        <span class="font-medium text-slate-800">
+                          {{ a.shift_block }}
+                        </span>
+                      </div>
+                    </li>
+                  {% endfor %}
+                </ul>
+              {% else %}
+                <p class="mt-3 text-sm text-slate-500">
+                  No PM duties assigned.
+                </p>
+              {% endif %}
+            </div>
+
+          </div>
+
         {% else %}
           <div class="rounded-xl bg-slate-50 ring-1 ring-slate-200 p-4 text-sm text-slate-700">
             <strong>No duties assigned yet.</strong>
@@ -71,7 +120,7 @@
         {% endif %}
 
         <!-- Actions -->
-        <div class="mt-6 flex justify-end">
+        <div class="flex justify-end">
           <button
             type="button"
             class="inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold
