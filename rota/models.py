@@ -226,6 +226,8 @@ class Assignment(models.Model):
         ShiftTemplate,
         on_delete=models.PROTECT,
         related_name="assignments",
+        null=True,
+        blank=True,
     )
     location_type = models.CharField(
         max_length=10,
@@ -243,32 +245,53 @@ class Assignment(models.Model):
             ),
         ]
 
-    def clean(self):
-        errors = {}
+def clean(self):
+    errors = {}
 
-        if self.location_type == "ROOM":
-            if self.isolator is not None:
-                errors["isolator"] = "Room assignments must not have an isolator."
-            if self.staff and self.staff.role != "SUPERVISOR":
-                errors["staff"] = "Only supervisors can be assigned to the clean room."
-            self.is_room_supervisor = True
+    # -------------------------
+    # Phase A rule: shift_block is required (AM/PM)
+    # -------------------------
+    if not getattr(self, "shift_block", None):
+        errors["shift_block"] = "Shift block is required (AM/PM)."
 
-        if self.location_type == "ISOLATOR":
-            if self.isolator is None:
-                errors["isolator"] = "Isolator assignments must select an isolator."
+    # -------------------------
+    # Location-specific rules
+    # -------------------------
+    if self.location_type == "ROOM":
+        if self.isolator is not None:
+            errors["isolator"] = "Room assignments must not have an isolator."
+        if self.staff and self.staff.role != "SUPERVISOR":
+            errors["staff"] = "Only supervisors can be assigned to the clean room."
+        self.is_room_supervisor = True
 
-            existing = Assignment.objects.filter(
-                rotaday=self.rotaday,
-                isolator=self.isolator,
-            ).exclude(id=self.id).count()
+        # Option 1: ShiftTemplate optional metadata (no validation required)
+        # If you want to enforce "no shift template for room supervisors", uncomment:
+        # if self.shift_id is not None:
+        #     errors["shift"] = "Room supervisors do not require a shift template; use AM/PM only."
 
-            if existing >= 6:
-                errors["isolator"] = "This isolator already has 6 assigned operators."
+    elif self.location_type == "ISOLATOR":
+        if self.isolator is None:
+            errors["isolator"] = "Isolator assignments must select an isolator."
 
-            self.is_room_supervisor = False
+        existing = (
+            Assignment.objects
+            .filter(rotaday=self.rotaday, isolator=self.isolator, location_type="ISOLATOR")
+            .exclude(id=self.id)
+            .count()
+        )
+        if existing >= 6:
+            errors["isolator"] = "This isolator already has 6 assigned operators."
 
-        if errors:
-            raise ValidationError(errors)
+        self.is_room_supervisor = False
+
+        # Option 1: ShiftTemplate optional metadata (no validation required)
+
+    else:
+        errors["location_type"] = "Invalid location type."
+
+    if errors:
+        raise ValidationError(errors)
+
 
     def __str__(self):
         loc = self.clean_room.name
