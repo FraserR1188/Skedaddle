@@ -8,4 +8,5 @@ urlpatterns = [
     path("new/", views.validation_create, name="create"),
     path("<int:pk>/edit/", views.validation_update, name="update"),
     path("<int:pk>/delete/", views.validation_delete, name="delete"),
+    path("matrix/", views.validation_matrix, name="matrix"),
 ]

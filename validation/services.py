@@ -109,3 +109,34 @@ def get_valid_operators_for_section(
         .distinct()
         .order_by("crew__sort_order", "crew__name", "last_name", "first_name")
     )
+
+def upsert_operator_validation(
+    *,
+    operator,
+    isolator_section,
+    status,
+    valid_from=None,
+    expires_on=None,
+    assessed_by="",
+    evidence_ref="",
+    notes="",
+):
+    """
+    Create or update the OperatorValidation for (operator, isolator_section).
+    """
+    if valid_from is None:
+        valid_from = timezone.localdate()
+
+    obj, _created = OperatorValidation.objects.update_or_create(
+        operator=operator,
+        isolator_section=isolator_section,
+        defaults={
+            "status": status,
+            "valid_from": valid_from,
+            "expires_on": expires_on,
+            "assessed_by": assessed_by,
+            "evidence_ref": evidence_ref,
+            "notes": notes,
+        },
+    )
+    return obj

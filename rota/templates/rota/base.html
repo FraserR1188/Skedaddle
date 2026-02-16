@@ -21,28 +21,29 @@
         <a href="{% url 'home' %}" class="navbar-brand">Skedaddle Rota</a>
       </div>
 
-      <nav class="navbar-links">
-        <a href="{% url 'monthly_calendar' year=today.year month=today.month %}">
-          Calendar
-        </a>
+    <nav class="navbar-links">
+      <a href="{% url 'monthly_calendar' year=today.year month=today.month %}">
+        Calendar
+      </a>
 
-        <a href="{% url 'daily_rota' year=today.year month=today.month day=today.day %}">
-          Today
-        </a>
+      <a href="{% url 'daily_rota' year=today.year month=today.month day=today.day %}">
+        Today
+      </a>
 
-        {% if perms.rota.rota_viewer %}
-          <a href="{% url 'staff_search' %}">Staff Search</a>
-        {% endif %}
+      {% if perms.rota.rota_viewer %}
+        <a href="{% url 'staff_search' %}">Staff Search</a>
+      {% endif %}
 
-        {% if perms.rota.rota_manager %}
-          <a href="{% url 'validation:list' %}">APS</a>
-        {% endif %}
+      {% if perms.rota.rota_manager %}
+        <a href="{% url 'validation:matrix' %}">APS</a>
+      {% endif %}
 
-        {% if user.is_authenticated and user.is_superuser %}
-          <a href="{% url 'staff_list' %}">Staff</a>
-          <a href="/admin/">Admin</a>
-        {% endif %}
-      </nav>
+      {% if user.is_authenticated and user.is_superuser %}
+        <a href="{% url 'staff_list' %}">Staff</a>
+        <a href="/admin/">Admin</a>
+      {% endif %}
+    </nav>
+
 
       <div class="navbar-right">
         {% if user.is_authenticated %}
