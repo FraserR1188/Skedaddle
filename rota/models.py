@@ -236,7 +236,12 @@ class Assignment(models.Model):
     is_room_supervisor = models.BooleanField(default=False)
 
     class Meta:
-        unique_together = ("rotaday", "staff")
+        constraints = [
+            models.UniqueConstraint(
+                fields=["rotaday", "staff", "shift_block"],
+                name="uniq_staff_per_rotaday_shiftblock",
+            ),
+        ]
 
     def clean(self):
         errors = {}
