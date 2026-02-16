@@ -1,5 +1,6 @@
 import calendar
 from datetime import date, timedelta
+from collections import defaultdict
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import (
@@ -8,14 +9,12 @@ from django.contrib.auth.decorators import (
     user_passes_test,
 )
 from django.contrib import messages
-from django.core.exceptions import PermissionDenied, ValidationError
+from django.core.exceptions import PermissionDenied
 from django.core.mail import send_mail
-from django.db import transaction
+from django.db import transaction, models, IntegrityError
 from django.template.loader import render_to_string
 from django.utils import timezone
 from django.db.models import Q
-from collections import defaultdict
-from django.db import models
 from django.urls import reverse
 from django.utils.http import urlencode
 
@@ -91,14 +90,11 @@ def daily_rota(request, year, month, day):
     target_date = date(int(year), int(month), int(day))
     rotaday, _ = RotaDay.objects.get_or_create(date=target_date)
 
-    shift_templates = list(
-        ShiftTemplate.objects.all().order_by("start_time")
-    )
+    shift_templates = list(ShiftTemplate.objects.all().order_by("start_time"))
     if not shift_templates:
         messages.error(request, "No shift templates configured.")
         today = date.today()
         return redirect("monthly_calendar", year=today.year, month=today.month)
-
 
     # -------------------------
     # POST — save assignments
@@ -110,7 +106,7 @@ def daily_rota(request, year, month, day):
         isolator = get_object_or_404(Isolator, pk=request.POST.get("isolator_id"))
 
         # -------------------------
-        # Collect selected operators (dedupe)
+        # Collect selected operators (dedupe by staff+block)
         # -------------------------
         chosen_ops = []
         for i in range(1, 7):
@@ -126,8 +122,6 @@ def daily_rota(request, year, month, day):
             if not ((t[0], t[2]) in seen or seen.add((t[0], t[2])))
         ]
 
-        chosen_op_ids = [sid for sid, _, _ in chosen_ops]
-
         # -------------------------
         # Collect selected room supervisors (max 4 per block)
         # -------------------------
@@ -142,52 +136,46 @@ def daily_rota(request, year, month, day):
         # Build selected (staff_id, shift_block) pairs for conflict checking
         # -------------------------
         selected_pairs = set()
-
         for staff_id, _, block in chosen_ops:
             selected_pairs.add((staff_id, block))
-
         for sid in supervisor_ids_am:
             selected_pairs.add((sid, "AM"))
-
         for sid in supervisor_ids_pm:
             selected_pairs.add((sid, "PM"))
 
         # -------------------------
-        # Collect selected room supervisors (max 4)
-        # -------------------------
-        supervisor_ids = [
-            int(sid) for sid in request.POST.getlist("room_supervisors") if sid.strip()
-        ][:4]
-
-        # -------------------------
-        # Validate conflicts (no auto-move)
-        # -------------------------
-        selected_ids = set(chosen_op_ids) | set(supervisor_ids)
-
         # "allowed" existing assignments = the ones already belonging to THIS edit context
         # - operators already assigned to this isolator
         # - room supervisors already assigned to this clean_room (as ROOM supervisor)
-        allowed_qs = Assignment.objects.filter(rotaday=rotaday).filter(
-            (
-                # assignments for this isolator being edited
-                models.Q(isolator=isolator, location_type="ISOLATOR")
-            ) |
-            (
-                # room supervisors for this cleanroom
+        # -------------------------
+        allowed_qs = (
+            Assignment.objects
+            .filter(rotaday=rotaday)
+            .filter(
+                models.Q(isolator=isolator, location_type="ISOLATOR") |
                 models.Q(clean_room=isolator.clean_room, location_type="ROOM", is_room_supervisor=True)
             )
-        ).values_list("id", flat=True)
-
-        # any other assignment for selected staff = conflict
-        conflicts = (
-            Assignment.objects
-            .filter(rotaday=rotaday, staff_id__in=selected_ids)
-            .exclude(id__in=allowed_qs)
-            .select_related("staff", "isolator", "clean_room")
+            .values_list("id", flat=True)
         )
 
+        # -------------------------
+        # Validate conflicts per (staff_id, shift_block)
+        # -------------------------
+        conflicts = Assignment.objects.none()
+        if selected_pairs:
+            conflict_q = models.Q()
+            for sid, block in selected_pairs:
+                conflict_q |= models.Q(staff_id=sid, shift_block=block)
+
+            conflicts = (
+                Assignment.objects
+                .filter(rotaday=rotaday)
+                .filter(conflict_q)
+                .exclude(id__in=allowed_qs)
+                .select_related("staff", "isolator", "clean_room")
+            )
+
         if conflicts.exists():
-            # Build a readable conflict message
             conflict_lines = []
             for a in conflicts:
                 if a.isolator_id:
@@ -196,55 +184,82 @@ def daily_rota(request, year, month, day):
                     where = f"{a.clean_room.name} – Room supervisor"
                 else:
                     where = f"{a.clean_room.name}"
-                conflict_lines.append(f"{a.staff.full_name} is already assigned to {where}.")
+                conflict_lines.append(
+                    f"{a.staff.full_name} is already assigned to {where} ({a.shift_block})."
+                )
 
             for line in conflict_lines:
                 messages.error(request, line)
 
-            # reopen the same modal
             url = reverse("daily_rota", kwargs={"year": year, "month": month, "day": day})
             query = urlencode({"edit_isolator": isolator.id})
             return redirect(f"{url}?{query}")
 
         # -------------------------
-        # No conflicts -> proceed to save
+        # No conflicts -> proceed to save (transactional)
         # -------------------------
-        Assignment.objects.filter(
-            rotaday=rotaday,
-            isolator=isolator,
-            location_type="ISOLATOR",
-        ).delete()
+        try:
+            with transaction.atomic():
+                # wipe + recreate isolator assignments for this isolator
+                Assignment.objects.filter(
+                    rotaday=rotaday,
+                    isolator=isolator,
+                    location_type="ISOLATOR",
+                ).delete()
 
-        for staff_id, shift_id in chosen_ops:
-            assn = Assignment(
-                rotaday=rotaday,
-                staff_id=staff_id,
-                clean_room=isolator.clean_room,
-                isolator=isolator,
-                shift_id=shift_id,
-                location_type="ISOLATOR",
+                for staff_id, shift_id, block in chosen_ops:
+                    assn = Assignment(
+                        rotaday=rotaday,
+                        staff_id=staff_id,
+                        clean_room=isolator.clean_room,
+                        isolator=isolator,
+                        shift_id=shift_id,
+                        location_type="ISOLATOR",
+                        shift_block=block,
+                    )
+                    assn.full_clean()
+                    assn.save()
+
+                # Room supervisors: wipe + recreate for this room (AM + PM)
+                Assignment.objects.filter(
+                    rotaday=rotaday,
+                    clean_room=isolator.clean_room,
+                    isolator__isnull=True,
+                    location_type="ROOM",
+                    is_room_supervisor=True,
+                ).delete()
+
+                for sid in supervisor_ids_am:
+                    Assignment.objects.create(
+                        rotaday=rotaday,
+                        staff_id=sid,
+                        clean_room=isolator.clean_room,
+                        shift=shift_templates[0],
+                        location_type="ROOM",
+                        is_room_supervisor=True,
+                        shift_block="AM",
+                    )
+
+                for sid in supervisor_ids_pm:
+                    Assignment.objects.create(
+                        rotaday=rotaday,
+                        staff_id=sid,
+                        clean_room=isolator.clean_room,
+                        shift=shift_templates[0],
+                        location_type="ROOM",
+                        is_room_supervisor=True,
+                        shift_block="PM",
+                    )
+
+        except IntegrityError:
+            # DB-level safety net for uniq(rotaday, staff, shift_block)
+            messages.error(
+                request,
+                "Conflict detected while saving: one or more people are already assigned in that AM/PM block.",
             )
-            assn.full_clean()
-            assn.save()
-
-        # Room supervisors: wipe + recreate for this room (safe because we validated already)
-        Assignment.objects.filter(
-            rotaday=rotaday,
-            clean_room=isolator.clean_room,
-            isolator__isnull=True,
-            location_type="ROOM",
-            is_room_supervisor=True,
-        ).delete()
-
-        for sid in supervisor_ids:
-            Assignment.objects.create(
-                rotaday=rotaday,
-                staff_id=sid,
-                clean_room=isolator.clean_room,
-                shift=shift_templates[0],
-                location_type="ROOM",
-                is_room_supervisor=True,
-            )
+            url = reverse("daily_rota", kwargs={"year": year, "month": month, "day": day})
+            query = urlencode({"edit_isolator": isolator.id})
+            return redirect(f"{url}?{query}")
 
         messages.success(request, f"Assignments updated for {isolator.name}.")
         return redirect("daily_rota", year=year, month=month, day=day)
@@ -256,20 +271,22 @@ def daily_rota(request, year, month, day):
         "staff", "staff__crew", "clean_room", "isolator", "shift"
     )
 
-    isolator_assignments = {}
-    room_supervisors_by_room = {}
+    isolator_assignments = {}  # iso_id -> [Assignment]
+    room_supervisors_by_room = {}  # room_id -> {"AM": [Staff], "PM": [Staff]}
 
     for a in assignments_qs:
         if a.isolator_id:
             isolator_assignments.setdefault(a.isolator_id, []).append(a)
+
         if a.is_room_supervisor:
-            room_supervisors_by_room.setdefault(a.clean_room_id, []).append(a.staff)
+            room_supervisors_by_room.setdefault(a.clean_room_id, {"AM": [], "PM": []})
+            room_supervisors_by_room[a.clean_room_id].setdefault(a.shift_block, [])
+            room_supervisors_by_room[a.clean_room_id][a.shift_block].append(a.staff)
 
     cleanrooms = CleanRoom.objects.prefetch_related("isolators")
     rooms_grid = []
 
     for room in cleanrooms:
-        # Order isolators predictably from admin "order" then name
         isolators = list(room.isolators.all().order_by("order", "name"))
 
         # Force EXACTLY 2 per wall (max 4 rendered)
@@ -286,26 +303,35 @@ def daily_rota(request, year, month, day):
                 key=lambda x: (x.staff.first_name.lower(), x.staff.last_name.lower()),
             )
 
-            # ✅ This is what your templates/partials commonly expect
+            # Split for display (and for your updated modal summary)
+            iso.operator_assignments_am = [a for a in ops if a.shift_block == "AM"]
+            iso.operator_assignments_pm = [a for a in ops if a.shift_block == "PM"]
+
+            # Keep legacy list if any other templates still reference it
             iso.operator_assignments = ops
 
-            # ✅ Still useful for the modal form
+            # Modal still expects 6 "slots" (mixture of AM/PM rows is fine)
             iso.operator_slots = ops + [None] * (6 - len(ops))
 
-            # ✅ And for quick “has content” checks
             iso.has_assignments = bool(ops)
 
-        room_supervisors = room_supervisors_by_room.get(room.id, [])
-        room.room_supervisors = room_supervisors
-        room.room_supervisor_ids = [s.id for s in room_supervisors]  # useful for the modal too
+        sup_bucket = room_supervisors_by_room.get(room.id, {"AM": [], "PM": []})
+        room.room_supervisors_am = sup_bucket.get("AM", [])
+        room.room_supervisors_pm = sup_bucket.get("PM", [])
+
+        room.room_supervisor_ids_am = [s.id for s in room.room_supervisors_am]
+        room.room_supervisor_ids_pm = [s.id for s in room.room_supervisors_pm]
+
+        # Keep legacy fields (if daily_rota.html still uses them)
+        room.room_supervisors = room.room_supervisors_am + room.room_supervisors_pm
+        room.room_supervisor_ids = room.room_supervisor_ids_am + room.room_supervisor_ids_pm
 
         rooms_grid.append({
             "room": room,
             "right_wall": right_wall,
             "left_wall": left_wall,
-            "room_supervisors": room_supervisors,
+            "room_supervisors": room.room_supervisors,
         })
-
 
     staff_list = (
         StaffMember.objects
@@ -376,7 +402,6 @@ def staff_list(request):
         crew_name = s.crew.name if s.crew else "No Crew"
         crews_map[crew_name].append(s)
 
-    # keep order stable (Crew A, Crew B, Crew C, then No Crew)
     crew_cards = [{"crew": name, "staff": crews_map[name]} for name in crews_map.keys()]
 
     return render(
@@ -455,67 +480,4 @@ def publish_rota_day(request, rotaday_id):
                 else "Published rota"
             ),
             after_json={
-                "publish_version": rotaday.publish_version,
-                "published_at": rotaday.published_at.isoformat() if rotaday.published_at else None,
-            },
-        )
-
-    _send_rota_publish_email(rotaday, reason=reason, is_update=already_published)
-
-    if already_published:
-        messages.success(
-            request, f"Rota republished (v{rotaday.publish_version}) and email sent."
-        )
-    else:
-        messages.success(request, "Rota published and email sent.")
-
-    return redirect(
-        "daily_rota",
-        year=rotaday.date.year,
-        month=rotaday.date.month,
-        day=rotaday.date.day,
-    )
-
-
-def _send_rota_publish_email(rotaday: RotaDay, reason: str, is_update: bool):
-    assignments = (
-        Assignment.objects.filter(rotaday=rotaday)
-        .select_related("staff", "clean_room", "isolator", "shift")
-        .order_by(
-            "clean_room__number",
-            "isolator__order",
-            "shift__start_time",
-            "staff__first_name",
-            "staff__last_name",
-        )
-    )
-
-    recipients = sorted(
-        {a.staff.email for a in assignments if getattr(a.staff, "email", "").strip()}
-    )
-    if not recipients:
-        return
-
-    subject = (
-        f"UPDATED rota published – {rotaday.date.isoformat()}"
-        if is_update
-        else f"Daily rota published – {rotaday.date.isoformat()}"
-    )
-
-    body = render_to_string(
-        "rota/emails/rota_published.txt",
-        {
-            "rotaday": rotaday,
-            "assignments": assignments,
-            "is_update": is_update,
-            "reason": reason,
-        },
-    )
-
-    send_mail(
-        subject=subject,
-        message=body,
-        from_email=None,
-        recipient_list=recipients,
-        fail_silently=False,
-    )
+                "publish_version": rotaday.publish_
