@@ -292,7 +292,6 @@ def clean(self):
     if errors:
         raise ValidationError(errors)
 
-
     def __str__(self):
         loc = self.clean_room.name
         if self.isolator:

@@ -42,6 +42,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     "rota.apps.RotaConfig",
+    "validation",
+
 ]
 
 MIDDLEWARE = [
