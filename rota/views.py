@@ -116,14 +116,41 @@ def daily_rota(request, year, month, day):
         for i in range(1, 7):
             staff_id = request.POST.get(f"op{i}_staff")
             shift_id = request.POST.get(f"op{i}_shift")
-            if staff_id and shift_id:
-                chosen_ops.append((int(staff_id), int(shift_id)))
+            block = request.POST.get(f"op{i}_block")  # AM/PM
+            if staff_id and shift_id and block:
+                chosen_ops.append((int(staff_id), int(shift_id), block))
 
-        # prevent selecting same person twice in 6 slots
         seen = set()
-        chosen_ops = [(sid, shid) for sid, shid in chosen_ops if not (sid in seen or seen.add(sid))]
+        chosen_ops = [
+            t for t in chosen_ops
+            if not ((t[0], t[2]) in seen or seen.add((t[0], t[2])))
+        ]
 
-        chosen_op_ids = [sid for sid, _ in chosen_ops]
+        chosen_op_ids = [sid for sid, _, _ in chosen_ops]
+
+        # -------------------------
+        # Collect selected room supervisors (max 4 per block)
+        # -------------------------
+        supervisor_ids_am = [
+            int(sid) for sid in request.POST.getlist("room_supervisors_am") if sid.strip()
+        ][:4]
+        supervisor_ids_pm = [
+            int(sid) for sid in request.POST.getlist("room_supervisors_pm") if sid.strip()
+        ][:4]
+
+        # -------------------------
+        # Build selected (staff_id, shift_block) pairs for conflict checking
+        # -------------------------
+        selected_pairs = set()
+
+        for staff_id, _, block in chosen_ops:
+            selected_pairs.add((staff_id, block))
+
+        for sid in supervisor_ids_am:
+            selected_pairs.add((sid, "AM"))
+
+        for sid in supervisor_ids_pm:
+            selected_pairs.add((sid, "PM"))
 
         # -------------------------
         # Collect selected room supervisors (max 4)
