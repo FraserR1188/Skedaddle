@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h1>APS / Validation</h1>
+
+<form method="get" style="margin-bottom: 1rem;">
+  <input type="text" name="q" value="{{ q }}" placeholder="Search operator / isolator / cleanroom" />
+  <select name="status">
+    <option value="">All statuses</option>
+    {% for key, label in status_choices %}
+      <option value="{{ key }}" {% if status == key %}selected{% endif %}>{{ label }}</option>
+    {% endfor %}
+  </select>
+  <button type="submit">Filter</button>
+  <a href="{% url 'validation:create' %}">+ New Validation</a>
+</form>
+
+<table border="1" cellpadding="6" cellspacing="0">
+  <thead>
+    <tr>
+      <th>Operator</th>
+      <th>Isolator Section</th>
+      <th>Status</th>
+      <th>Valid From</th>
+      <th>Expires</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for v in validations %}
+      <tr>
+        <td>{{ v.operator.full_name }}</td>
+        <td>{{ v.isolator_section }}</td>
+        <td>{{ v.get_status_display }}</td>
+        <td>{{ v.valid_from }}</td>
+        <td>{{ v.expires_on|default:"-" }}</td>
+        <td>
+          <a href="{% url 'validation:update' v.pk %}">Edit</a>
+          |
+          <a href="{% url 'validation:delete' v.pk %}">Delete</a>
+        </td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="6">No validations found.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% endblock %}

@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h1>Delete Validation</h1>
+
+<p>Are you sure you want to delete:</p>
+<p><strong>{{ obj.operator.full_name }}</strong> → <strong>{{ obj.isolator_section }}</strong> ({{ obj.get_status_display }})</p>
+
+<form method="post">
+  {% csrf_token %}
+  <button type="submit">Yes, delete</button>
+  <a href="{% url 'validation:list' %}">Cancel</a>
+</form>
+
+{% endblock %}

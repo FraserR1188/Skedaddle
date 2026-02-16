@@ -34,6 +34,10 @@
           <a href="{% url 'staff_search' %}">Staff Search</a>
         {% endif %}
 
+        {% if perms.rota.rota_manager %}
+          <a href="{% url 'validation:list' %}">APS</a>
+        {% endif %}
+
         {% if user.is_authenticated and user.is_superuser %}
           <a href="{% url 'staff_list' %}">Staff</a>
           <a href="/admin/">Admin</a>

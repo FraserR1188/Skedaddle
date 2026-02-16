@@ -32,4 +32,5 @@ urlpatterns = [
     path('calendar/<int:year>/<int:month>/', rota_views.monthly_calendar, name='monthly_calendar'),
     path('day/<int:year>/<int:month>/<int:day>/', rota_views.daily_rota, name='daily_rota'),
     path("", include("rota.urls")),
+    path("validation/", include("validation.urls", namespace="validation")),
 ]
