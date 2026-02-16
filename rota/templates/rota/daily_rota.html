@@ -245,15 +245,13 @@
                               {% if iso.operator_assignments_am %}
                                 <div class="mt-2 space-y-1 text-slate-700">
                                   {% for a in iso.operator_assignments_am %}
-                                    <div class="flex flex-wrap gap-x-2">
-                                      <span class="font-medium">{{ a.staff.full_name }}</span>
-                                      <span class="text-slate-400">–</span>
-                                      <span class="text-slate-600">{{ a.shift.name }}</span>
+                                    <div class="font-medium text-slate-900">
+                                      {{ a.staff.full_name }}
                                     </div>
                                   {% endfor %}
                                 </div>
                               {% else %}
-                                <p class="mt-2 text-sm text-slate-500">No AM duties.</p>
+                                <p class="mt-2 text-sm text-slate-500">Unmanned (AM).</p>
                               {% endif %}
                             </div>
 
@@ -266,15 +264,13 @@
                               {% if iso.operator_assignments_pm %}
                                 <div class="mt-2 space-y-1 text-slate-700">
                                   {% for a in iso.operator_assignments_pm %}
-                                    <div class="flex flex-wrap gap-x-2">
-                                      <span class="font-medium">{{ a.staff.full_name }}</span>
-                                      <span class="text-slate-400">–</span>
-                                      <span class="text-slate-600">{{ a.shift.name }}</span>
+                                    <div class="font-medium text-slate-900">
+                                      {{ a.staff.full_name }}
                                     </div>
                                   {% endfor %}
                                 </div>
                               {% else %}
-                                <p class="mt-2 text-sm text-slate-500">No PM duties.</p>
+                                <p class="mt-2 text-sm text-slate-500">Unmanned (PM).</p>
                               {% endif %}
                             </div>
                           </div>
@@ -350,15 +346,13 @@
                               {% if iso.operator_assignments_am %}
                                 <div class="mt-2 space-y-1 text-slate-700">
                                   {% for a in iso.operator_assignments_am %}
-                                    <div class="flex flex-wrap gap-x-2">
-                                      <span class="font-medium">{{ a.staff.full_name }}</span>
-                                      <span class="text-slate-400">–</span>
-                                      <span class="text-slate-600">{{ a.shift.name }}</span>
+                                    <div class="font-medium text-slate-900">
+                                      {{ a.staff.full_name }}
                                     </div>
                                   {% endfor %}
                                 </div>
                               {% else %}
-                                <p class="mt-2 text-sm text-slate-500">No AM duties.</p>
+                                <p class="mt-2 text-sm text-slate-500">Unmanned (AM).</p>
                               {% endif %}
                             </div>
 
@@ -371,15 +365,13 @@
                               {% if iso.operator_assignments_pm %}
                                 <div class="mt-2 space-y-1 text-slate-700">
                                   {% for a in iso.operator_assignments_pm %}
-                                    <div class="flex flex-wrap gap-x-2">
-                                      <span class="font-medium">{{ a.staff.full_name }}</span>
-                                      <span class="text-slate-400">–</span>
-                                      <span class="text-slate-600">{{ a.shift.name }}</span>
+                                    <div class="font-medium text-slate-900">
+                                      {{ a.staff.full_name }}
                                     </div>
                                   {% endfor %}
                                 </div>
                               {% else %}
-                                <p class="mt-2 text-sm text-slate-500">No PM duties.</p>
+                                <p class="mt-2 text-sm text-slate-500">Unmanned (PM).</p>
                               {% endif %}
                             </div>
                           </div>
