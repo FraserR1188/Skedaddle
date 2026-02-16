@@ -1,30 +1,15 @@
 from __future__ import annotations
 
-from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
 
-
-class Isolator(models.Model):
-    """
-    Represents an isolator unit (e.g. Isolator 1).
-    """
-
-    name = models.CharField(max_length=100, unique=True)
-    sort_order = models.PositiveIntegerField(default=0)
-    is_active = models.BooleanField(default=True)
-
-    class Meta:
-        ordering = ["sort_order", "name"]
-
-    def __str__(self) -> str:
-        return self.name
+from rota.models import StaffMember, Isolator as RotaIsolator
 
 
 class IsolatorSection(models.Model):
     """
-    Represents a section of an isolator (e.g. Left / Right).
+    Represents a section of a rota Isolator (e.g. Left / Right).
     APS validation is applied at this level.
     """
 
@@ -32,8 +17,9 @@ class IsolatorSection(models.Model):
         LEFT = "L", "Left"
         RIGHT = "R", "Right"
 
+    # ✅ IMPORTANT: points to rota.Isolator (not a duplicate model)
     isolator = models.ForeignKey(
-        Isolator,
+        RotaIsolator,
         on_delete=models.PROTECT,
         related_name="sections",
     )
@@ -47,15 +33,15 @@ class IsolatorSection(models.Model):
 
     class Meta:
         unique_together = ("isolator", "section")
-        ordering = ["isolator__sort_order", "section"]
+        ordering = ["isolator__clean_room__number", "isolator__order", "section"]
 
     def __str__(self) -> str:
-        return f"{self.isolator.name} {self.get_section_display()}"
-        
+        return f"{self.isolator} {self.get_section_display()}"
+
 
 class OperatorValidation(models.Model):
     """
-    Maps an operator to an isolator section with APS validation status.
+    Maps a StaffMember to an isolator section with APS validation status.
     """
 
     class Status(models.TextChoices):
@@ -64,9 +50,8 @@ class OperatorValidation(models.Model):
         RESTRICTED = "RESTRICTED", "Restricted"
         SUSPENDED = "SUSPENDED", "Suspended"
 
-    # ⚠️ Change this if you use a Staff model instead of auth User
     operator = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
+        StaffMember,
         on_delete=models.PROTECT,
         related_name="isolator_validations",
     )
@@ -102,28 +87,20 @@ class OperatorValidation(models.Model):
         ]
 
     def __str__(self) -> str:
-        return f"{self.operator} → {self.isolator_section} [{self.status}]"
+        return f"{self.operator.full_name} → {self.isolator_section} [{self.status}]"
 
     def clean(self):
         if self.expires_on and self.expires_on < self.valid_from:
-            raise ValidationError(
-                {"expires_on": "Expiry date cannot be before valid_from."}
-            )
+            raise ValidationError({"expires_on": "Expiry date cannot be before valid_from."})
 
     def is_effective_on(self, date=None) -> bool:
-        """
-        Returns True if validation is effective on given date.
-        """
         if date is None:
             date = timezone.localdate()
 
         if self.status != self.Status.VALID:
             return False
-
         if date < self.valid_from:
             return False
-
         if self.expires_on and date > self.expires_on:
             return False
-
         return True

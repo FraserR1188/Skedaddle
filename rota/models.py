@@ -1,6 +1,8 @@
-from django.db import models
-from django.core.exceptions import ValidationError
+from __future__ import annotations
+
 from django.conf import settings
+from django.core.exceptions import ValidationError
+from django.db import models
 from django.utils import timezone
 
 
@@ -31,7 +33,6 @@ class Isolator(models.Model):
 
 class Crew(models.Model):
     name = models.CharField(max_length=20, unique=True)
-    # Allows enforced ordering: Crew A, Crew B, Crew C etc.
     sort_order = models.PositiveSmallIntegerField(default=0)
 
     class Meta:
@@ -74,7 +75,6 @@ class StaffMember(models.Model):
             ("rota_manager", "Can manage rota (create/update/delete)"),
             ("rota_viewer", "Can view rota"),
         ]
-        # Default ordering for admin + list views etc.
         ordering = ["crew__sort_order", "crew__name", "first_name", "last_name"]
 
 
@@ -88,10 +88,6 @@ class ShiftTemplate(models.Model):
 
 
 class RotaDay(models.Model):
-    """
-    Represents a single calendar day for rota planning.
-    """
-
     DRAFT = "DRAFT"
     PUBLISHED = "PUBLISHED"
 
@@ -117,9 +113,6 @@ class RotaDay(models.Model):
     publish_version = models.PositiveIntegerField(default=0)
 
     def mark_published(self, user):
-        """
-        Marks the rota as published or republished.
-        """
         if self.status != self.PUBLISHED:
             self.status = self.PUBLISHED
             self.publish_version = 1
@@ -134,10 +127,6 @@ class RotaDay(models.Model):
 
 
 class RotaDayAuditEvent(models.Model):
-    """
-    Immutable audit trail for a single rota day.
-    """
-
     ASSIGNMENT_CREATED = "ASSIGNMENT_CREATED"
     ASSIGNMENT_UPDATED = "ASSIGNMENT_UPDATED"
     ASSIGNMENT_DELETED = "ASSIGNMENT_DELETED"
@@ -181,12 +170,17 @@ class RotaDayAuditEvent(models.Model):
 class Assignment(models.Model):
     """
     One person on one location (room or isolator) for a given day and shift.
-    Supports up to 6 operators per isolator.
+    Supports up to 6 operators per isolator per AM/PM.
+    Enforces APS validation against isolator *section* (L/R).
     """
+
     class ShiftBlock(models.TextChoices):
         AM = "AM", "AM"
         PM = "PM", "PM"
-        # Later: CORE = "CORE", "Core"; EVE = "EVE", "Evening"
+
+    class LocationType(models.TextChoices):
+        ROOM = "ROOM", "Room (Supervisor)"
+        ISOLATOR = "ISOLATOR", "Isolator (Operative/Supervisor)"
 
     shift_block = models.CharField(
         max_length=8,
@@ -194,11 +188,6 @@ class Assignment(models.Model):
         default=ShiftBlock.AM,
         db_index=True,
     )
-
-    LOCATION_TYPES = [
-        ("ROOM", "Room (Supervisor)"),
-        ("ISOLATOR", "Isolator (Operative/Supervisor)"),
-    ]
 
     rotaday = models.ForeignKey(
         RotaDay,
@@ -222,6 +211,17 @@ class Assignment(models.Model):
         blank=True,
         related_name="assignments",
     )
+
+    # section-level location (Isolator 1 L / Isolator 1 R)
+    isolator_section = models.ForeignKey(
+        "validation.IsolatorSection",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="assignments",
+        help_text="Required for isolator assignments (e.g. Isolator 1 Left/Right).",
+    )
+
     shift = models.ForeignKey(
         ShiftTemplate,
         on_delete=models.PROTECT,
@@ -229,12 +229,13 @@ class Assignment(models.Model):
         null=True,
         blank=True,
     )
+
     location_type = models.CharField(
         max_length=10,
-        choices=LOCATION_TYPES,
+        choices=LocationType.choices,
     )
-    notes = models.CharField(max_length=255, blank=True)
 
+    notes = models.CharField(max_length=255, blank=True)
     is_room_supervisor = models.BooleanField(default=False)
 
     class Meta:
@@ -245,55 +246,93 @@ class Assignment(models.Model):
             ),
         ]
 
-def clean(self):
-    errors = {}
+    def clean(self):
+        errors = {}
 
-    # -------------------------
-    # Phase A rule: shift_block is required (AM/PM)
-    # -------------------------
-    if not getattr(self, "shift_block", None):
-        errors["shift_block"] = "Shift block is required (AM/PM)."
+        # -------------------------
+        # Core rule: shift_block required (AM/PM)
+        # -------------------------
+        if not self.shift_block:
+            errors["shift_block"] = "Shift block is required (AM/PM)."
 
-    # -------------------------
-    # Location-specific rules
-    # -------------------------
-    if self.location_type == "ROOM":
-        if self.isolator is not None:
-            errors["isolator"] = "Room assignments must not have an isolator."
-        if self.staff and self.staff.role != "SUPERVISOR":
-            errors["staff"] = "Only supervisors can be assigned to the clean room."
-        self.is_room_supervisor = True
+        # -------------------------
+        # Location-specific rules
+        # -------------------------
+        if self.location_type == self.LocationType.ROOM:
+            # Room assignments must not target isolator/section
+            if self.isolator_id is not None:
+                errors["isolator"] = "Room assignments must not have an isolator."
+            if self.isolator_section_id is not None:
+                errors["isolator_section"] = "Room assignments must not have an isolator section."
 
-        # Option 1: ShiftTemplate optional metadata (no validation required)
-        # If you want to enforce "no shift template for room supervisors", uncomment:
-        # if self.shift_id is not None:
-        #     errors["shift"] = "Room supervisors do not require a shift template; use AM/PM only."
+            # Supervisors only
+            if self.staff_id and self.staff.role != "SUPERVISOR":
+                errors["staff"] = "Only supervisors can be assigned to the clean room."
 
-    elif self.location_type == "ISOLATOR":
-        if self.isolator is None:
-            errors["isolator"] = "Isolator assignments must select an isolator."
+            self.is_room_supervisor = True
 
-        existing = (
-            Assignment.objects
-            .filter(rotaday=self.rotaday, isolator=self.isolator, location_type="ISOLATOR")
-            .exclude(id=self.id)
-            .count()
-        )
-        if existing >= 6:
-            errors["isolator"] = "This isolator already has 6 assigned operators."
+        elif self.location_type == self.LocationType.ISOLATOR:
+            self.is_room_supervisor = False
 
-        self.is_room_supervisor = False
+            # Must select isolator + section
+            if self.isolator_id is None:
+                errors["isolator"] = "Isolator assignments must select an isolator."
+            if self.isolator_section_id is None:
+                errors["isolator_section"] = "Isolator assignments must select an isolator section (Left/Right)."
 
-        # Option 1: ShiftTemplate optional metadata (no validation required)
+            # Consistency: isolator belongs to clean_room
+            if self.isolator_id is not None and self.clean_room_id is not None:
+                if self.isolator.clean_room_id != self.clean_room_id:
+                    errors["clean_room"] = "Selected isolator does not belong to the selected clean room."
 
-    else:
-        errors["location_type"] = "Invalid location type."
+            # Consistency: isolator_section belongs to isolator
+            if self.isolator_section_id is not None and self.isolator_id is not None:
+                if self.isolator_section.isolator_id != self.isolator_id:
+                    errors["isolator_section"] = "Selected isolator section does not belong to the selected isolator."
 
-    if errors:
-        raise ValidationError(errors)
+            # Max 6 per isolator per AM/PM (only run when we have the required fields)
+            if self.rotaday_id and self.isolator_id and self.shift_block:
+                existing = (
+                    Assignment.objects
+                    .filter(
+                        rotaday=self.rotaday,
+                        shift_block=self.shift_block,
+                        isolator=self.isolator,
+                        location_type=self.LocationType.ISOLATOR,
+                    )
+                    .exclude(id=self.id)
+                    .count()
+                )
+                if existing >= 6:
+                    errors["isolator"] = "This isolator already has 6 assigned operators for this shift block."
+
+            # APS validation enforcement (hard block)
+            if self.staff_id and self.isolator_section_id and self.rotaday_id:
+                # Import inside method to avoid circular imports
+                from validation.services import is_operator_valid_for_section
+
+                ok, reason = is_operator_valid_for_section(
+                    operator=self.staff,
+                    isolator_section=self.isolator_section,
+                    on_date=self.rotaday.date,
+                )
+                if not ok:
+                    errors["staff"] = (
+                        f"{self.staff.full_name} is not APS validated for "
+                        f"{self.isolator_section}: {reason}"
+                    )
+
+        else:
+            errors["location_type"] = "Invalid location type."
+
+        if errors:
+            raise ValidationError(errors)
 
     def __str__(self):
         loc = self.clean_room.name
         if self.isolator:
             loc += f" - {self.isolator.name}"
-        return f"{self.rotaday} {self.shift} | {self.staff} @ {loc}"
+        if self.isolator_section:
+            loc += f" ({self.isolator_section})"
+        shift = self.shift.name if self.shift else self.shift_block
+        return f"{self.rotaday} {shift} | {self.staff} @ {loc}"
