@@ -91,6 +91,8 @@ As a Rota Manager, I want to assign operators and supervisors to AM/PM shifts wi
 enforced business rules, so that I can confidently publish a rota that is operationally
 safe and compliant.
 
+Acceptance Criteria:
+
 - The system must clearly separate AM and PM shifts.
 - An operator cannot be assigned to more than one area within the same time block.
 - Supervisors can be assigned to either room level supervisory role or manufacturing.
@@ -107,3 +109,81 @@ Edge Cases / Constraints
 - Assigning an operator who lacks isolator validation.
 - Exceeding isolator capacity.
 - Editing a rota after publication (must trigger republish flow).
+
+### Rota User (Computer Literate)
+
+An experienced operator who is comfortable using digital systems. They regularly
+check schedules online and expect efficiency.
+
+As an Operator, who is digitally confident, I want to quickly view my assigned shifts
+and isolator allocations.
+
+Acceptance Criteria:
+
+- User can log in securely
+- Dashboard clearly displays:
+  - Assigned date.
+  - AN/PM shifts.
+  - Location (Room / Isolator)
+- Validation status is visible
+- Navigation is minimal and initutive
+- Page loads quickly.
+- System is mobile-repsonsive
+
+Edge Cases / Constraints
+
+- Use should not see other operators private data throughout the site.
+- Only the newest draft should be visible.
+
+### Rota User (Computer Ill-Literate / Low Confidence)
+
+An operator with low digital literacy. May struggle with complex navigation,
+dropdowns or cluttered interfaces. Needs clarity and reassurance.
+
+This persona is useful to accommodate as it is critical in healthcare environments.
+
+As an operator with low digital confidence, I want a very clear and simple way to see
+where I am working so that I do not feel confused or anxious about the system.
+
+Acceptance Criteria:
+
+- Interface must see:
+  - Large readable text (or have an option to increase text size for that user).
+  - Clear labels (AM Shift / PM Shift)
+  - Minimal technical terminology
+- Only essential information shown on dashboard.
+- No nested navigation required to see assignment.
+- Colour coding must be meaningful but not the only indicator (accessibility).
+- System must avoid ambiguous abbreviations.
+- Error message must be written in plain language.
+
+Edge Cases / Constraints
+
+- User forgets password – clear reset flow.
+- User accesses on older device – UI must still respond correctly.
+- No hidden logic that requires advanced understanding.
+
+### Senior Level Manager (Operational Oversight)
+
+Senior manager overseeing production output, compliance, and staffing risk.
+Interested in operational visibility, compliance assurance and high-level reporting.
+They do not build the rota but need to have confidence in it.
+
+As Senior Management, I want visibility of rota coverage, validation status, and
+staffing risks, so that I can ensure operational continuity and regulatory compliance.
+
+Acceptance Criteria:
+
+- Manager can view monthly rota overview.
+- RAG (Red/Amber/Green) isolator status visible.
+- Validation coverage summary available.
+- Supervisor coverage clearly indicated.
+- Audit trail accessible for review.
+- Published vs draft clearly differentiated.
+- No editing capability (view-only mode).
+
+Edge Cases / Constraints
+
+- Sudden staff shortage – easy identification of gaps.
+- High validation expiry – visible risk indicator.
+- Compliance review which would require export capability.
