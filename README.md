@@ -187,3 +187,140 @@ Edge Cases / Constraints
 - Sudden staff shortage – easy identification of gaps.
 - High validation expiry – visible risk indicator.
 - Compliance review which would require export capability.
+
+## Technology Stack
+
+Backend
+
+- Django
+- Django ORM
+- Python 3.12.8
+
+Frontend
+
+- Django Template
+- Tailwind CSS (CLI build)
+- JavaScript (minimal client logic)
+
+Database
+
+- PostgreSQl (production target)
+- SQLite (development)
+
+Development Environment
+
+- Virtual Environment (venv)
+- Git – GitHub for version control
+- VS Code
+
+Planned:
+
+- Docker containerisation
+- Azure hosting (NHS alignment)
+
+## Architecture Overview
+
+Skedaddle currently follows a traditional MVC-style Django architecture.
+User → Django Views → Business Rule Validation → ORM → Database
+
+Key Design Principles:
+
+- Business rules enforced in clean() methods and model validation
+- Separation of assignment types (ROOM vs ISOLATOR)
+- Shift-based uniqueness enforcement
+- Validation eligibility decoupled from assignment logic
+- Audit logging for traceability
+
+Future direction:
+
+- REST API layer
+- React front-end migration (NHS aligned)
+- Azure based deployment model (NHS aligned)
+
+## Business Rules (Core Logic)
+
+AM / PM Constraints
+
+- An operator may only be assigned to one location per time block.
+- Supervisors can be room-level assigned and isolator assigned but can’t be double booked.
+- Isolator assignments require isolator selection.
+
+Isolator Capacity
+
+- Maximum operators per isolator enforced at model level.
+- Over-allocation blocked with validation error.
+
+Validation Eligibility
+
+- Operators must hold valid section validation before assignment.
+- Validation counts dynamically calculated per isolator group.
+
+Publication Control
+
+- Only authorised role may publish rotas.
+- Changes logged for audit.
+
+## Local Development Setup
+
+Clone Repo
+Create Virtual Environment
+Install Dependencies
+Apply Migrations
+Run Dev Server
+Tailwind Dev
+
+## Environment Configuration
+
+Environment Variables required:
+
+- SECRET_KEY
+- DEBUG
+- DATABASE_URL
+- EMAIL_HOST
+- EMAIL_HOST_USER
+- EMAIL_HOST_PASSWORD
+
+Production must:
+
+- Use PostgreSQL
+- Disable DEBUG
+- Use secure email configuration
+- Enforce HTTPS
+
+## Testing
+
+Manual Testing Areas
+
+- AM/PM assignment validation
+- Isolator capacity enforcement
+- Validation eligibility logic
+- Publish/republish flow
+- Permission enforcement
+
+Future Enhancements
+
+- Unit tests for model validation rules
+- Integration tests for rota workflows
+- CI/CD test automation
+
+## Security Considerations
+
+- Role-based access control
+- Server-side validation enforcement
+- CSRF protection enabled
+- Controlled admin access
+- Audit logging of rota changes
+
+Planned:
+
+- Single Sign-On (SSO)
+- Azure AD integration
+- Environment isolation (Dev / QA / Prod)
+
+## Deployment Strategy (Planned)
+
+- Docker containerization
+- Azure App Service or Azure Container Apps
+- Multiple environments (Dev / QA / UAT / Prod)
+- Blue/green deployment model
+- CI/CD pipeline integration
