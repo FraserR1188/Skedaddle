@@ -512,6 +512,7 @@ def daily_rota(request, year, month, day):
         "supervisors": supervisors,
         "shift_templates": shift_templates,
         "assignments": assignments_qs,
+        "overview": build_suite_overview(rotaday),
     }
 
     return render(request, "rota/daily_rota.html", context)
