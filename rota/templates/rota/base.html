@@ -16,6 +16,7 @@
   </head>
 
   <body>
+    
     <header class="navbar">
       <div class="navbar-left">
         <a href="{% url 'home' %}" class="navbar-brand">Skedaddle Rota</a>
@@ -26,8 +27,12 @@
         Calendar
       </a>
 
+      <a href="{% url 'suite_overview' year=today.year month=today.month day=today.day %}">
+        Today Overview
+      </a>
+
       <a href="{% url 'daily_rota' year=today.year month=today.month day=today.day %}">
-        Today
+        Assignments
       </a>
 
       {% if perms.rota.rota_viewer %}
