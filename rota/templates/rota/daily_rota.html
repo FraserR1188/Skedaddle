@@ -1,34 +1,49 @@
 {% extends "rota/base.html" %}
 
-{% block title %}Daily Rota – {{ date }}{% endblock %}
+{% block title %}Assignment Management – {{ date }}{% endblock %}
 
 {% block content %}
 <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
 
   <!-- PAGE HEADER -->
-  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+  <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
     <div>
-      <h1 class="text-2xl font-semibold tracking-tight">
-        Daily Rota – {{ date }}
+      <p class="text-xs font-semibold uppercase tracking-[0.25em] text-slate-500">
+        Skedaddle Assignment Management
+      </p>
+      <h1 class="mt-1 text-2xl sm:text-3xl font-semibold tracking-tight text-slate-950">
+        Assignment Management – {{ date }}
       </h1>
       <p class="mt-1 text-sm text-slate-500">
-        Cleanroom & isolator assignments for this day.
+        Detailed cleanroom, isolator, room supervisor, and AM/PM assignment editing.
       </p>
     </div>
-    <a
-      href="{% url 'monthly_calendar' date.year date.month %}"
-      class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium
-            bg-white text-slate-900 shadow ring-1 ring-slate-200
-            hover:bg-slate-50 hover:text-slate-900 transition"
-    >
-      ← Back to Month
-    </a>
+
+    <div class="flex flex-col sm:flex-row gap-2">
+      <a
+        href="{% url 'suite_overview' date.year date.month date.day %}"
+        class="inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-semibold
+              bg-slate-900 text-white shadow-sm ring-1 ring-slate-800
+              hover:bg-slate-800 transition"
+      >
+        ← Suite Overview
+      </a>
+
+      <a
+        href="{% url 'monthly_calendar' date.year date.month %}"
+        class="inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-semibold
+              bg-white text-slate-900 shadow-sm ring-1 ring-slate-200
+              hover:bg-slate-50 hover:text-slate-900 transition"
+      >
+        Back to Month
+      </a>
+    </div>
   </div>
 
   {# ================= PUBLISH / STATUS BAR ================= #}
   {% if rotaday %}
     {% if rotaday.status == "PUBLISHED" %}
-      <div class="rounded-xl bg-sky-50 p-4 ring-1 ring-sky-200 text-sky-900">
+      <div class="rounded-2xl bg-sky-50 p-4 ring-1 ring-sky-200 text-sky-900">
         <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
           <div class="flex items-start gap-3">
             <div class="mt-1 h-2.5 w-2.5 rounded-full bg-sky-500"></div>
@@ -75,7 +90,7 @@
         </div>
       </div>
     {% else %}
-      <div class="rounded-xl bg-amber-50 p-4 ring-1 ring-amber-200 text-amber-900">
+      <div class="rounded-2xl bg-amber-50 p-4 ring-1 ring-amber-200 text-amber-900">
         <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
           <div class="flex items-start gap-3">
             <div class="mt-1 h-2.5 w-2.5 rounded-full bg-amber-500"></div>
@@ -115,19 +130,20 @@
 
   <!-- INFO BANNER -->
   {% if not assignments %}
-    <div class="rounded-xl bg-amber-50 p-4 ring-1 ring-amber-200 text-amber-900">
+    <div class="rounded-2xl bg-amber-50 p-4 ring-1 ring-amber-200 text-amber-900">
       <div class="flex items-start gap-3">
         <div class="mt-1 h-2.5 w-2.5 rounded-full bg-amber-500"></div>
         <div>
-          <p class="font-semibold">No Assigned Rota for Today.</p>
+          <p class="font-semibold">No assignments recorded for this day.</p>
           <p class="text-sm text-amber-800/90">
-            If this is unexpected, check staffing or shift templates.
+            Use the cleanroom cards below to add room supervisors and isolator staff.
+            Work-area assignment editing will be added separately.
           </p>
         </div>
       </div>
     </div>
   {% else %}
-    <div class="rounded-xl bg-emerald-50 p-4 ring-1 ring-emerald-200 text-emerald-900">
+    <div class="rounded-2xl bg-emerald-50 p-4 ring-1 ring-emerald-200 text-emerald-900">
       <div class="flex items-start gap-3">
         <div class="mt-1 h-2.5 w-2.5 rounded-full bg-emerald-500"></div>
         <div>
@@ -135,7 +151,8 @@
             Showing {{ assignments|length }} assignment{{ assignments|length|pluralize }} for this day.
           </p>
           <p class="text-sm text-emerald-800/90">
-            Click an isolator to review duties or update assignments.
+            Use this page for detailed cleanroom and isolator assignment editing.
+            Return to Suite Overview for whole-suite status.
           </p>
         </div>
       </div>
@@ -146,7 +163,7 @@
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
 
     {% for block in rooms_grid %}
-      <section class="rounded-2xl bg-white shadow ring-1 ring-slate-200 overflow-hidden">
+      <section class="rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 overflow-hidden">
 
         <!-- ROOM HEADER -->
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-5 border-b border-slate-200">
@@ -155,7 +172,7 @@
               {{ block.room.name }}
             </h2>
             <p class="text-sm text-slate-500">
-              Assignments by wall and isolator.
+              Assign room supervisors and isolator staff by AM/PM block.
             </p>
           </div>
 
@@ -169,7 +186,7 @@
               <!-- AM -->
               <div class="rounded-lg bg-white ring-1 ring-slate-200 p-3">
                 <div class="text-[11px] font-semibold uppercase tracking-wide text-slate-600">
-                  Room Supervisors — AM
+                  AM
                 </div>
 
                 {% if block.room.room_supervisors_am %}
@@ -183,7 +200,7 @@
                   </ul>
                 {% else %}
                   <p class="mt-2 text-sm text-slate-500">
-                    None assigned (AM).
+                    None assigned.
                   </p>
                 {% endif %}
               </div>
@@ -191,7 +208,7 @@
               <!-- PM -->
               <div class="rounded-lg bg-white ring-1 ring-slate-200 p-3">
                 <div class="text-[11px] font-semibold uppercase tracking-wide text-slate-600">
-                  Room Supervisors — PM
+                  PM
                 </div>
 
                 {% if block.room.room_supervisors_pm %}
@@ -205,7 +222,7 @@
                   </ul>
                 {% else %}
                   <p class="mt-2 text-sm text-slate-500">
-                    None assigned (PM).
+                    None assigned.
                   </p>
                 {% endif %}
               </div>
@@ -222,9 +239,9 @@
               Left Wall
             </h3>
 
-            {% if block.right_wall %}
+            {% if block.left_wall %}
               <div class="space-y-3">
-                {% for iso in block.right_wall %}
+                {% for iso in block.left_wall %}
                   <div class="rounded-xl bg-white ring-1 ring-slate-200 p-4">
 
                     <div class="space-y-3">
@@ -251,7 +268,7 @@
                                   {% endfor %}
                                 </div>
                               {% else %}
-                                <p class="mt-2 text-sm text-slate-500">Unmanned (AM).</p>
+                                <p class="mt-2 text-sm text-slate-500">Unmanned.</p>
                               {% endif %}
                             </div>
 
@@ -270,7 +287,7 @@
                                   {% endfor %}
                                 </div>
                               {% else %}
-                                <p class="mt-2 text-sm text-slate-500">Unmanned (PM).</p>
+                                <p class="mt-2 text-sm text-slate-500">Unmanned.</p>
                               {% endif %}
                             </div>
                           </div>
@@ -323,9 +340,9 @@
               Right Wall
             </h3>
 
-            {% if block.left_wall %}
+            {% if block.right_wall %}
               <div class="space-y-3">
-                {% for iso in block.left_wall %}
+                {% for iso in block.right_wall %}
                   <div class="rounded-xl bg-white ring-1 ring-slate-200 p-4">
 
                     <div class="space-y-3">
@@ -352,7 +369,7 @@
                                   {% endfor %}
                                 </div>
                               {% else %}
-                                <p class="mt-2 text-sm text-slate-500">Unmanned (AM).</p>
+                                <p class="mt-2 text-sm text-slate-500">Unmanned.</p>
                               {% endif %}
                             </div>
 
@@ -371,7 +388,7 @@
                                   {% endfor %}
                                 </div>
                               {% else %}
-                                <p class="mt-2 text-sm text-slate-500">Unmanned (PM).</p>
+                                <p class="mt-2 text-sm text-slate-500">Unmanned.</p>
                               {% endif %}
                             </div>
                           </div>
@@ -426,12 +443,12 @@
 
   {# ================= CHANGE LOG / AUDIT TRAIL ================= #}
   {% if rotaday %}
-    <details class="rounded-2xl bg-white shadow ring-1 ring-slate-200 overflow-hidden">
+    <details class="rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 overflow-hidden">
       <summary class="cursor-pointer select-none p-5 border-b border-slate-200 flex items-center justify-between">
         <div>
           <h2 class="text-lg font-semibold text-slate-900">Change history</h2>
           <p class="text-sm text-slate-500">
-            Logged actions for this rota day (latest first).
+            Logged actions for this rota day, latest first.
           </p>
         </div>
         <span class="text-sm font-semibold text-slate-600">
@@ -473,7 +490,6 @@
       </div>
     </details>
   {% endif %}
-
   {# ================= END CHANGE LOG ================= #}
 
 </div>
