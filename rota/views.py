@@ -1,6 +1,7 @@
 import calendar
 from datetime import date, timedelta
 from collections import defaultdict
+from .services.suite_overview import build_suite_overview
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import (
@@ -369,6 +370,22 @@ def daily_rota(request, year, month, day):
     }
     return render(request, "rota/daily_rota.html", context)
 
+@login_required
+@permission_required("rota.rota_viewer", raise_exception=True)
+def suite_overview(request, year, month, day):
+    target_date = date(int(year), int(month), int(day))
+    rotaday, _ = RotaDay.objects.get_or_create(date=target_date)
+
+    overview = build_suite_overview(rotaday)
+
+    context = {
+        "date": target_date,
+        "today": date.today(),
+        "rotaday": rotaday,
+        "overview": overview,
+    }
+
+    return render(request, "rota/suite_overview.html", context)
 
 # ------------------------------------------------------------
 # STAFF MANAGEMENT
