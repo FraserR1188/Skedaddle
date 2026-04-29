@@ -87,6 +87,52 @@ class ShiftTemplate(models.Model):
         return f"{self.name} {self.start_time}-{self.end_time}"
 
 
+class WorkArea(models.Model):
+    """
+    Represents non-isolator operational areas in the aseptic suite.
+
+    Examples:
+    - Clean MAL
+    - Dirty MAL
+    - Support Room 1-4
+    - Visual Inspection 1-4
+    - Overlabelling
+
+    These areas can have AM/PM staffing requirements without needing to be
+    modelled as cleanrooms or isolators.
+    """
+
+    class AreaType(models.TextChoices):
+        MAL = "MAL", "MAL"
+        SUPPORT_ROOM = "SUPPORT_ROOM", "Support Room"
+        VISUAL_INSPECTION = "VISUAL_INSPECTION", "Visual Inspection"
+        OVERLABELLING = "OVERLABELLING", "Overlabelling"
+        OTHER = "OTHER", "Other"
+
+    name = models.CharField(max_length=80, unique=True)
+
+    area_type = models.CharField(
+        max_length=30,
+        choices=AreaType.choices,
+        default=AreaType.OTHER,
+    )
+
+    sort_order = models.PositiveSmallIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+
+    required_staff_am = models.PositiveSmallIntegerField(default=0)
+    required_staff_pm = models.PositiveSmallIntegerField(default=0)
+
+    requires_supervisor = models.BooleanField(default=False)
+    requires_validation = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ["sort_order", "name"]
+
+    def __str__(self):
+        return self.name
+
+
 class RotaDay(models.Model):
     DRAFT = "DRAFT"
     PUBLISHED = "PUBLISHED"
@@ -169,9 +215,15 @@ class RotaDayAuditEvent(models.Model):
 
 class Assignment(models.Model):
     """
-    One person on one location (room or isolator) for a given day and shift.
-    Supports up to 6 operators per isolator per AM/PM.
-    Enforces APS validation against isolator *section* (L/R).
+    One person assigned to one location for a given rota day and AM/PM block.
+
+    Supported assignment types:
+    - ROOM: cleanroom supervisor assignment
+    - ISOLATOR: isolator / isolator-section assignment
+    - WORK_AREA: non-isolator operational area assignment
+
+    Core rule:
+    - A staff member can only have one assignment per rota day per AM/PM block.
     """
 
     class ShiftBlock(models.TextChoices):
@@ -181,6 +233,7 @@ class Assignment(models.Model):
     class LocationType(models.TextChoices):
         ROOM = "ROOM", "Room (Supervisor)"
         ISOLATOR = "ISOLATOR", "Isolator (Operative/Supervisor)"
+        WORK_AREA = "WORK_AREA", "Work Area"
 
     shift_block = models.CharField(
         max_length=8,
@@ -194,16 +247,22 @@ class Assignment(models.Model):
         on_delete=models.CASCADE,
         related_name="assignments",
     )
+
     staff = models.ForeignKey(
         StaffMember,
         on_delete=models.CASCADE,
         related_name="assignments",
     )
+
     clean_room = models.ForeignKey(
         CleanRoom,
         on_delete=models.CASCADE,
+        null=True,
+        blank=True,
         related_name="assignments",
+        help_text="Required for room and isolator assignments. Not required for work-area assignments.",
     )
+
     isolator = models.ForeignKey(
         Isolator,
         on_delete=models.CASCADE,
@@ -212,14 +271,22 @@ class Assignment(models.Model):
         related_name="assignments",
     )
 
-    # section-level location (Isolator 1 L / Isolator 1 R)
     isolator_section = models.ForeignKey(
         "validation.IsolatorSection",
         on_delete=models.PROTECT,
         null=True,
         blank=True,
         related_name="assignments",
-        help_text="Required for isolator assignments (e.g. Isolator 1 Left/Right).",
+        help_text="Required for isolator assignments, e.g. Isolator 1 Left/Right.",
+    )
+
+    work_area = models.ForeignKey(
+        WorkArea,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="assignments",
+        help_text="Required for work-area assignments, e.g. Clean MAL or Visual Inspection 1.",
     )
 
     shift = models.ForeignKey(
@@ -231,7 +298,7 @@ class Assignment(models.Model):
     )
 
     location_type = models.CharField(
-        max_length=10,
+        max_length=12,
         choices=LocationType.choices,
     )
 
@@ -249,78 +316,17 @@ class Assignment(models.Model):
     def clean(self):
         errors = {}
 
-        # -------------------------
-        # Core rule: shift_block required (AM/PM)
-        # -------------------------
         if not self.shift_block:
             errors["shift_block"] = "Shift block is required (AM/PM)."
 
-        # -------------------------
-        # Location-specific rules
-        # -------------------------
         if self.location_type == self.LocationType.ROOM:
-            # Room assignments must not target isolator/section
-            if self.isolator_id is not None:
-                errors["isolator"] = "Room assignments must not have an isolator."
-            if self.isolator_section_id is not None:
-                errors["isolator_section"] = "Room assignments must not have an isolator section."
-
-            # Supervisors only
-            if self.staff_id and self.staff.role != "SUPERVISOR":
-                errors["staff"] = "Only supervisors can be assigned to the clean room."
-
-            self.is_room_supervisor = True
+            self._clean_room_assignment(errors)
 
         elif self.location_type == self.LocationType.ISOLATOR:
-            self.is_room_supervisor = False
+            self._clean_isolator_assignment(errors)
 
-            # Must select isolator + section
-            if self.isolator_id is None:
-                errors["isolator"] = "Isolator assignments must select an isolator."
-            if self.isolator_section_id is None:
-                errors["isolator_section"] = "Isolator assignments must select an isolator section (Left/Right)."
-
-            # Consistency: isolator belongs to clean_room
-            if self.isolator_id is not None and self.clean_room_id is not None:
-                if self.isolator.clean_room_id != self.clean_room_id:
-                    errors["clean_room"] = "Selected isolator does not belong to the selected clean room."
-
-            # Consistency: isolator_section belongs to isolator
-            if self.isolator_section_id is not None and self.isolator_id is not None:
-                if self.isolator_section.isolator_id != self.isolator_id:
-                    errors["isolator_section"] = "Selected isolator section does not belong to the selected isolator."
-
-            # Max 6 per isolator per AM/PM (only run when we have the required fields)
-            if self.rotaday_id and self.isolator_id and self.shift_block:
-                existing = (
-                    Assignment.objects
-                    .filter(
-                        rotaday=self.rotaday,
-                        shift_block=self.shift_block,
-                        isolator=self.isolator,
-                        location_type=self.LocationType.ISOLATOR,
-                    )
-                    .exclude(id=self.id)
-                    .count()
-                )
-                if existing >= 6:
-                    errors["isolator"] = "This isolator already has 6 assigned operators for this shift block."
-
-            # APS validation enforcement (hard block)
-            if self.staff_id and self.isolator_section_id and self.rotaday_id:
-                # Import inside method to avoid circular imports
-                from validation.services import is_operator_valid_for_section
-
-                ok, reason = is_operator_valid_for_section(
-                    operator=self.staff,
-                    isolator_section=self.isolator_section,
-                    on_date=self.rotaday.date,
-                )
-                if not ok:
-                    errors["staff"] = (
-                        f"{self.staff.full_name} is not APS validated for "
-                        f"{self.isolator_section}: {reason}"
-                    )
+        elif self.location_type == self.LocationType.WORK_AREA:
+            self._clean_work_area_assignment(errors)
 
         else:
             errors["location_type"] = "Invalid location type."
@@ -328,11 +334,140 @@ class Assignment(models.Model):
         if errors:
             raise ValidationError(errors)
 
+    def _clean_room_assignment(self, errors):
+        """
+        Validate cleanroom supervisor assignment.
+        """
+        self.is_room_supervisor = True
+
+        if self.clean_room_id is None:
+            errors["clean_room"] = "Room assignments must select a clean room."
+
+        if self.isolator_id is not None:
+            errors["isolator"] = "Room assignments must not have an isolator."
+
+        if self.isolator_section_id is not None:
+            errors["isolator_section"] = "Room assignments must not have an isolator section."
+
+        if self.work_area_id is not None:
+            errors["work_area"] = "Room assignments must not have a work area."
+
+        if self.staff_id and self.staff.role != "SUPERVISOR":
+            errors["staff"] = "Only supervisors can be assigned to the clean room."
+
+    def _clean_isolator_assignment(self, errors):
+        """
+        Validate isolator assignment.
+
+        Isolator assignments require:
+        - clean_room
+        - isolator
+        - isolator_section
+        - valid APS status for the selected isolator section
+        """
+        self.is_room_supervisor = False
+
+        if self.clean_room_id is None:
+            errors["clean_room"] = "Isolator assignments must select a clean room."
+
+        if self.isolator_id is None:
+            errors["isolator"] = "Isolator assignments must select an isolator."
+
+        if self.isolator_section_id is None:
+            errors["isolator_section"] = "Isolator assignments must select an isolator section."
+
+        if self.work_area_id is not None:
+            errors["work_area"] = "Isolator assignments must not have a work area."
+
+        if self.isolator_id is not None and self.clean_room_id is not None:
+            if self.isolator.clean_room_id != self.clean_room_id:
+                errors["clean_room"] = "Selected isolator does not belong to the selected clean room."
+
+        if self.isolator_section_id is not None and self.isolator_id is not None:
+            if self.isolator_section.isolator_id != self.isolator_id:
+                errors["isolator_section"] = "Selected isolator section does not belong to the selected isolator."
+
+        if self.rotaday_id and self.isolator_id and self.shift_block:
+            existing = (
+                Assignment.objects
+                .filter(
+                    rotaday=self.rotaday,
+                    shift_block=self.shift_block,
+                    isolator=self.isolator,
+                    location_type=self.LocationType.ISOLATOR,
+                )
+                .exclude(id=self.id)
+                .count()
+            )
+
+            if existing >= 6:
+                errors["isolator"] = "This isolator already has 6 assigned operators for this shift block."
+
+        if self.staff_id and self.isolator_section_id and self.rotaday_id:
+            from validation.services import is_operator_valid_for_section
+
+            ok, reason = is_operator_valid_for_section(
+                operator=self.staff,
+                isolator_section=self.isolator_section,
+                on_date=self.rotaday.date,
+            )
+
+            if not ok:
+                errors["staff"] = (
+                    f"{self.staff.full_name} is not APS validated for "
+                    f"{self.isolator_section}: {reason}"
+                )
+
+    def _clean_work_area_assignment(self, errors):
+        """
+        Validate non-isolator work-area assignment.
+
+        Current work areas include:
+        - Clean MAL
+        - Dirty MAL
+        - Support Rooms
+        - Visual Inspection
+        - Overlabelling
+        """
+        self.is_room_supervisor = False
+
+        if self.work_area_id is None:
+            errors["work_area"] = "Work-area assignments must select a work area."
+
+        if self.clean_room_id is not None:
+            errors["clean_room"] = "Work-area assignments must not have a clean room."
+
+        if self.isolator_id is not None:
+            errors["isolator"] = "Work-area assignments must not have an isolator."
+
+        if self.isolator_section_id is not None:
+            errors["isolator_section"] = "Work-area assignments must not have an isolator section."
+
+        if self.work_area_id is not None:
+            if self.work_area.requires_supervisor and self.staff_id:
+                if self.staff.role != "SUPERVISOR":
+                    errors["staff"] = f"{self.work_area.name} requires a supervisor."
+
+            if self.work_area.requires_validation:
+                errors["work_area"] = (
+                    f"{self.work_area.name} is configured as requiring validation, "
+                    "but work-area validation rules have not been implemented yet."
+                )
+
     def __str__(self):
-        loc = self.clean_room.name
-        if self.isolator:
-            loc += f" - {self.isolator.name}"
-        if self.isolator_section:
-            loc += f" ({self.isolator_section})"
+        if self.location_type == self.LocationType.WORK_AREA and self.work_area_id:
+            loc = self.work_area.name
+        elif self.clean_room_id:
+            loc = self.clean_room.name
+
+            if self.isolator_id:
+                loc += f" - {self.isolator.name}"
+
+            if self.isolator_section_id:
+                loc += f" ({self.isolator_section})"
+        else:
+            loc = "Unassigned location"
+
         shift = self.shift.name if self.shift else self.shift_block
+
         return f"{self.rotaday} {shift} | {self.staff} @ {loc}"
