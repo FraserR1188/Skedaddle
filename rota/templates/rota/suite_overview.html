@@ -1,0 +1,415 @@
+{% extends "rota/base.html" %}
+
+{% block title %}Suite Overview – {{ date }}{% endblock %}
+
+{% block content %}
+<div class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+  <!-- HEADER -->
+  <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+    <div>
+      <p class="text-xs font-semibold uppercase tracking-[0.25em] text-slate-500">
+        Skedaddle Control Board
+      </p>
+      <h1 class="mt-1 text-2xl sm:text-3xl font-semibold tracking-tight text-slate-950">
+        Suite Overview – {{ date }}
+      </h1>
+      <p class="mt-1 text-sm text-slate-500">
+        Whole-suite AM/PM staffing status, cleanroom cover, work-area cover, and exceptions.
+      </p>
+    </div>
+
+    <div class="flex flex-col sm:flex-row gap-2">
+      <a
+        href="{% url 'monthly_calendar' date.year date.month %}"
+        class="inline-flex items-center justify-center rounded-xl bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm ring-1 ring-slate-200 hover:bg-slate-50"
+      >
+        ← Back to Month
+      </a>
+
+      <a
+        href="{% url 'daily_rota' date.year date.month date.day %}"
+        class="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-slate-800"
+      >
+        Open Daily Rota
+      </a>
+    </div>
+  </div>
+
+  <!-- PUBLICATION STATUS -->
+  <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div class="flex items-start gap-3">
+        {% if rotaday.status == "PUBLISHED" %}
+          <span class="mt-1 h-3 w-3 rounded-full bg-sky-500"></span>
+          <div>
+            <p class="font-semibold text-slate-950">
+              Published v{{ rotaday.publish_version }}
+            </p>
+            <p class="text-sm text-slate-500">
+              {% if rotaday.published_at %}Published at {{ rotaday.published_at }}{% endif %}
+              {% if rotaday.published_by %} by {{ rotaday.published_by }}{% endif %}
+            </p>
+          </div>
+        {% else %}
+          <span class="mt-1 h-3 w-3 rounded-full bg-amber-500"></span>
+          <div>
+            <p class="font-semibold text-slate-950">
+              Draft — not published
+            </p>
+            <p class="text-sm text-slate-500">
+              Changes are saved, but staff will not be notified until the rota is published.
+            </p>
+          </div>
+        {% endif %}
+      </div>
+
+      {% if user.is_superuser or perms.rota.rota_manager %}
+        <form method="post" action="{% url 'publish_rota_day' rotaday.id %}">
+          {% csrf_token %}
+          <button
+            type="submit"
+            class="inline-flex w-full md:w-auto items-center justify-center rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
+          >
+            {% if rotaday.status == "PUBLISHED" %}
+              Republish rota
+            {% else %}
+              Publish rota
+            {% endif %}
+          </button>
+        </form>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- SUMMARY STRIP -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4">
+
+    <div class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
+      <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+        Suite Status
+      </p>
+
+      <div class="mt-3 flex items-center gap-2">
+        {% if overview.suite_summary.suite_status == "Red" %}
+          <span class="h-3 w-3 rounded-full bg-rose-500"></span>
+          <span class="text-2xl font-semibold text-rose-700">Red</span>
+        {% elif overview.suite_summary.suite_status == "Amber" %}
+          <span class="h-3 w-3 rounded-full bg-amber-500"></span>
+          <span class="text-2xl font-semibold text-amber-700">Amber</span>
+        {% elif overview.suite_summary.suite_status == "Green" %}
+          <span class="h-3 w-3 rounded-full bg-emerald-500"></span>
+          <span class="text-2xl font-semibold text-emerald-700">Green</span>
+        {% else %}
+          <span class="h-3 w-3 rounded-full bg-slate-400"></span>
+          <span class="text-2xl font-semibold text-slate-600">Grey</span>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
+      <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+        Assignments
+      </p>
+      <p class="mt-3 text-2xl font-semibold text-slate-950">
+        {{ overview.suite_summary.total_assignments }}
+      </p>
+      <p class="mt-1 text-sm text-slate-500">Total AM/PM assignments</p>
+    </div>
+
+    <div class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
+      <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+        Cleanrooms Active
+      </p>
+      <p class="mt-3 text-2xl font-semibold text-slate-950">
+        {{ overview.suite_summary.cleanrooms_active }}/{{ overview.suite_summary.cleanrooms_total }}
+      </p>
+      <p class="mt-1 text-sm text-slate-500">Rooms with rota activity</p>
+    </div>
+
+    <div class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
+      <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+        Work Areas Covered
+      </p>
+      <p class="mt-3 text-2xl font-semibold text-slate-950">
+        {{ overview.suite_summary.required_work_areas_covered }}/{{ overview.suite_summary.required_work_areas_total }}
+      </p>
+      <p class="mt-1 text-sm text-slate-500">Required areas fully staffed</p>
+    </div>
+
+    <div class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
+      <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+        Issues
+      </p>
+      <p class="mt-3 text-2xl font-semibold text-slate-950">
+        {{ overview.suite_summary.issue_count }}
+      </p>
+      <p class="mt-1 text-sm text-slate-500">
+        {{ overview.suite_summary.red_issue_count }} red /
+        {{ overview.suite_summary.amber_issue_count }} amber
+      </p>
+    </div>
+
+  </div>
+
+  <!-- NEEDS ATTENTION -->
+  <section class="rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 overflow-hidden">
+    <div class="border-b border-slate-200 p-5">
+      <h2 class="text-lg font-semibold text-slate-950">Needs Attention</h2>
+      <p class="mt-1 text-sm text-slate-500">
+        Exceptions generated from staffing and coverage rules.
+      </p>
+    </div>
+
+    <div class="p-5">
+      {% if overview.issues %}
+        <div class="space-y-3">
+          {% for issue in overview.issues %}
+            <div
+              class="rounded-xl p-4 ring-1
+              {% if issue.severity == 'Red' %}
+                bg-rose-50 ring-rose-200 text-rose-900
+              {% elif issue.severity == 'Amber' %}
+                bg-amber-50 ring-amber-200 text-amber-900
+              {% else %}
+                bg-slate-50 ring-slate-200 text-slate-800
+              {% endif %}"
+            >
+              <div class="flex items-start gap-3">
+                {% if issue.severity == "Red" %}
+                  <span class="mt-1.5 h-2.5 w-2.5 rounded-full bg-rose-500"></span>
+                {% elif issue.severity == "Amber" %}
+                  <span class="mt-1.5 h-2.5 w-2.5 rounded-full bg-amber-500"></span>
+                {% else %}
+                  <span class="mt-1.5 h-2.5 w-2.5 rounded-full bg-slate-400"></span>
+                {% endif %}
+
+                <div>
+                  <p class="text-sm font-semibold">
+                    {{ issue.severity }}
+                  </p>
+                  <p class="text-sm">
+                    {{ issue.message }}
+                  </p>
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="rounded-xl bg-emerald-50 p-4 ring-1 ring-emerald-200 text-emerald-900">
+          <p class="text-sm font-semibold">No issues detected.</p>
+          <p class="mt-1 text-sm">The suite overview has not detected any staffing exceptions.</p>
+        </div>
+      {% endif %}
+    </div>
+  </section>
+
+  <!-- CLEANROOMS -->
+  <section class="space-y-4">
+    <div>
+      <h2 class="text-lg font-semibold text-slate-950">Cleanrooms & Isolators</h2>
+      <p class="mt-1 text-sm text-slate-500">
+        Supervisor cover and isolator activity by AM/PM block.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 xl:grid-cols-2 gap-5">
+      {% for card in overview.cleanroom_cards %}
+        <article class="rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 overflow-hidden">
+          <div class="flex items-start justify-between gap-4 border-b border-slate-200 p-5">
+            <div>
+              <h3 class="text-lg font-semibold text-slate-950">
+                {{ card.room.name }}
+              </h3>
+              <p class="mt-1 text-sm text-slate-500">
+                AM operators: {{ card.am_operator_count }} /
+                PM operators: {{ card.pm_operator_count }}
+              </p>
+            </div>
+
+            {% if card.status == "Red" %}
+              <span class="rounded-full bg-rose-100 px-3 py-1 text-xs font-semibold text-rose-700 ring-1 ring-rose-200">Red</span>
+            {% elif card.status == "Amber" %}
+              <span class="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-700 ring-1 ring-amber-200">Amber</span>
+            {% elif card.status == "Green" %}
+              <span class="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700 ring-1 ring-emerald-200">Green</span>
+            {% else %}
+              <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600 ring-1 ring-slate-200">Grey</span>
+            {% endif %}
+          </div>
+
+          <div class="p-5 space-y-4">
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div class="rounded-xl bg-slate-50 p-4 ring-1 ring-slate-200">
+                <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  AM Supervisor
+                </p>
+                {% if card.supervisors_am %}
+                  <div class="mt-2 space-y-1">
+                    {% for assignment in card.supervisors_am %}
+                      <p class="text-sm font-medium text-slate-900">
+                        {{ assignment.staff.full_name }}
+                      </p>
+                    {% endfor %}
+                  </div>
+                {% else %}
+                  <p class="mt-2 text-sm text-slate-500">None assigned</p>
+                {% endif %}
+              </div>
+
+              <div class="rounded-xl bg-slate-50 p-4 ring-1 ring-slate-200">
+                <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  PM Supervisor
+                </p>
+                {% if card.supervisors_pm %}
+                  <div class="mt-2 space-y-1">
+                    {% for assignment in card.supervisors_pm %}
+                      <p class="text-sm font-medium text-slate-900">
+                        {{ assignment.staff.full_name }}
+                      </p>
+                    {% endfor %}
+                  </div>
+                {% else %}
+                  <p class="mt-2 text-sm text-slate-500">None assigned</p>
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="space-y-2">
+              {% for iso_card in card.isolators %}
+                <div class="rounded-xl bg-slate-50 p-3 ring-1 ring-slate-200">
+                  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                    <div>
+                      <p class="text-sm font-semibold text-slate-950">
+                        {{ iso_card.isolator.name }}
+                      </p>
+                      <p class="text-xs text-slate-500">
+                        AM {{ iso_card.am_count }}/{{ iso_card.capacity }}
+                        · PM {{ iso_card.pm_count }}/{{ iso_card.capacity }}
+                      </p>
+                    </div>
+
+                    {% if iso_card.status == "Red" %}
+                      <span class="rounded-full bg-rose-100 px-2.5 py-1 text-xs font-semibold text-rose-700 ring-1 ring-rose-200">Red</span>
+                    {% elif iso_card.status == "Amber" %}
+                      <span class="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-700 ring-1 ring-amber-200">Amber</span>
+                    {% elif iso_card.status == "Green" %}
+                      <span class="rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-700 ring-1 ring-emerald-200">Green</span>
+                    {% else %}
+                      <span class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600 ring-1 ring-slate-200">Grey</span>
+                    {% endif %}
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+
+            <div class="pt-2">
+              <a
+                href="{% url 'daily_rota' date.year date.month date.day %}"
+                class="inline-flex w-full items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
+              >
+                Manage in Daily Rota
+              </a>
+            </div>
+
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- WORK AREAS -->
+  <section class="space-y-4">
+    <div>
+      <h2 class="text-lg font-semibold text-slate-950">Operational Areas</h2>
+      <p class="mt-1 text-sm text-slate-500">
+        MAL, support rooms, visual inspection, and overlabelling coverage.
+      </p>
+    </div>
+
+    <div class="rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-slate-200">
+          <thead class="bg-slate-50">
+            <tr>
+              <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Status</th>
+              <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Area</th>
+              <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">AM Cover</th>
+              <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">PM Cover</th>
+              <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Assigned Staff</th>
+            </tr>
+          </thead>
+
+          <tbody class="divide-y divide-slate-200 bg-white">
+            {% for card in overview.work_area_cards %}
+              <tr>
+                <td class="px-4 py-4 align-top">
+                  {% if card.status == "Red" %}
+                    <span class="rounded-full bg-rose-100 px-2.5 py-1 text-xs font-semibold text-rose-700 ring-1 ring-rose-200">Red</span>
+                  {% elif card.status == "Amber" %}
+                    <span class="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-700 ring-1 ring-amber-200">Amber</span>
+                  {% elif card.status == "Green" %}
+                    <span class="rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-700 ring-1 ring-emerald-200">Green</span>
+                  {% else %}
+                    <span class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600 ring-1 ring-slate-200">Grey</span>
+                  {% endif %}
+                </td>
+
+                <td class="px-4 py-4 align-top">
+                  <p class="text-sm font-semibold text-slate-950">
+                    {{ card.area.name }}
+                  </p>
+                  <p class="text-xs text-slate-500">
+                    {{ card.area.get_area_type_display }}
+                  </p>
+                </td>
+
+                <td class="px-4 py-4 align-top">
+                  <p class="text-sm font-medium text-slate-900">
+                    {{ card.am_count }}/{{ card.required_am }}
+                  </p>
+                </td>
+
+                <td class="px-4 py-4 align-top">
+                  <p class="text-sm font-medium text-slate-900">
+                    {{ card.pm_count }}/{{ card.required_pm }}
+                  </p>
+                </td>
+
+                <td class="px-4 py-4 align-top">
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                      <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">AM</p>
+                      {% if card.am_assignments %}
+                        {% for assignment in card.am_assignments %}
+                          <p class="text-sm text-slate-800">{{ assignment.staff.full_name }}</p>
+                        {% endfor %}
+                      {% else %}
+                        <p class="text-sm text-slate-400">None</p>
+                      {% endif %}
+                    </div>
+
+                    <div>
+                      <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">PM</p>
+                      {% if card.pm_assignments %}
+                        {% for assignment in card.pm_assignments %}
+                          <p class="text-sm text-slate-800">{{ assignment.staff.full_name }}</p>
+                        {% endfor %}
+                      {% else %}
+                        <p class="text-sm text-slate-400">None</p>
+                      {% endif %}
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+</div>
+{% endblock content %}
