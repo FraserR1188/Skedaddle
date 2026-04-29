@@ -13,4 +13,9 @@ urlpatterns = [
     "suite-overview/<int:year>/<int:month>/<int:day>/",
     views.suite_overview,
     name="suite_overview"),
+    path(
+    "work-area/<int:year>/<int:month>/<int:day>/<int:area_id>/",
+    views.work_area_assignment,
+    name="work_area_assignment",
+),
 ]
