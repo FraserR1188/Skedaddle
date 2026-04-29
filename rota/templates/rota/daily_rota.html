@@ -159,6 +159,180 @@
     </div>
   {% endif %}
 
+    <!-- WORK AREA ASSIGNMENT MANAGEMENT -->
+  <section class="rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 overflow-hidden">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-slate-200 p-5">
+      <div>
+        <h2 class="text-lg font-semibold text-slate-900">
+          Operational Work Areas
+        </h2>
+        <p class="mt-1 text-sm text-slate-500">
+          Assign AM/PM staff to MAL, support rooms, visual inspection, and overlabelling.
+        </p>
+      </div>
+
+      <a
+        href="{% url 'suite_overview' date.year date.month date.day %}"
+        class="inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-semibold
+              bg-slate-900 text-white shadow-sm ring-1 ring-slate-800
+              hover:bg-slate-800 transition"
+      >
+        View Suite Status
+      </a>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-slate-200">
+        <thead class="bg-slate-50">
+          <tr>
+            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
+              Status
+            </th>
+            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
+              Area
+            </th>
+            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
+              AM Cover
+            </th>
+            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
+              PM Cover
+            </th>
+            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
+              Assigned Staff
+            </th>
+            <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-600">
+              Action
+            </th>
+          </tr>
+        </thead>
+
+        <tbody class="divide-y divide-slate-200 bg-white">
+          {% for card in overview.work_area_cards %}
+            <tr class="hover:bg-slate-50 transition">
+              <td class="px-4 py-4 align-top">
+                {% if card.status == "Red" %}
+                  <span class="rounded-full bg-rose-100 px-2.5 py-1 text-xs font-semibold text-rose-700 ring-1 ring-rose-200">
+                    Red
+                  </span>
+                {% elif card.status == "Amber" %}
+                  <span class="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-700 ring-1 ring-amber-200">
+                    Amber
+                  </span>
+                {% elif card.status == "Green" %}
+                  <span class="rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-700 ring-1 ring-emerald-200">
+                    Green
+                  </span>
+                {% else %}
+                  <span class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600 ring-1 ring-slate-200">
+                    Grey
+                  </span>
+                {% endif %}
+              </td>
+
+              <td class="px-4 py-4 align-top">
+                <p class="text-sm font-semibold text-slate-900">
+                  {{ card.area.name }}
+                </p>
+                <p class="text-xs text-slate-500">
+                  {{ card.area.get_area_type_display }}
+                </p>
+              </td>
+
+              <td class="px-4 py-4 align-top">
+                {% if card.required_am %}
+                  <p class="text-sm font-medium text-slate-900">
+                    {{ card.am_count }}/{{ card.required_am }}
+                  </p>
+                {% else %}
+                  <p class="text-sm font-medium text-slate-900">
+                    {{ card.am_count }}
+                  </p>
+                  <p class="text-xs text-slate-400">
+                    No fixed requirement
+                  </p>
+                {% endif %}
+              </td>
+
+              <td class="px-4 py-4 align-top">
+                {% if card.required_pm %}
+                  <p class="text-sm font-medium text-slate-900">
+                    {{ card.pm_count }}/{{ card.required_pm }}
+                  </p>
+                {% else %}
+                  <p class="text-sm font-medium text-slate-900">
+                    {{ card.pm_count }}
+                  </p>
+                  <p class="text-xs text-slate-400">
+                    No fixed requirement
+                  </p>
+                {% endif %}
+              </td>
+
+              <td class="px-4 py-4 align-top">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                      AM
+                    </p>
+                    {% if card.am_assignments %}
+                      {% for assignment in card.am_assignments %}
+                        <p class="text-sm text-slate-800">
+                          {{ assignment.staff.full_name }}
+                        </p>
+                      {% endfor %}
+                    {% else %}
+                      <p class="text-sm text-slate-400">
+                        None
+                      </p>
+                    {% endif %}
+                  </div>
+
+                  <div>
+                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                      PM
+                    </p>
+                    {% if card.pm_assignments %}
+                      {% for assignment in card.pm_assignments %}
+                        <p class="text-sm text-slate-800">
+                          {{ assignment.staff.full_name }}
+                        </p>
+                      {% endfor %}
+                    {% else %}
+                      <p class="text-sm text-slate-400">
+                        None
+                      </p>
+                    {% endif %}
+                  </div>
+                </div>
+              </td>
+
+              <td class="px-4 py-4 align-top text-right">
+                {% if user.is_superuser or perms.rota.rota_manager %}
+                  <a
+                    href="{% url 'work_area_assignment' date.year date.month date.day card.area.id %}"
+                    class="inline-flex items-center justify-center rounded-xl bg-emerald-600 px-3 py-2 text-sm font-semibold text-white hover:bg-emerald-700 transition"
+                  >
+                    Manage
+                  </a>
+                {% else %}
+                  <span class="text-sm text-slate-400">
+                    View only
+                  </span>
+                {% endif %}
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="6" class="px-4 py-8 text-center text-sm text-slate-500">
+                No operational work areas have been configured yet.
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
   <!-- CLEANROOMS GRID -->
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
 
