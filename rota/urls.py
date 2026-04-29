@@ -9,4 +9,8 @@ urlpatterns = [
     path("staff/add/", views.staff_create, name="staff_create"),
     path("staff/search/", views.staff_search, name="staff_search"),
     path("rotaday/<int:rotaday_id>/publish/", views.publish_rota_day, name="publish_rota_day"),
+    path(
+    "suite-overview/<int:year>/<int:month>/<int:day>/",
+    views.suite_overview,
+    name="suite_overview"),
 ]
