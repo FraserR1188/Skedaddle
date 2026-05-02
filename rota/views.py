@@ -425,7 +425,7 @@ def daily_rota(request, year, month, day):
                 assignment.shift_block
             ].append(assignment.staff)
 
-    cleanrooms = CleanRoom.objects.prefetch_related("isolators").order_by(
+    cleanrooms = CleanRoom.objects.prefetch_related("isolators__sections").order_by(
         "number",
         "name",
     )
@@ -439,6 +439,9 @@ def daily_rota(request, year, month, day):
         left_wall = isolators[2:4]
 
         for isolator in left_wall + right_wall:
+            isolator.active_sections = [
+                section for section in isolator.sections.all() if section.is_active
+            ]
             ops = sorted(
                 isolator_assignments.get(isolator.id, []),
                 key=lambda item: (
