@@ -258,6 +258,52 @@ class APSSectionAssignmentWorkflowTests(TestCase):
             ).exists()
         )
 
+    def test_room_supervisor_conflicts_are_still_rejected(self):
+        other_room = CleanRoom.objects.create(number=2, name="Room 2")
+        supervisor = StaffMember.objects.create(
+            first_name="Dana",
+            last_name="Supervisor",
+            role="SUPERVISOR",
+            crew=self.crew,
+            is_active=True,
+        )
+        OperatorValidation.objects.create(
+            operator=supervisor,
+            isolator_section=self.left_section,
+            status=OperatorValidation.Status.VALID,
+            valid_from=self.target_date,
+        )
+        self.create_assignment(
+            rotaday=self.rotaday,
+            staff=supervisor,
+            clean_room=other_room,
+            shift=self.am_shift,
+            location_type=Assignment.LocationType.ROOM,
+            shift_block=Assignment.ShiftBlock.AM,
+        )
+
+        self.client.force_login(self.manager_user)
+
+        response = self.client.post(
+            self.url,
+            self.build_post_data(
+                op1_staff=str(supervisor.id),
+                op1_block="AM",
+                op1_section=str(self.left_section.id),
+            ),
+            follow=True,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "is already assigned to Room 2 – Room supervisor (AM).")
+        self.assertFalse(
+            Assignment.objects.filter(
+                rotaday=self.rotaday,
+                isolator=self.isolator,
+                location_type=Assignment.LocationType.ISOLATOR,
+            ).exists()
+        )
+
     def test_daily_rota_displays_section_not_recorded_for_legacy_null_section(self):
         Assignment.objects.create(
             rotaday=self.rotaday,
