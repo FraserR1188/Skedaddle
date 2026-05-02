@@ -59,7 +59,10 @@
                 {% if iso.operator_assignments_am %}
                   <ul class="mt-2 space-y-1 text-sm">
                     {% for a in iso.operator_assignments_am %}
-                      <li>{{ a.staff.full_name }}</li>
+                      <li>
+                        <span class="font-medium text-slate-900">{{ a.staff.full_name }}</span>
+                        <span class="text-slate-500">({{ a.isolator_section_display }})</span>
+                      </li>
                     {% endfor %}
                   </ul>
                 {% else %}
@@ -78,7 +81,10 @@
                 {% if iso.operator_assignments_pm %}
                   <ul class="mt-2 space-y-1 text-sm">
                     {% for a in iso.operator_assignments_pm %}
-                      <li>{{ a.staff.full_name }}</li>
+                      <li>
+                        <span class="font-medium text-slate-900">{{ a.staff.full_name }}</span>
+                        <span class="text-slate-500">({{ a.isolator_section_display }})</span>
+                      </li>
                     {% endfor %}
                   </ul>
                 {% else %}

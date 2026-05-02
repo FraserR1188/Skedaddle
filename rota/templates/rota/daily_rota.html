@@ -436,8 +436,13 @@
                               {% if iso.operator_assignments_am %}
                                 <div class="mt-2 space-y-1 text-slate-700">
                                   {% for a in iso.operator_assignments_am %}
-                                    <div class="font-medium text-slate-900">
-                                      {{ a.staff.full_name }}
+                                    <div>
+                                      <div class="font-medium text-slate-900">
+                                        {{ a.staff.full_name }}
+                                      </div>
+                                      <div class="text-xs text-slate-500">
+                                        {{ a.isolator_section_display }}
+                                      </div>
                                     </div>
                                   {% endfor %}
                                 </div>
@@ -455,8 +460,13 @@
                               {% if iso.operator_assignments_pm %}
                                 <div class="mt-2 space-y-1 text-slate-700">
                                   {% for a in iso.operator_assignments_pm %}
-                                    <div class="font-medium text-slate-900">
-                                      {{ a.staff.full_name }}
+                                    <div>
+                                      <div class="font-medium text-slate-900">
+                                        {{ a.staff.full_name }}
+                                      </div>
+                                      <div class="text-xs text-slate-500">
+                                        {{ a.isolator_section_display }}
+                                      </div>
                                     </div>
                                   {% endfor %}
                                 </div>
@@ -537,8 +547,13 @@
                               {% if iso.operator_assignments_am %}
                                 <div class="mt-2 space-y-1 text-slate-700">
                                   {% for a in iso.operator_assignments_am %}
-                                    <div class="font-medium text-slate-900">
-                                      {{ a.staff.full_name }}
+                                    <div>
+                                      <div class="font-medium text-slate-900">
+                                        {{ a.staff.full_name }}
+                                      </div>
+                                      <div class="text-xs text-slate-500">
+                                        {{ a.isolator_section_display }}
+                                      </div>
                                     </div>
                                   {% endfor %}
                                 </div>
@@ -556,8 +571,13 @@
                               {% if iso.operator_assignments_pm %}
                                 <div class="mt-2 space-y-1 text-slate-700">
                                   {% for a in iso.operator_assignments_pm %}
-                                    <div class="font-medium text-slate-900">
-                                      {{ a.staff.full_name }}
+                                    <div>
+                                      <div class="font-medium text-slate-900">
+                                        {{ a.staff.full_name }}
+                                      </div>
+                                      <div class="text-xs text-slate-500">
+                                        {{ a.isolator_section_display }}
+                                      </div>
                                     </div>
                                   {% endfor %}
                                 </div>

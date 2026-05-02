@@ -454,6 +454,12 @@ class Assignment(models.Model):
                     "but work-area validation rules have not been implemented yet."
                 )
 
+    @property
+    def isolator_section_display(self) -> str:
+        if self.isolator_section_id and self.isolator_section:
+            return self.isolator_section.get_section_display()
+        return "Section not recorded"
+
     def __str__(self):
         if self.location_type == self.LocationType.WORK_AREA and self.work_area_id:
             loc = self.work_area.name
