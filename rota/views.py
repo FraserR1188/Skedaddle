@@ -73,35 +73,6 @@ def shift_for_block(block: str) -> ShiftTemplate:
     return shift_templates[0]
 
 
-def get_default_isolator_section_for(isolator: Isolator):
-    """
-    Temporary compatibility helper.
-
-    The Assignment model now expects an isolator_section for isolator
-    assignments. Your current daily rota UI edits by isolator, not by explicit
-    isolator section, so this attempts to select the most appropriate active
-    section from the isolator name.
-
-    If your isolator names end in L/R, e.g. "Isolator 1 L", it will prefer the
-    matching section. Otherwise it falls back to the first active section.
-    """
-    sections = isolator.sections.filter(is_active=True).order_by("section")
-
-    name = (isolator.name or "").strip().upper()
-
-    if name.endswith(" L"):
-        section = sections.filter(section="L").first()
-        if section:
-            return section
-
-    if name.endswith(" R"):
-        section = sections.filter(section="R").first()
-        if section:
-            return section
-
-    return sections.first()
-
-
 def assignment_location_label(assignment: Assignment) -> str:
     """
     Human-readable location label for conflict messages and emails.
@@ -220,11 +191,27 @@ def daily_rota(request, year, month, day):
 
         chosen_ops = []
         for i in range(1, 7):
-            staff_id = request.POST.get(f"op{i}_staff")
-            block = request.POST.get(f"op{i}_block")
+            staff_id = (request.POST.get(f"op{i}_staff") or "").strip()
+            block = (request.POST.get(f"op{i}_block") or "").strip().upper()
+            section_id = (request.POST.get(f"op{i}_section") or "").strip()
 
-            if staff_id and block:
-                chosen_ops.append((int(staff_id), block.strip().upper()))
+            if staff_id and block and not section_id:
+                messages.error(
+                    request,
+                    (
+                        f"Operator {i} requires an isolator section when "
+                        "staff and shift block are selected."
+                    ),
+                )
+                url = reverse(
+                    "daily_rota",
+                    kwargs={"year": year, "month": month, "day": day},
+                )
+                query = urlencode({"edit_isolator": isolator.id})
+                return redirect(f"{url}?{query}")
+
+            if staff_id and block and section_id:
+                chosen_ops.append((int(staff_id), block, int(section_id)))
 
         seen = set()
         chosen_ops = [
@@ -247,7 +234,7 @@ def daily_rota(request, year, month, day):
 
         selected_pairs = set()
 
-        for staff_id, block in chosen_ops:
+        for staff_id, block, _section_id in chosen_ops:
             selected_pairs.add((staff_id, block))
 
         for supervisor_id in supervisor_ids_am:
@@ -313,15 +300,13 @@ def daily_rota(request, year, month, day):
                     location_type=Assignment.LocationType.ISOLATOR,
                 ).delete()
 
-                isolator_section = get_default_isolator_section_for(isolator)
-
-                for staff_id, block in chosen_ops:
+                for staff_id, block, section_id in chosen_ops:
                     assignment = Assignment(
                         rotaday=rotaday,
                         staff_id=staff_id,
                         clean_room=isolator.clean_room,
                         isolator=isolator,
-                        isolator_section=isolator_section,
+                        isolator_section_id=section_id,
                         shift=shift_for_block(block),
                         location_type=Assignment.LocationType.ISOLATOR,
                         shift_block=block,
