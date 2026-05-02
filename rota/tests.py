@@ -119,6 +119,39 @@ class APSSectionAssignmentWorkflowTests(TestCase):
         )
         self.assertEqual(post_response.status_code, 403)
 
+    def test_suite_overview_and_assignment_pages_render_for_viewer(self):
+        work_area = WorkArea.objects.create(
+            name="Support Room 1",
+            area_type=WorkArea.AreaType.SUPPORT_ROOM,
+            sort_order=1,
+        )
+
+        self.client.force_login(self.viewer_user)
+
+        suite_response = self.client.get(
+            reverse(
+                "suite_overview",
+                kwargs={"year": 2026, "month": 5, "day": 2},
+            )
+        )
+        daily_response = self.client.get(self.url)
+        work_area_response = self.client.get(
+            reverse(
+                "work_area_assignment",
+                kwargs={"year": 2026, "month": 5, "day": 2, "area_id": work_area.id},
+            )
+        )
+
+        self.assertEqual(suite_response.status_code, 200)
+        self.assertEqual(daily_response.status_code, 200)
+        self.assertEqual(work_area_response.status_code, 200)
+
+        suite_html = suite_response.content.decode()
+        self.assertLess(
+            suite_html.index("Operational Areas"),
+            suite_html.index("Needs Attention"),
+        )
+
     def test_manager_can_save_assignments_with_explicit_sections(self):
         self.client.force_login(self.manager_user)
 
