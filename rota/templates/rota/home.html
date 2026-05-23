@@ -1,133 +1,87 @@
-<!-- prettier-ignore-start -->
 {% extends "rota/base.html" %}
-<!-- prettier-ignore-end -->
 
-{% block title %}Home – Skedaddle Rota{% endblock %}
+{% block title %}Home - Skedaddle Rota{% endblock %}
+{% block topbar_title %}Home{% endblock %}
 
 {% block content %}
-<div class="max-w-7xl mx-auto px-4 py-8 space-y-8">
-
-  <!-- HERO / INTRO -->
-  <div class="rounded-3xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white p-8 shadow">
-    <h1 class="text-3xl font-semibold tracking-tight">
-      Rota Dashboard
-    </h1>
-    <p class="mt-2 max-w-2xl text-emerald-50">
-      Welcome to Skedaddle — the aseptic rota management system designed for clarity,
-      safety, and speed in cleanroom environments.
-    </p>
+<div class="sk-page">
+  <div class="sk-page-head">
+    <div>
+      <p class="eyebrow">Aseptic Rota Management</p>
+      <h1 class="sk-title">Skedaddle</h1>
+      <p class="sk-subtitle">
+        A focused control surface for cleanroom staffing, AM/PM conflict handling, APS validation, publishing, and audit-ready change history.
+      </p>
+    </div>
+    <div class="sk-actions">
+      <a class="btn btn-primary" href="{% url 'suite_overview' year=today.year month=today.month day=today.day %}">Open Today</a>
+      <a class="btn btn-outline" href="{% url 'monthly_calendar' year=today.year month=today.month %}">Calendar</a>
+    </div>
   </div>
 
-  <!-- QUICK ACTION CARDS -->
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+  <section class="status-bar">
+    <a class="stat" href="{% url 'monthly_calendar' year=today.year month=today.month %}">
+      <div class="stat-label">Planning</div>
+      <div class="stat-value" style="font-size: 20px;">Calendar</div>
+      <div class="stat-meta">Monthly rota navigation</div>
+    </a>
 
-    <!-- ROTA CALENDAR -->
-    <div class="group rounded-2xl bg-white shadow ring-1 ring-slate-200 p-6 transition hover:shadow-lg">
-      <div class="flex items-center justify-between">
-        <h2 class="text-lg font-semibold text-slate-900">
-          Rota Calendar
-        </h2>
-        <span class="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800">
-          Planning
-        </span>
-      </div>
+    <a class="stat" href="{% url 'suite_overview' year=today.year month=today.month day=today.day %}">
+      <div class="stat-label">Live board</div>
+      <div class="stat-value" style="font-size: 20px;">Overview</div>
+      <div class="stat-meta">Whole-suite coverage</div>
+    </a>
 
-      <p class="mt-2 text-sm text-slate-600">
-        View the monthly rota and drill down into daily cleanroom and isolator assignments.
-      </p>
+    <a class="stat" href="{% url 'daily_rota' year=today.year month=today.month day=today.day %}">
+      <div class="stat-label">Assignments</div>
+      <div class="stat-value" style="font-size: 20px;">Daily Rota</div>
+      <div class="stat-meta">Detailed edit surface</div>
+    </a>
 
-      <a
-        href="{% url 'monthly_calendar' year=today.year month=today.month %}"
-        class="mt-4 inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold
-               bg-emerald-600 text-white hover:bg-emerald-700 transition"
-      >
-        Open monthly calendar →
+    {% if perms.rota.rota_viewer %}
+      <a class="stat" href="{% url 'staff_search' %}">
+        <div class="stat-label">Staff</div>
+        <div class="stat-value" style="font-size: 20px;">Search</div>
+        <div class="stat-meta">Find upcoming assignments</div>
       </a>
-    </div>
+    {% endif %}
 
-    <!-- TODAY’S ROTA -->
-    <div class="group rounded-2xl bg-white shadow ring-1 ring-slate-200 p-6 transition hover:shadow-lg">
-      <div class="flex items-center justify-between">
-        <h2 class="text-lg font-semibold text-slate-900">
-          Today’s Rota
-        </h2>
-        <span class="rounded-full bg-teal-100 px-3 py-1 text-xs font-semibold text-teal-800">
-          Live
-        </span>
-      </div>
-
-      <p class="mt-2 text-sm text-slate-600">
-        Jump straight to today’s cleanroom layout and see who is assigned where.
-      </p>
-
-      <a
-        href="{% url 'daily_rota' year=today.year month=today.month day=today.day %}"
-        class="mt-4 inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold
-               bg-teal-600 text-white hover:bg-teal-700 transition"
-      >
-        View today’s rota →
+    {% if is_manager or user.is_superuser %}
+      <a class="stat" href="{% url 'validation:validation_cards' %}">
+        <div class="stat-label">APS</div>
+        <div class="stat-value" style="font-size: 20px;">Validation</div>
+        <div class="stat-meta">Operator section clearance</div>
       </a>
-    </div>
+    {% endif %}
+  </section>
 
-    <!-- STAFF & PERMISSIONS -->
-    <div class="group rounded-2xl bg-white shadow ring-1 ring-slate-200 p-6 transition hover:shadow-lg">
-      <div class="flex items-center justify-between">
-        <h2 class="text-lg font-semibold text-slate-900">
-          Staff & Permissions
-        </h2>
-        {% if is_manager or user.is_superuser %}
-          <span class="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800">
-            Manager
-          </span>
-        {% else %}
-          <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
-            Viewer
-          </span>
-        {% endif %}
+  <section class="sk-panel">
+    <div class="sk-panel-head">
+      <div>
+        <h2 class="sk-panel-title">Access</h2>
+        <p class="sk-panel-sub">Your current permissions determine which edit controls appear across the rota.</p>
       </div>
-
       {% if is_manager or user.is_superuser %}
-        <p class="mt-2 text-sm text-slate-600">
-          You have rota manager access. Manage staff, permissions, and assignments
-          to keep the suite running smoothly.
-        </p>
-
-        <div class="mt-4 flex flex-wrap gap-2">
-          <a
-            href="{% url 'staff_create' %}"
-            class="inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold
-                   bg-emerald-600 text-white hover:bg-emerald-700 transition"
-          >
-            Add staff member
-          </a>
-          <a
-            href="{% url 'staff_list' %}"
-            class="inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold
-                   bg-white ring-1 ring-slate-200 hover:bg-slate-50 transition"
-          >
-            View all staff
-          </a>
-        </div>
+        <span class="rag rag-green"><span class="rag-glyph">ok</span>Manager</span>
       {% else %}
-        <p class="mt-2 text-sm text-slate-600">
-          You currently have viewer access. You can browse the rota but cannot
-          modify staff or assignments.
-        </p>
+        <span class="rag rag-grey"><span class="rag-glyph">-</span>Viewer</span>
       {% endif %}
     </div>
 
-  </div>
-
-  <!-- FUTURE EXPANSION (OPTIONAL) -->
-  <div class="rounded-2xl bg-slate-50 ring-1 ring-slate-200 p-6">
-    <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-600">
-      Coming soon
-    </h3>
-    <p class="mt-1 text-sm text-slate-600">
-      Performance dashboards, rota validation checks, and audit-ready exports
-      are planned future enhancements.
-    </p>
-  </div>
-
+    <div class="sk-panel-body">
+      {% if is_manager or user.is_superuser %}
+        <p class="sk-subtitle" style="margin: 0;">You can manage assignments and publish rotas. Staff and admin tools remain limited to superusers where configured.</p>
+        <div class="sk-actions" style="justify-content: flex-start; margin-top: 14px;">
+          {% if user.is_superuser %}
+            <a class="btn btn-outline" href="{% url 'staff_create' %}">Add Staff</a>
+            <a class="btn btn-outline" href="{% url 'staff_list' %}">Staff List</a>
+          {% endif %}
+          <a class="btn btn-primary" href="{% url 'daily_rota' year=today.year month=today.month day=today.day %}">Manage Today</a>
+        </div>
+      {% else %}
+        <p class="sk-subtitle" style="margin: 0;">You have viewer access. You can browse the rota and staff assignments, but assignment and publish controls are hidden.</p>
+      {% endif %}
+    </div>
+  </section>
 </div>
-{% endblock %}
+{% endblock content %}

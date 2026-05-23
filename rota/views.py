@@ -113,6 +113,13 @@ def add_validation_messages(request, exc: ValidationError):
     messages.error(request, str(exc))
 
 
+def date_navigation_context(target_date):
+    return {
+        "prev_date": target_date - timedelta(days=1),
+        "next_date": target_date + timedelta(days=1),
+    }
+
+
 # ------------------------------------------------------------
 # HOME
 # ------------------------------------------------------------
@@ -502,6 +509,7 @@ def daily_rota(request, year, month, day):
         "assignments": assignments_qs,
         "overview": build_suite_overview(rotaday),
     }
+    context.update(date_navigation_context(target_date))
 
     return render(request, "rota/daily_rota.html", context)
 
@@ -523,6 +531,7 @@ def suite_overview(request, year, month, day):
         "rotaday": rotaday,
         "overview": overview,
     }
+    context.update(date_navigation_context(target_date))
 
     return render(request, "rota/suite_overview.html", context)
 
@@ -754,6 +763,7 @@ def work_area_assignment(request, year, month, day, area_id):
         "selected_am_ids": selected_am_ids,
         "selected_pm_ids": selected_pm_ids,
     }
+    context.update(date_navigation_context(target_date))
 
     return render(request, "rota/work_area_assignment.html", context)
 

@@ -1,659 +1,383 @@
 {% extends "rota/base.html" %}
+{% load common_extras %}
 
-{% block title %}Assignment Management – {{ date }}{% endblock %}
+{% block title %}Assignment Management - {{ date }}{% endblock %}
+{% block topbar_title %}Assignments{% endblock %}
+{% block topbar_context %} <span aria-hidden="true">/</span> {{ date|date:"D j M Y" }}{% endblock %}
+
+{% block topbar_actions %}
+  <div class="date-pager" aria-label="Date navigation">
+    <a href="{% url 'daily_rota' prev_date.year prev_date.month prev_date.day %}" title="Previous day">
+      <svg class="sk-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="m15 6-6 6 6 6"></path>
+      </svg>
+    </a>
+    <div class="date-main">
+      <div class="date-day">{{ date|date:"l" }} &middot; {{ rotaday.get_status_display }}</div>
+      <div class="date-full">{{ date|date:"j M Y" }}</div>
+    </div>
+    <a href="{% url 'daily_rota' next_date.year next_date.month next_date.day %}" title="Next day">
+      <svg class="sk-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="m9 6 6 6-6 6"></path>
+      </svg>
+    </a>
+  </div>
+{% endblock %}
 
 {% block content %}
-<div class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-
-  <!-- PAGE HEADER -->
-  <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+<div class="sk-page is-wide">
+  <div class="sk-page-head">
     <div>
-      <p class="text-xs font-semibold uppercase tracking-[0.25em] text-slate-500">
-        Skedaddle Assignment Management
-      </p>
-      <h1 class="mt-1 text-2xl sm:text-3xl font-semibold tracking-tight text-slate-950">
-        Assignment Management – {{ date }}
-      </h1>
-      <p class="mt-1 text-sm text-slate-500">
-        Detailed cleanroom, isolator, room supervisor, and AM/PM assignment editing.
+      <p class="eyebrow">Skedaddle Assignment Management</p>
+      <h1 class="sk-title">Daily Assignments</h1>
+      <p class="sk-subtitle">
+        Detailed cleanroom, isolator, room supervisor, and AM/PM assignment editing. Validation and conflict rules remain enforced by the backend.
       </p>
     </div>
 
-    <div class="flex flex-col sm:flex-row gap-2">
-      <a
-        href="{% url 'suite_overview' date.year date.month date.day %}"
-        class="inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-semibold
-              bg-slate-900 text-white shadow-sm ring-1 ring-slate-800
-              hover:bg-slate-800 transition"
-      >
-        ← Suite Overview
-      </a>
-
-      <a
-        href="{% url 'monthly_calendar' date.year date.month %}"
-        class="inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-semibold
-              bg-white text-slate-900 shadow-sm ring-1 ring-slate-200
-              hover:bg-slate-50 hover:text-slate-900 transition"
-      >
-        Back to Month
-      </a>
+    <div class="sk-actions">
+      <a class="btn btn-outline" href="{% url 'monthly_calendar' date.year date.month %}">Back to Month</a>
+      <a class="btn btn-primary" href="{% url 'suite_overview' date.year date.month date.day %}">Suite Overview</a>
     </div>
   </div>
 
-  {# ================= PUBLISH / STATUS BAR ================= #}
-  {% if rotaday %}
-    {% if rotaday.status == "PUBLISHED" %}
-      <div class="rounded-2xl bg-sky-50 p-4 ring-1 ring-sky-200 text-sky-900">
-        <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-          <div class="flex items-start gap-3">
-            <div class="mt-1 h-2.5 w-2.5 rounded-full bg-sky-500"></div>
-            <div>
-              <p class="font-semibold">
-                Published v{{ rotaday.publish_version }}
-              </p>
-              <p class="text-sm text-sky-800/90">
-                {% if rotaday.published_at %}Published at {{ rotaday.published_at }}{% endif %}
-                {% if rotaday.published_by %} by {{ rotaday.published_by }}{% endif %}
-              </p>
-            </div>
-          </div>
-
-          {% if user.is_superuser or perms.rota.rota_manager %}
-            <form
-              method="post"
-              action="{% url 'publish_rota_day' rotaday.id %}"
-              class="w-full md:w-auto"
-            >
-              {% csrf_token %}
-              <div class="flex flex-col sm:flex-row gap-2 sm:items-center sm:justify-end">
-                <input
-                  type="text"
-                  name="reason"
-                  placeholder="Reason for update (optional)"
-                  class="w-full sm:w-80 rounded-lg px-3 py-2 text-sm bg-white ring-1 ring-sky-200
-                         placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-300"
-                />
-                <button
-                  type="submit"
-                  class="inline-flex w-full sm:w-auto items-center justify-center
-                         rounded-lg px-4 py-2 text-sm font-semibold
-                         bg-sky-900 text-white hover:bg-sky-800 transition"
-                >
-                  Republish update
-                </button>
-              </div>
-              <p class="mt-2 text-xs text-sky-800/80">
-                Republish will send an updated email notification to assigned staff.
-              </p>
-            </form>
-          {% endif %}
-        </div>
-      </div>
-    {% else %}
-      <div class="rounded-2xl bg-amber-50 p-4 ring-1 ring-amber-200 text-amber-900">
-        <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-          <div class="flex items-start gap-3">
-            <div class="mt-1 h-2.5 w-2.5 rounded-full bg-amber-500"></div>
-            <div>
-              <p class="font-semibold">Draft — not published</p>
-              <p class="text-sm text-amber-800/90">
-                Changes are saved, but staff won’t be notified until published.
-              </p>
-            </div>
-          </div>
-
-          {% if user.is_superuser or perms.rota.rota_manager %}
-            <form
-              method="post"
-              action="{% url 'publish_rota_day' rotaday.id %}"
-              class="w-full md:w-auto"
-            >
-              {% csrf_token %}
-              <button
-                type="submit"
-                class="inline-flex w-full md:w-auto items-center justify-center
-                       rounded-lg px-4 py-2 text-sm font-semibold
-                       bg-emerald-600 text-white hover:bg-emerald-700 transition"
-              >
-                Publish rota
-              </button>
-              <p class="mt-2 text-xs text-amber-800/80">
-                Publishing will email assigned staff for this day.
-              </p>
-            </form>
-          {% endif %}
-        </div>
-      </div>
-    {% endif %}
-  {% endif %}
-  {# ================= END PUBLISH / STATUS BAR ================= #}
-
-  <!-- INFO BANNER -->
-  {% if not assignments %}
-    <div class="rounded-2xl bg-amber-50 p-4 ring-1 ring-amber-200 text-amber-900">
-      <div class="flex items-start gap-3">
-        <div class="mt-1 h-2.5 w-2.5 rounded-full bg-amber-500"></div>
+  <div class="content-deck-row">
+    <section class="card publish {% if rotaday.status == 'PUBLISHED' %}is-published{% endif %}">
+      <div class="card-head">
         <div>
-          <p class="font-semibold">No assignments recorded for this day.</p>
-          <p class="text-sm text-amber-800/90">
-            Use the cleanroom cards below to add room supervisors and isolator staff.
-            Operational work areas can be reviewed and managed below.
-          </p>
-        </div>
-      </div>
-    </div>
-  {% else %}
-    <div class="rounded-2xl bg-emerald-50 p-4 ring-1 ring-emerald-200 text-emerald-900">
-      <div class="flex items-start gap-3">
-        <div class="mt-1 h-2.5 w-2.5 rounded-full bg-emerald-500"></div>
-        <div>
-          <p class="font-semibold">
-            Showing {{ assignments|length }} assignment{{ assignments|length|pluralize }} for this day.
-          </p>
-          <p class="text-sm text-emerald-800/90">
-            Use this page for detailed cleanroom and isolator assignment editing.
-            Return to Suite Overview for whole-suite status.
-          </p>
-        </div>
-      </div>
-    </div>
-  {% endif %}
-
-  <!-- WORK AREA ASSIGNMENT MANAGEMENT -->
-  <section class="rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 overflow-hidden">
-    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-slate-200 p-5">
-      <div>
-        <h2 class="text-lg font-semibold text-slate-900">
-          Operational Work Areas
-        </h2>
-        <p class="mt-1 text-sm text-slate-500">
-          Review cover and manage daily staffing for MAL, support rooms, visual inspection, and overlabelling.
-        </p>
-      </div>
-
-      <a
-        href="{% url 'suite_overview' date.year date.month date.day %}"
-        class="inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-semibold
-               bg-slate-900 text-white shadow-sm ring-1 ring-slate-800
-               hover:bg-slate-800 transition"
-      >
-        View Suite Status
-      </a>
-    </div>
-
-    {% if overview.work_area_cards %}
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 p-4">
-        {% for card in overview.work_area_cards %}
-          <article class="rounded-xl bg-slate-50 p-3 ring-1 ring-slate-200 hover:bg-white hover:shadow-sm transition">
-
-            <!-- Header -->
-            <div class="flex items-start justify-between gap-3">
-              <div class="min-w-0">
-                <div class="flex flex-wrap items-center gap-2">
-                  {% if card.status == "Red" %}
-                    <span class="rounded-full bg-rose-100 px-2.5 py-0.5 text-xs font-semibold text-rose-700 ring-1 ring-rose-200">
-                      Red
-                    </span>
-                  {% elif card.status == "Amber" %}
-                    <span class="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-700 ring-1 ring-amber-200">
-                      Amber
-                    </span>
-                  {% elif card.status == "Green" %}
-                    <span class="rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-700 ring-1 ring-emerald-200">
-                      Green
-                    </span>
-                  {% else %}
-                    <span class="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-600 ring-1 ring-slate-200">
-                      Grey
-                    </span>
-                  {% endif %}
-
-                  <span class="text-xs font-medium text-slate-500">
-                    {{ card.area.get_area_type_display }}
-                  </span>
-                </div>
-
-                <h3 class="mt-2 truncate text-sm font-semibold text-slate-950">
-                  {{ card.area.name }}
-                </h3>
-              </div>
-
-              {% if user.is_superuser or perms.rota.rota_manager %}
-                <a
-                  href="{% url 'work_area_assignment' date.year date.month date.day card.area.id %}"
-                  class="shrink-0 rounded-full bg-emerald-600 px-3 py-1 text-xs font-semibold text-white hover:bg-emerald-700 transition"
-                >
-                  Manage
-                </a>
-              {% else %}
-                <span class="shrink-0 text-xs text-slate-400">
-                  View only
-                </span>
-              {% endif %}
-            </div>
-
-            <!-- AM / PM Summary -->
-            <div class="mt-3 grid grid-cols-2 gap-2">
-
-              <!-- AM -->
-              <div class="rounded-lg bg-white p-2.5 ring-1 ring-slate-200">
-                <div class="flex items-center justify-between gap-2">
-                  <span class="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold uppercase text-slate-600 ring-1 ring-slate-200">
-                    AM
-                  </span>
-
-                  <span class="text-xs font-bold text-slate-900">
-                    {{ card.am_count }}{% if card.required_am %}/{{ card.required_am }}{% endif %}
-                  </span>
-                </div>
-
-                <div class="mt-2 flex flex-wrap gap-1.5">
-                  {% if card.am_assignments %}
-                    {% for assignment in card.am_assignments %}
-                      <span class="max-w-full truncate rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-800 ring-1 ring-slate-200">
-                        {{ assignment.staff.full_name }}
-                      </span>
-                    {% endfor %}
-                  {% else %}
-                    <span class="text-xs text-slate-400">
-                      No AM staff
-                    </span>
-                  {% endif %}
-                </div>
-              </div>
-
-              <!-- PM -->
-              <div class="rounded-lg bg-white p-2.5 ring-1 ring-slate-200">
-                <div class="flex items-center justify-between gap-2">
-                  <span class="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold uppercase text-slate-600 ring-1 ring-slate-200">
-                    PM
-                  </span>
-
-                  <span class="text-xs font-bold text-slate-900">
-                    {{ card.pm_count }}{% if card.required_pm %}/{{ card.required_pm }}{% endif %}
-                  </span>
-                </div>
-
-                <div class="mt-2 flex flex-wrap gap-1.5">
-                  {% if card.pm_assignments %}
-                    {% for assignment in card.pm_assignments %}
-                      <span class="max-w-full truncate rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-800 ring-1 ring-slate-200">
-                        {{ assignment.staff.full_name }}
-                      </span>
-                    {% endfor %}
-                  {% else %}
-                    <span class="text-xs text-slate-400">
-                      No PM staff
-                    </span>
-                  {% endif %}
-                </div>
-              </div>
-
-            </div>
-          </article>
-        {% endfor %}
-      </div>
-    {% else %}
-      <div class="p-5">
-        <div class="rounded-xl bg-slate-50 p-6 text-center text-sm text-slate-500 ring-1 ring-dashed ring-slate-300">
-          No operational work areas have been configured yet.
-        </div>
-      </div>
-    {% endif %}
-  </section>
-
-  <!-- CLEANROOMS GRID -->
-  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-
-    {% for block in rooms_grid %}
-      <section class="rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 overflow-hidden">
-
-        <!-- ROOM HEADER -->
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-5 border-b border-slate-200">
-          <div>
-            <h2 class="text-lg font-semibold text-slate-900">
-              {{ block.room.name }}
-            </h2>
-            <p class="text-sm text-slate-500">
-              Assign room supervisors and isolator staff by AM/PM block.
-            </p>
+          <div class="card-title">
+            {% if rotaday.status == "PUBLISHED" %}Published v{{ rotaday.publish_version }}{% else %}Draft rota{% endif %}
           </div>
-
-          <!-- ROOM SUPERVISORS (AM/PM) -->
-          <div class="rounded-xl bg-slate-50 ring-1 ring-slate-200 p-4 min-w-[260px]">
-            <div class="text-xs font-semibold uppercase tracking-wide text-slate-600">
-              Room Supervisors
-            </div>
-
-            <div class="mt-3 grid grid-cols-1 gap-3">
-              <!-- AM -->
-              <div class="rounded-lg bg-white ring-1 ring-slate-200 p-3">
-                <div class="text-[11px] font-semibold uppercase tracking-wide text-slate-600">
-                  AM
-                </div>
-
-                {% if block.room.room_supervisors_am %}
-                  <ul class="mt-2 space-y-1 text-sm text-slate-800">
-                    {% for sup in block.room.room_supervisors_am %}
-                      <li class="flex items-center gap-2">
-                        <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
-                        {{ sup.full_name }}
-                      </li>
-                    {% endfor %}
-                  </ul>
-                {% else %}
-                  <p class="mt-2 text-sm text-slate-500">
-                    None assigned.
-                  </p>
-                {% endif %}
-              </div>
-
-              <!-- PM -->
-              <div class="rounded-lg bg-white ring-1 ring-slate-200 p-3">
-                <div class="text-[11px] font-semibold uppercase tracking-wide text-slate-600">
-                  PM
-                </div>
-
-                {% if block.room.room_supervisors_pm %}
-                  <ul class="mt-2 space-y-1 text-sm text-slate-800">
-                    {% for sup in block.room.room_supervisors_pm %}
-                      <li class="flex items-center gap-2">
-                        <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
-                        {{ sup.full_name }}
-                      </li>
-                    {% endfor %}
-                  </ul>
-                {% else %}
-                  <p class="mt-2 text-sm text-slate-500">
-                    None assigned.
-                  </p>
-                {% endif %}
-              </div>
-            </div>
+          <div class="card-sub">
+            {% if rotaday.published_at %}{{ rotaday.published_at }}{% else %}Not yet sent to staff{% endif %}
+          </div>
+        </div>
+        <span class="dot {% if rotaday.status == 'PUBLISHED' %}dot-green{% else %}dot-amber{% endif %}"></span>
+      </div>
+      <div class="card-body">
+        <div class="publish-checks">
+          <div class="check {% if overview.suite_summary.red_issue_count == 0 %}check-pass{% else %}check-fail{% endif %}">
+            <span class="check-icon">{% if overview.suite_summary.red_issue_count == 0 %}ok{% else %}x{% endif %}</span>
+            <span>No red coverage gaps</span>
+            <span class="check-count">{{ overview.suite_summary.red_issue_count }}</span>
+          </div>
+          <div class="check check-pass">
+            <span class="check-icon">ok</span>
+            <span>Assignment.clean() enforced</span>
+            <span class="check-count">server</span>
           </div>
         </div>
 
-        <!-- WALLS -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 p-5">
-
-          <!-- LEFT WALL -->
-          <div class="rounded-xl bg-slate-50 ring-1 ring-slate-200 p-4">
-            <h3 class="mb-3 text-sm font-semibold text-slate-800">
-              Left Wall
-            </h3>
-
-            {% if block.left_wall %}
-              <div class="space-y-3">
-                {% for iso in block.left_wall %}
-                  <div class="rounded-xl bg-white ring-1 ring-slate-200 p-4">
-
-                    <div class="space-y-3">
-                      <!-- Isolator info -->
-                      <div>
-                        <div class="text-sm font-semibold text-slate-900">
-                          {{ iso.name }}
-                        </div>
-
-                        {% if iso.has_assignments %}
-                          <div class="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-                            <!-- AM list -->
-                            <div class="rounded-lg bg-slate-50 ring-1 ring-slate-200 p-3">
-                              <div class="text-[11px] font-semibold uppercase tracking-wide text-slate-600">
-                                AM
-                              </div>
-
-                              {% if iso.operator_assignments_am %}
-                                <div class="mt-2 space-y-1 text-slate-700">
-                                  {% for a in iso.operator_assignments_am %}
-                                    <div>
-                                      <div class="font-medium text-slate-900">
-                                        {{ a.staff.full_name }}
-                                      </div>
-                                      <div class="text-xs text-slate-500">
-                                        {{ a.isolator_section_display }}
-                                      </div>
-                                    </div>
-                                  {% endfor %}
-                                </div>
-                              {% else %}
-                                <p class="mt-2 text-sm text-slate-500">Unmanned.</p>
-                              {% endif %}
-                            </div>
-
-                            <!-- PM list -->
-                            <div class="rounded-lg bg-slate-50 ring-1 ring-slate-200 p-3">
-                              <div class="text-[11px] font-semibold uppercase tracking-wide text-slate-600">
-                                PM
-                              </div>
-
-                              {% if iso.operator_assignments_pm %}
-                                <div class="mt-2 space-y-1 text-slate-700">
-                                  {% for a in iso.operator_assignments_pm %}
-                                    <div>
-                                      <div class="font-medium text-slate-900">
-                                        {{ a.staff.full_name }}
-                                      </div>
-                                      <div class="text-xs text-slate-500">
-                                        {{ a.isolator_section_display }}
-                                      </div>
-                                    </div>
-                                  {% endfor %}
-                                </div>
-                              {% else %}
-                                <p class="mt-2 text-sm text-slate-500">Unmanned.</p>
-                              {% endif %}
-                            </div>
-                          </div>
-                        {% else %}
-                          <div class="mt-2 text-sm text-slate-500">
-                            No duties assigned yet.
-                          </div>
-                        {% endif %}
-                      </div>
-
-                      <!-- ACTIONS -->
-                      <div class="flex flex-col sm:flex-row sm:justify-end gap-2">
-                        <button
-                          class="w-full sm:w-auto inline-flex items-center justify-center
-                                 rounded-lg px-4 py-2 text-sm font-semibold
-                                 bg-slate-900 text-white hover:bg-slate-800 transition"
-                          data-open-modal="modal-duties-{{ iso.id }}"
-                        >
-                          Show Duties
-                        </button>
-
-                        {% if user.is_superuser or perms.rota.rota_manager %}
-                          <button
-                            class="w-full sm:w-auto inline-flex items-center justify-center
-                                   rounded-lg px-4 py-2 text-sm font-semibold
-                                   bg-emerald-600 text-white hover:bg-emerald-700 transition"
-                            data-open-modal="modal-isolator-{{ iso.id }}"
-                          >
-                            Edit Assignments
-                          </button>
-                        {% endif %}
-                      </div>
-                    </div>
-
-                    {% include "rota/partials/isolator_modal.html" with iso=iso room=block.room date=date staff_list=staff_list supervisors=supervisors %}
-                    {% include "rota/partials/isolator_duties_modal.html" with iso=iso date=date %}
-                  </div>
-                {% endfor %}
-              </div>
-            {% else %}
-              <div class="rounded-xl bg-white ring-1 ring-dashed ring-slate-300 p-4 text-sm text-slate-500">
-                No isolators on this wall.
-              </div>
+        {% if user.is_superuser or perms.rota.rota_manager %}
+          <form method="post" action="{% url 'publish_rota_day' rotaday.id %}">
+            {% csrf_token %}
+            {% if rotaday.status == "PUBLISHED" %}
+              <textarea class="publish-reason" name="reason" rows="2" placeholder="Reason for republishing (optional)"></textarea>
             {% endif %}
-          </div>
-
-          <!-- RIGHT WALL -->
-          <div class="rounded-xl bg-slate-50 ring-1 ring-slate-200 p-4">
-            <h3 class="mb-3 text-sm font-semibold text-slate-800">
-              Right Wall
-            </h3>
-
-            {% if block.right_wall %}
-              <div class="space-y-3">
-                {% for iso in block.right_wall %}
-                  <div class="rounded-xl bg-white ring-1 ring-slate-200 p-4">
-
-                    <div class="space-y-3">
-                      <!-- Isolator info -->
-                      <div>
-                        <div class="text-sm font-semibold text-slate-900">
-                          {{ iso.name }}
-                        </div>
-
-                        {% if iso.has_assignments %}
-                          <div class="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-                            <!-- AM list -->
-                            <div class="rounded-lg bg-slate-50 ring-1 ring-slate-200 p-3">
-                              <div class="text-[11px] font-semibold uppercase tracking-wide text-slate-600">
-                                AM
-                              </div>
-
-                              {% if iso.operator_assignments_am %}
-                                <div class="mt-2 space-y-1 text-slate-700">
-                                  {% for a in iso.operator_assignments_am %}
-                                    <div>
-                                      <div class="font-medium text-slate-900">
-                                        {{ a.staff.full_name }}
-                                      </div>
-                                      <div class="text-xs text-slate-500">
-                                        {{ a.isolator_section_display }}
-                                      </div>
-                                    </div>
-                                  {% endfor %}
-                                </div>
-                              {% else %}
-                                <p class="mt-2 text-sm text-slate-500">Unmanned.</p>
-                              {% endif %}
-                            </div>
-
-                            <!-- PM list -->
-                            <div class="rounded-lg bg-slate-50 ring-1 ring-slate-200 p-3">
-                              <div class="text-[11px] font-semibold uppercase tracking-wide text-slate-600">
-                                PM
-                              </div>
-
-                              {% if iso.operator_assignments_pm %}
-                                <div class="mt-2 space-y-1 text-slate-700">
-                                  {% for a in iso.operator_assignments_pm %}
-                                    <div>
-                                      <div class="font-medium text-slate-900">
-                                        {{ a.staff.full_name }}
-                                      </div>
-                                      <div class="text-xs text-slate-500">
-                                        {{ a.isolator_section_display }}
-                                      </div>
-                                    </div>
-                                  {% endfor %}
-                                </div>
-                              {% else %}
-                                <p class="mt-2 text-sm text-slate-500">Unmanned.</p>
-                              {% endif %}
-                            </div>
-                          </div>
-                        {% else %}
-                          <div class="mt-2 text-sm text-slate-500">
-                            No duties assigned yet.
-                          </div>
-                        {% endif %}
-                      </div>
-
-                      <!-- ACTIONS -->
-                      <div class="flex flex-col sm:flex-row sm:justify-end gap-2">
-                        <button
-                          class="w-full sm:w-auto inline-flex items-center justify-center
-                                 rounded-lg px-4 py-2 text-sm font-semibold
-                                 bg-slate-900 text-white hover:bg-slate-800 transition"
-                          data-open-modal="modal-duties-{{ iso.id }}"
-                        >
-                          Show Duties
-                        </button>
-
-                        {% if user.is_superuser or perms.rota.rota_manager %}
-                          <button
-                            class="w-full sm:w-auto inline-flex items-center justify-center
-                                   rounded-lg px-4 py-2 text-sm font-semibold
-                                   bg-emerald-600 text-white hover:bg-emerald-700 transition"
-                            data-open-modal="modal-isolator-{{ iso.id }}"
-                          >
-                            Edit Assignments
-                          </button>
-                        {% endif %}
-                      </div>
-                    </div>
-
-                    {% include "rota/partials/isolator_modal.html" with iso=iso room=block.room date=date staff_list=staff_list supervisors=supervisors %}
-                    {% include "rota/partials/isolator_duties_modal.html" with iso=iso date=date %}
-                  </div>
-                {% endfor %}
-              </div>
-            {% else %}
-              <div class="rounded-xl bg-white ring-1 ring-dashed ring-slate-300 p-4 text-sm text-slate-500">
-                No isolators on this wall.
-              </div>
-            {% endif %}
-          </div>
-
-        </div>
-      </section>
-    {% endfor %}
-
-  </div>
-
-  {# ================= CHANGE LOG / AUDIT TRAIL ================= #}
-  {% if rotaday %}
-    <details class="rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 overflow-hidden">
-      <summary class="cursor-pointer select-none p-5 border-b border-slate-200 flex items-center justify-between">
-        <div>
-          <h2 class="text-lg font-semibold text-slate-900">Change history</h2>
-          <p class="text-sm text-slate-500">
-            Logged actions for this rota day, latest first.
-          </p>
-        </div>
-        <span class="text-sm font-semibold text-slate-600">
-          {% if rotaday.audit_events.count %}
-            {{ rotaday.audit_events.count }} event{{ rotaday.audit_events.count|pluralize }}
-          {% else %}
-            0 events
-          {% endif %}
-        </span>
-      </summary>
-
-      <div class="p-5">
-        {% if rotaday.audit_events.all %}
-          <ol class="space-y-3">
-            {% for e in rotaday.audit_events.all %}
-              <li class="flex items-start gap-3">
-                <span class="mt-2 h-2 w-2 rounded-full bg-slate-400"></span>
-                <div class="min-w-0">
-                  <p class="text-sm text-slate-900">
-                    <span class="font-semibold">{{ e.timestamp }}</span>
-                    <span class="text-slate-500">—</span>
-                    {{ e.summary }}
-                    {% if e.actor %}
-                      <span class="text-slate-500">({{ e.actor }})</span>
-                    {% endif %}
-                  </p>
-                  <p class="text-xs text-slate-500">
-                    {{ e.get_event_type_display }}
-                  </p>
-                </div>
-              </li>
-            {% endfor %}
-          </ol>
+            <button type="submit" class="btn btn-publish" style="width: 100%;">
+              {% if rotaday.status == "PUBLISHED" %}Republish and notify{% else %}Publish rota{% endif %}
+            </button>
+          </form>
         {% else %}
-          <div class="rounded-xl bg-slate-50 ring-1 ring-slate-200 p-4 text-sm text-slate-600">
-            No changes logged yet.
-          </div>
+          <p class="empty-copy">You have view-only access to publishing controls.</p>
         {% endif %}
       </div>
-    </details>
-  {% endif %}
-  {# ================= END CHANGE LOG ================= #}
+    </section>
 
+    <section class="card">
+      <div class="card-head">
+        <div>
+          <div class="card-title">Today at a glance</div>
+          <div class="card-sub">{{ assignments|length }} assignment{{ assignments|length|pluralize }}</div>
+        </div>
+        <span class="rag rag-{{ overview.suite_summary.suite_status|status_key }}">
+          <span class="rag-glyph">{{ overview.suite_summary.suite_status|status_glyph }}</span>
+          {{ overview.suite_summary.suite_status }}
+        </span>
+      </div>
+      <div class="card-body">
+        <div class="shift-summaries">
+          <div class="shift-summary">
+            <div class="shift-summary-head"><span>Rooms</span><span>{{ overview.suite_summary.cleanrooms_active }}/{{ overview.suite_summary.cleanrooms_total }}</span></div>
+            <p class="sk-panel-sub">Cleanrooms with rota activity.</p>
+          </div>
+          <div class="shift-summary">
+            <div class="shift-summary-head"><span>Areas</span><span>{{ overview.suite_summary.required_work_areas_covered }}/{{ overview.suite_summary.required_work_areas_total }}</span></div>
+            <p class="sk-panel-sub">Required work areas fully staffed.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-head">
+        <div>
+          <div class="card-title">Needs Attention</div>
+          <div class="card-sub">{{ overview.suite_summary.issue_count }} issue{{ overview.suite_summary.issue_count|pluralize }}</div>
+        </div>
+      </div>
+      <div class="issues">
+        {% for issue in overview.issues|slice:":5" %}
+          <div class="issue issue-{{ issue.severity|status_key }}">
+            <div class="issue-icon">{{ issue.severity|status_glyph }}</div>
+            <div>
+              <div class="issue-msg">{{ issue.message }}</div>
+              {% if issue.source %}<div class="issue-loc">{{ issue.source }}</div>{% endif %}
+            </div>
+          </div>
+        {% empty %}
+          <div class="card-body">
+            <span class="rag rag-green"><span class="rag-glyph">ok</span>all clear</span>
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+  </div>
+
+  <section class="sk-panel">
+    <div class="sk-panel-head">
+      <div>
+        <h2 class="sk-panel-title">Operational Work Areas</h2>
+        <p class="sk-panel-sub">MAL, support rooms, visual inspection, and overlabelling cover.</p>
+      </div>
+      <a class="btn btn-outline" href="{% url 'suite_overview' date.year date.month date.day %}">View Status</a>
+    </div>
+
+    <div class="sk-panel-body">
+      <div class="area-deck">
+        {% for card in overview.work_area_cards %}
+          <article class="area-tile">
+            <div class="area-tile-head">
+              <div>
+                <div class="area-tile-name">{{ card.area.name }}</div>
+                <div class="area-tile-type">{{ card.area.get_area_type_display }}</div>
+              </div>
+              <span class="rag rag-{{ card.status|status_key }}">
+                <span class="rag-glyph">{{ card.status|status_glyph }}</span>
+                {{ card.status }}
+              </span>
+            </div>
+
+            <div class="shift-summaries">
+              <div class="shift-summary">
+                <div class="shift-summary-head"><span>AM</span><span>{{ card.am_count }}{% if card.required_am %}/{{ card.required_am }}{% endif %}</span></div>
+                <div class="name-pills">
+                  {% for assignment in card.am_assignments %}
+                    <span class="name-pill">{{ assignment.staff.full_name }}</span>
+                  {% empty %}
+                    <span class="empty-copy">No AM staff</span>
+                  {% endfor %}
+                </div>
+              </div>
+              <div class="shift-summary">
+                <div class="shift-summary-head"><span>PM</span><span>{{ card.pm_count }}{% if card.required_pm %}/{{ card.required_pm }}{% endif %}</span></div>
+                <div class="name-pills">
+                  {% for assignment in card.pm_assignments %}
+                    <span class="name-pill">{{ assignment.staff.full_name }}</span>
+                  {% empty %}
+                    <span class="empty-copy">No PM staff</span>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+
+            {% if user.is_superuser or perms.rota.rota_manager %}
+              <a class="btn btn-outline" href="{% url 'work_area_assignment' date.year date.month date.day card.area.id %}">Manage</a>
+            {% else %}
+              <span class="empty-copy">View only</span>
+            {% endif %}
+          </article>
+        {% empty %}
+          <p class="empty-copy">No operational work areas have been configured yet.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sk-page-head" style="margin-bottom: 12px;">
+      <div>
+        <h2 class="sk-panel-title">Cleanrooms and Isolators</h2>
+        <p class="sk-panel-sub">Assign room supervisors and isolator staff by AM/PM block.</p>
+      </div>
+    </div>
+
+    <div class="room-grid">
+      {% for block in rooms_grid %}
+        <article class="room-card">
+          <div class="room-card-head">
+            <div>
+              <h3 class="room-card-title">{{ block.room.name }}</h3>
+              <p class="room-card-meta">Room supervisor and isolator assignment controls</p>
+            </div>
+          </div>
+
+          <div class="supervisor-strip">
+            <div class="shift-summary">
+              <div class="shift-summary-head"><span>AM Supervisor</span><span>{{ block.room.room_supervisors_am|length }}</span></div>
+              <div class="name-pills">
+                {% for sup in block.room.room_supervisors_am %}
+                  <span class="name-pill">{{ sup.full_name }}</span>
+                {% empty %}
+                  <span class="empty-copy">None assigned</span>
+                {% endfor %}
+              </div>
+            </div>
+            <div class="shift-summary">
+              <div class="shift-summary-head"><span>PM Supervisor</span><span>{{ block.room.room_supervisors_pm|length }}</span></div>
+              <div class="name-pills">
+                {% for sup in block.room.room_supervisors_pm %}
+                  <span class="name-pill">{{ sup.full_name }}</span>
+                {% empty %}
+                  <span class="empty-copy">None assigned</span>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+
+          <div class="wall-grid">
+            <div class="wall-panel">
+              <div class="wall-title">Left Wall</div>
+              {% for iso in block.left_wall %}
+                <div class="iso-card">
+                  <div class="iso-card-head">
+                    <div>
+                      <div class="iso-card-name">{{ iso.name }}</div>
+                      <div class="iso-card-meta">AM {{ iso.operator_assignments_am|length }} &middot; PM {{ iso.operator_assignments_pm|length }}</div>
+                    </div>
+                  </div>
+
+                  <div class="shift-summaries">
+                    <div class="shift-summary">
+                      <div class="shift-summary-head"><span>AM</span><span>{{ iso.operator_assignments_am|length }}</span></div>
+                      <div class="name-pills">
+                        {% for a in iso.operator_assignments_am %}
+                          <span class="name-pill">{{ a.staff.full_name }} ({{ a.isolator_section_display }})</span>
+                        {% empty %}
+                          <span class="empty-copy">Unmanned</span>
+                        {% endfor %}
+                      </div>
+                    </div>
+                    <div class="shift-summary">
+                      <div class="shift-summary-head"><span>PM</span><span>{{ iso.operator_assignments_pm|length }}</span></div>
+                      <div class="name-pills">
+                        {% for a in iso.operator_assignments_pm %}
+                          <span class="name-pill">{{ a.staff.full_name }} ({{ a.isolator_section_display }})</span>
+                        {% empty %}
+                          <span class="empty-copy">Unmanned</span>
+                        {% endfor %}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="iso-actions">
+                    <button type="button" class="btn btn-outline" data-open-modal="modal-duties-{{ iso.id }}">Show Duties</button>
+                    {% if user.is_superuser or perms.rota.rota_manager %}
+                      <button type="button" class="btn btn-success" data-open-modal="modal-isolator-{{ iso.id }}">Edit Assignments</button>
+                    {% endif %}
+                  </div>
+
+                  {% include "rota/partials/isolator_modal.html" with iso=iso room=block.room date=date staff_list=staff_list supervisors=supervisors %}
+                  {% include "rota/partials/isolator_duties_modal.html" with iso=iso date=date %}
+                </div>
+              {% empty %}
+                <div class="iso-card"><p class="empty-copy">No isolators on this wall.</p></div>
+              {% endfor %}
+            </div>
+
+            <div class="wall-panel">
+              <div class="wall-title">Right Wall</div>
+              {% for iso in block.right_wall %}
+                <div class="iso-card">
+                  <div class="iso-card-head">
+                    <div>
+                      <div class="iso-card-name">{{ iso.name }}</div>
+                      <div class="iso-card-meta">AM {{ iso.operator_assignments_am|length }} &middot; PM {{ iso.operator_assignments_pm|length }}</div>
+                    </div>
+                  </div>
+
+                  <div class="shift-summaries">
+                    <div class="shift-summary">
+                      <div class="shift-summary-head"><span>AM</span><span>{{ iso.operator_assignments_am|length }}</span></div>
+                      <div class="name-pills">
+                        {% for a in iso.operator_assignments_am %}
+                          <span class="name-pill">{{ a.staff.full_name }} ({{ a.isolator_section_display }})</span>
+                        {% empty %}
+                          <span class="empty-copy">Unmanned</span>
+                        {% endfor %}
+                      </div>
+                    </div>
+                    <div class="shift-summary">
+                      <div class="shift-summary-head"><span>PM</span><span>{{ iso.operator_assignments_pm|length }}</span></div>
+                      <div class="name-pills">
+                        {% for a in iso.operator_assignments_pm %}
+                          <span class="name-pill">{{ a.staff.full_name }} ({{ a.isolator_section_display }})</span>
+                        {% empty %}
+                          <span class="empty-copy">Unmanned</span>
+                        {% endfor %}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="iso-actions">
+                    <button type="button" class="btn btn-outline" data-open-modal="modal-duties-{{ iso.id }}">Show Duties</button>
+                    {% if user.is_superuser or perms.rota.rota_manager %}
+                      <button type="button" class="btn btn-success" data-open-modal="modal-isolator-{{ iso.id }}">Edit Assignments</button>
+                    {% endif %}
+                  </div>
+
+                  {% include "rota/partials/isolator_modal.html" with iso=iso room=block.room date=date staff_list=staff_list supervisors=supervisors %}
+                  {% include "rota/partials/isolator_duties_modal.html" with iso=iso date=date %}
+                </div>
+              {% empty %}
+                <div class="iso-card"><p class="empty-copy">No isolators on this wall.</p></div>
+              {% endfor %}
+            </div>
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+  </section>
+
+  {% if rotaday %}
+    <section class="sk-panel">
+      <div class="sk-panel-head">
+        <div>
+          <h2 class="sk-panel-title">Change History</h2>
+          <p class="sk-panel-sub">Logged actions for this rota day, latest first.</p>
+        </div>
+        <span class="rag rag-grey"><span class="rag-glyph">-</span>{{ rotaday.audit_events.count }}</span>
+      </div>
+
+      <div class="sk-panel-body">
+        <div class="activity">
+          {% for event in rotaday.audit_events.all %}
+            <div class="activity-row">
+              <span class="activity-time">{{ event.timestamp|date:"H:i" }}</span>
+              <div class="activity-text">
+                {{ event.summary }}
+                {% if event.actor %}<strong> &middot; {{ event.actor }}</strong>{% endif %}
+                <div class="issue-loc">{{ event.get_event_type_display }}</div>
+              </div>
+            </div>
+          {% empty %}
+            <p class="empty-copy">No changes logged yet.</p>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+  {% endif %}
 </div>
+
+{% if request.GET.edit_isolator %}
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      var modal = document.getElementById("modal-isolator-{{ request.GET.edit_isolator|escapejs }}");
+      if (!modal) return;
+      modal.classList.remove("hidden");
+      modal.setAttribute("aria-hidden", "false");
+      document.documentElement.classList.add("overflow-hidden");
+    });
+  </script>
+{% endif %}
 {% endblock content %}

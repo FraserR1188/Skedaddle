@@ -1,87 +1,167 @@
 {% load static %}
+{% load common_extras %}
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-    {# Tailwind can stay for later; harmless if empty #}
     <link rel="stylesheet" href="{% static 'rota/css/tailwind.css' %}">
-    {# Your main custom CSS #}
     <link rel="stylesheet" href="{% static 'rota/css/main.css' %}" />
-
     <title>{% block title %}Skedaddle Rota{% endblock %}</title>
-
     {% block extra_head %}{% endblock %}
   </head>
 
   <body>
-    
-    <header class="navbar">
-      <div class="navbar-left">
-        <a href="{% url 'home' %}" class="navbar-brand">Skedaddle Rota</a>
-      </div>
+    {% with url_name=request.resolver_match.url_name namespace=request.resolver_match.namespace %}
+      <div class="app">
+        <aside class="rail" aria-label="Primary navigation">
+          <a href="{% url 'home' %}" class="rail-logo" title="Home">S</a>
 
-    <nav class="navbar-links">
-      <a href="{% url 'monthly_calendar' year=today.year month=today.month %}">
-        Calendar
-      </a>
-
-      <a href="{% url 'suite_overview' year=today.year month=today.month day=today.day %}">
-        Today Overview
-      </a>
-
-      <a href="{% url 'daily_rota' year=today.year month=today.month day=today.day %}">
-        Assignments
-      </a>
-
-      {% if perms.rota.rota_viewer %}
-        <a href="{% url 'staff_search' %}">Staff Search</a>
-      {% endif %}
-
-      {% if perms.rota.rota_manager %}
-        <a href="{% url 'validation:validation_cards' %}">APS</a>
-      {% endif %}
-
-      {% if user.is_authenticated and user.is_superuser %}
-        <a href="{% url 'staff_list' %}">Staff</a>
-        <a href="/admin/">Admin</a>
-      {% endif %}
-    </nav>
-
-
-      <div class="navbar-right">
-        {% if user.is_authenticated %}
-          <span>{{ user.username }}</span>
-          <a class="btn-pill" href="{% url 'logout' %}">Logout</a>
-        {% else %}
-          <a class="btn-pill" href="{% url 'login' %}">Login</a>
-        {% endif %}
-      </div>
-    </header>
-
-    {# Optional simple messages bar #}
-    {% if messages %}
-      {% for message in messages %}
-        <div class="message {{ message.tags }}">{{ message }}</div>
-      {% endfor %}
-    {% endif %}
-
-    <main class="page-wrapper">
-      <div class="flash-messages">
-        {% if messages %}
-          {% for message in messages %}
-            <div
-              class="flash-message {% if message.tags == 'success' %}flash-success{% elif message.tags == 'error' %}flash-error{% endif %}"
+          {% if user.is_authenticated %}
+            <a
+              href="{% url 'suite_overview' year=today.year month=today.month day=today.day %}"
+              class="rail-item {% if url_name == 'suite_overview' %}is-active{% endif %}"
+              title="Suite overview"
             >
-              {{ message }}
-            </div>
-          {% endfor %}
-        {% endif %}
-      </div>
+              <svg class="sk-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="3" y="3" width="7" height="7" rx="1"></rect>
+                <rect x="14" y="3" width="7" height="7" rx="1"></rect>
+                <rect x="3" y="14" width="7" height="7" rx="1"></rect>
+                <rect x="14" y="14" width="7" height="7" rx="1"></rect>
+              </svg>
+            </a>
 
-      {% block content %}{% endblock %}
-    </main>
+            <a
+              href="{% url 'monthly_calendar' year=today.year month=today.month %}"
+              class="rail-item {% if url_name == 'monthly_calendar' %}is-active{% endif %}"
+              title="Calendar"
+            >
+              <svg class="sk-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="3" y="5" width="18" height="16" rx="2"></rect>
+                <path d="M3 9h18M8 3v4M16 3v4"></path>
+              </svg>
+            </a>
+
+            <a
+              href="{% url 'daily_rota' year=today.year month=today.month day=today.day %}"
+              class="rail-item {% if url_name == 'daily_rota' %}is-active{% endif %}"
+              title="Assignments"
+            >
+              <svg class="sk-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M8 6h13M8 12h13M8 18h13"></path>
+                <path d="M3.5 6h.01M3.5 12h.01M3.5 18h.01"></path>
+              </svg>
+            </a>
+
+            {% if perms.rota.rota_viewer %}
+              <a
+                href="{% url 'staff_search' %}"
+                class="rail-item {% if url_name == 'staff_search' %}is-active{% endif %}"
+                title="Staff search"
+              >
+                <svg class="sk-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <circle cx="9" cy="8" r="3.5"></circle>
+                  <path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"></path>
+                  <circle cx="17" cy="9" r="2.5"></circle>
+                  <path d="M21 19c0-2.5-2-4.5-4.5-4.5"></path>
+                </svg>
+              </a>
+            {% endif %}
+
+            {% if perms.rota.rota_manager %}
+              <a
+                href="{% url 'validation:validation_cards' %}"
+                class="rail-item {% if namespace == 'validation' %}is-active{% endif %}"
+                title="APS validations"
+              >
+                <svg class="sk-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M12 3l8 3v6c0 4.5-3.5 8.5-8 9-4.5-.5-8-4.5-8-9V6l8-3z"></path>
+                  <path d="m9 12 2 2 4-4"></path>
+                </svg>
+              </a>
+            {% endif %}
+
+            {% if user.is_superuser %}
+              <a
+                href="{% url 'staff_list' %}"
+                class="rail-item {% if url_name == 'staff_list' or url_name == 'staff_create' %}is-active{% endif %}"
+                title="Staff management"
+              >
+                <svg class="sk-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="9" cy="7" r="4"></circle>
+                  <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+              </a>
+            {% endif %}
+          {% endif %}
+
+          <div class="rail-spacer"></div>
+
+          {% if user.is_authenticated %}
+            {% if user.is_superuser %}
+              <a href="/admin/" class="rail-item" title="Django admin">
+                <svg class="sk-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <circle cx="12" cy="12" r="3"></circle>
+                  <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"></path>
+                </svg>
+              </a>
+            {% endif %}
+            <div class="rail-avatar" title="{{ user.username }}">{{ user.username|initials }}</div>
+          {% else %}
+            <a href="{% url 'login' %}" class="rail-avatar" title="Login">in</a>
+          {% endif %}
+        </aside>
+
+        <div class="main">
+          <header class="topbar">
+            <div class="topbar-left">
+              <div class="crumbs">
+                Skedaddle <span aria-hidden="true">/</span>
+                <strong>{% block topbar_title %}Rota{% endblock %}</strong>
+                {% block topbar_context %}{% endblock %}
+              </div>
+            </div>
+
+            <div class="topbar-right">
+              {% if user.is_authenticated and perms.rota.rota_viewer %}
+                <form class="search" method="get" action="{% url 'staff_search' %}">
+                  <span class="search-icon">
+                    <svg class="sk-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <circle cx="11" cy="11" r="7"></circle>
+                      <path d="m20 20-3.5-3.5"></path>
+                    </svg>
+                  </span>
+                  <input name="q" type="search" placeholder="Find staff..." value="{{ query|default:'' }}">
+                </form>
+              {% endif %}
+
+              {% block topbar_actions %}{% endblock %}
+
+              {% if user.is_authenticated %}
+                <span class="topbar-meta">{{ user.username }}</span>
+                <a class="btn btn-outline" href="{% url 'logout' %}">Logout</a>
+              {% else %}
+                <a class="btn btn-primary" href="{% url 'login' %}">Login</a>
+              {% endif %}
+            </div>
+          </header>
+
+          <main class="content">
+            {% if messages %}
+              <div class="message-stack">
+                {% for message in messages %}
+                  <div class="message {{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+              </div>
+            {% endif %}
+
+            {% block content %}{% endblock %}
+          </main>
+        </div>
+      </div>
+    {% endwith %}
 
     <script>
       (function () {
@@ -99,31 +179,27 @@
           document.documentElement.classList.remove("overflow-hidden");
         }
 
-        // Open: any element with data-open-modal="modal-id"
-        document.addEventListener("click", (e) => {
-          const opener = e.target.closest("[data-open-modal]");
+        document.addEventListener("click", (event) => {
+          const opener = event.target.closest("[data-open-modal]");
           if (opener) {
-            e.preventDefault();
+            event.preventDefault();
             openModal(opener.getAttribute("data-open-modal"));
             return;
           }
 
-          // Close: click anything with data-close-modal inside a modal
-          const closer = e.target.closest("[data-close-modal]");
+          const closer = event.target.closest("[data-close-modal]");
           if (closer) {
-            const modal = e.target.closest(".fixed.inset-0.z-50");
+            const modal = event.target.closest(".fixed.inset-0.z-50, .sk-modal-root");
             if (modal) closeModal(modal);
           }
         });
 
-        // Close on Escape
-        document.addEventListener("keydown", (e) => {
-          if (e.key !== "Escape") return;
-          const openModalEl = document.querySelector(".fixed.inset-0.z-50:not(.hidden)");
-          if (openModalEl) closeModal(openModalEl);
+        document.addEventListener("keydown", (event) => {
+          if (event.key !== "Escape") return;
+          const modal = document.querySelector(".fixed.inset-0.z-50:not(.hidden), .sk-modal-root:not(.hidden)");
+          if (modal) closeModal(modal);
         });
       })();
     </script>
-
   </body>
 </html>

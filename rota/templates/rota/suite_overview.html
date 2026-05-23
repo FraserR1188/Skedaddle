@@ -1,429 +1,528 @@
 {% extends "rota/base.html" %}
+{% load common_extras %}
 
-{% block title %}Suite Overview – {{ date }}{% endblock %}
+{% block title %}Suite Overview - {{ date }}{% endblock %}
+{% block topbar_title %}Suite Overview{% endblock %}
+{% block topbar_context %} <span aria-hidden="true">/</span> {{ date|date:"D j M Y" }}{% endblock %}
+
+{% block topbar_actions %}
+  <div class="date-pager" aria-label="Date navigation">
+    <a href="{% url 'suite_overview' prev_date.year prev_date.month prev_date.day %}" title="Previous day">
+      <svg class="sk-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="m15 6-6 6 6 6"></path>
+      </svg>
+    </a>
+    <div class="date-main">
+      <div class="date-day">{{ date|date:"l" }} &middot; {{ rotaday.get_status_display }}</div>
+      <div class="date-full">{{ date|date:"j M Y" }}</div>
+    </div>
+    <a href="{% url 'suite_overview' next_date.year next_date.month next_date.day %}" title="Next day">
+      <svg class="sk-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="m9 6 6 6-6 6"></path>
+      </svg>
+    </a>
+  </div>
+{% endblock %}
 
 {% block content %}
-<div class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-
-  <!-- HEADER -->
-  <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+<div class="sk-page is-wide">
+  <div class="sk-page-head">
     <div>
-      <p class="text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">
-        Skedaddle Control Board
-      </p>
-      <h1 class="mt-1 text-2xl sm:text-3xl font-bold tracking-tight text-white">
-        Suite Overview – {{ date }}
-      </h1>
-      <p class="mt-1 text-sm text-slate-300">
-        Whole-suite AM/PM staffing status, cleanroom cover, work-area cover, and exceptions.
+      <p class="eyebrow">Skedaddle Control Board</p>
+      <h1 class="sk-title">Suite Overview</h1>
+      <p class="sk-subtitle">
+        Whole-suite AM/PM staffing status, cleanroom cover, operational work-area cover, publish state, and audit activity.
       </p>
     </div>
 
-    <div class="flex flex-col sm:flex-row gap-2">
-      <a
-        href="{% url 'monthly_calendar' date.year date.month %}"
-        class="inline-flex items-center justify-center rounded-xl bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm ring-1 ring-slate-300 hover:bg-slate-100 transition"
-      >
-        ← Back to Month
-      </a>
-
-      <a
-        href="{% url 'daily_rota' date.year date.month date.day %}"
-        class="inline-flex items-center justify-center rounded-xl bg-sky-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-sky-700 transition"
-      >
-        Open Daily Rota
-      </a>
+    <div class="sk-actions">
+      <a class="btn btn-outline" href="{% url 'monthly_calendar' date.year date.month %}">Back to Month</a>
+      <a class="btn btn-primary" href="{% url 'daily_rota' date.year date.month date.day %}">Open Assignments</a>
     </div>
   </div>
 
-  <!-- PUBLICATION STATUS -->
-  <div class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-300">
-    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-      <div class="flex items-start gap-3">
-        {% if rotaday.status == "PUBLISHED" %}
-          <span class="mt-1 h-3 w-3 rounded-full bg-emerald-500"></span>
-          <div>
-            <p class="font-semibold text-slate-900">
-              Published v{{ rotaday.publish_version }}
-            </p>
-            <p class="text-sm text-slate-600">
-              {% if rotaday.published_at %}Published at {{ rotaday.published_at }}{% endif %}
-              {% if rotaday.published_by %} by {{ rotaday.published_by }}{% endif %}
-            </p>
-          </div>
-        {% else %}
-          <span class="mt-1 h-3 w-3 rounded-full bg-amber-500"></span>
-          <div>
-            <p class="font-semibold text-slate-900">
-              Draft — not published
-            </p>
-            <p class="text-sm text-slate-600">
-              Changes are saved, but staff will not be notified until the rota is published.
-            </p>
-          </div>
-        {% endif %}
+  <div class="status-bar">
+    <div class="stat">
+      <div class="stat-label">Suite status</div>
+      <div class="stat-value">
+        <span class="rag rag-{{ overview.suite_summary.suite_status|status_key }}">
+          <span class="rag-glyph">{{ overview.suite_summary.suite_status|status_glyph }}</span>
+          {{ overview.suite_summary.suite_status }}
+        </span>
       </div>
+      <div class="stat-meta">{{ overview.suite_summary.issue_count }} open issue{{ overview.suite_summary.issue_count|pluralize }}</div>
+    </div>
 
-      {% if user.is_superuser or perms.rota.rota_manager %}
-        <form method="post" action="{% url 'publish_rota_day' rotaday.id %}">
-          {% csrf_token %}
-          <button
-            type="submit"
-            class="inline-flex w-full md:w-auto items-center justify-center rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 transition"
-          >
-            {% if rotaday.status == "PUBLISHED" %}
-              Republish rota
-            {% else %}
-              Publish rota
-            {% endif %}
-          </button>
-        </form>
-      {% endif %}
+    <div class="stat">
+      <div class="stat-label">Assignments</div>
+      <div class="stat-value">{{ overview.suite_summary.total_assignments }}</div>
+      <div class="stat-meta">Total AM/PM assignment rows</div>
+    </div>
+
+    <div class="stat">
+      <div class="stat-label">Cleanrooms active</div>
+      <div class="stat-value">{{ overview.suite_summary.cleanrooms_active }}<span style="color: var(--ink-4)">/{{ overview.suite_summary.cleanrooms_total }}</span></div>
+      <div class="stat-meta">{{ overview.suite_summary.cleanrooms_green }} green room{{ overview.suite_summary.cleanrooms_green|pluralize }}</div>
+    </div>
+
+    <div class="stat">
+      <div class="stat-label">Isolator sections</div>
+      <div class="stat-value">{{ overview.suite_summary.isolator_slot_filled }}<span style="color: var(--ink-4)">/{{ overview.suite_summary.isolator_slot_total }}</span></div>
+      <div class="stat-meta">Section AM/PM slots with staff</div>
+    </div>
+
+    <div class="stat">
+      <div class="stat-label">Issues</div>
+      <div class="stat-value">{{ overview.suite_summary.issue_count }}</div>
+      <div class="stat-meta">{{ overview.suite_summary.red_issue_count }} red / {{ overview.suite_summary.amber_issue_count }} amber</div>
     </div>
   </div>
 
-  <!-- SUMMARY STRIP -->
-  <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4">
-
-    <div class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-300">
-      <p class="text-xs font-semibold uppercase tracking-wide text-slate-600">
-        Suite Status
-      </p>
-
-      <div class="mt-3 flex items-center gap-2">
-        {% if overview.suite_summary.suite_status == "Red" %}
-          <span class="h-3 w-3 rounded-full bg-rose-500"></span>
-          <span class="text-3xl font-bold text-rose-700">Red</span>
-        {% elif overview.suite_summary.suite_status == "Amber" %}
-          <span class="h-3 w-3 rounded-full bg-amber-500"></span>
-          <span class="text-3xl font-bold text-amber-700">Amber</span>
-        {% elif overview.suite_summary.suite_status == "Green" %}
-          <span class="h-3 w-3 rounded-full bg-emerald-500"></span>
-          <span class="text-3xl font-bold text-emerald-700">Green</span>
-        {% else %}
-          <span class="h-3 w-3 rounded-full bg-slate-500"></span>
-          <span class="text-3xl font-bold text-slate-700">Grey</span>
-        {% endif %}
+  <section class="canvas">
+    <div class="canvas-header">
+      <div>
+        <div class="canvas-title">Aseptic Suite floor plan</div>
+        <div class="canvas-sub">4 cleanrooms &middot; Operational Areas &middot; AM + PM &middot; click cleanroom tiles to open Daily Assignments</div>
+      </div>
+      <div class="legend" aria-label="Status legend">
+        <span><span class="dot dot-green"></span> covered</span>
+        <span><span class="dot dot-amber"></span> partial</span>
+        <span><span class="dot dot-red"></span> open</span>
+        <span><span class="dot dot-grey"></span> inactive</span>
       </div>
     </div>
 
-    <div class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-300">
-      <p class="text-xs font-semibold uppercase tracking-wide text-slate-600">
-        Assignments
-      </p>
-      <p class="mt-3 text-3xl font-bold text-slate-900">
-        {{ overview.suite_summary.total_assignments }}
-      </p>
-      <p class="mt-1 text-sm text-slate-600">Total AM/PM assignments</p>
-    </div>
+    <div class="fp-scroll">
+      <div class="fp">
+        <div class="fp-corridor">
+          <span>Exit Corridor</span>
+          <span>Suite circulation</span>
+        </div>
 
-    <div class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-300">
-      <p class="text-xs font-semibold uppercase tracking-wide text-slate-600">
-        Cleanrooms Active
-      </p>
-      <p class="mt-3 text-3xl font-bold text-slate-900">
-        {{ overview.suite_summary.cleanrooms_active }}/{{ overview.suite_summary.cleanrooms_total }}
-      </p>
-      <p class="mt-1 text-sm text-slate-600">Rooms with rota activity</p>
-    </div>
-
-    <div class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-300">
-      <p class="text-xs font-semibold uppercase tracking-wide text-slate-600">
-        Work Areas Covered
-      </p>
-      <p class="mt-3 text-3xl font-bold text-slate-900">
-        {{ overview.suite_summary.required_work_areas_covered }}/{{ overview.suite_summary.required_work_areas_total }}
-      </p>
-      <p class="mt-1 text-sm text-slate-600">Required areas fully staffed</p>
-    </div>
-
-    <div class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-300">
-      <p class="text-xs font-semibold uppercase tracking-wide text-slate-600">
-        Issues
-      </p>
-      <p class="mt-3 text-3xl font-bold text-slate-900">
-        {{ overview.suite_summary.issue_count }}
-      </p>
-      <p class="mt-1 text-sm text-slate-600">
-        {{ overview.suite_summary.red_issue_count }} red /
-        {{ overview.suite_summary.amber_issue_count }} amber
-      </p>
-    </div>
-
-  </div>
-
-  <!-- CLEANROOMS -->
-  <section class="space-y-4">
-    <div>
-      <h2 class="text-lg font-bold text-white">Cleanrooms & Isolators</h2>
-      <p class="mt-1 text-sm text-slate-300">
-        Supervisor cover and isolator activity by AM/PM block.
-      </p>
-    </div>
-
-    <div class="grid grid-cols-1 xl:grid-cols-2 gap-5">
-      {% for card in overview.cleanroom_cards %}
-        <article class="rounded-2xl bg-white shadow-sm ring-1 ring-slate-300 overflow-hidden">
-          <div class="flex items-start justify-between gap-4 border-b border-slate-200 p-5">
-            <div>
-              <h3 class="text-lg font-bold text-slate-900">
-                {{ card.room.name }}
-              </h3>
-              <p class="mt-1 text-sm text-slate-700">
-                AM operators: {{ card.am_operator_count }} /
-                PM operators: {{ card.pm_operator_count }}
-              </p>
-            </div>
-
-            {% if card.status == "Red" %}
-              <span class="rounded-full bg-rose-100 px-3 py-1 text-xs font-semibold text-rose-800 ring-1 ring-rose-300">Red</span>
-            {% elif card.status == "Amber" %}
-              <span class="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800 ring-1 ring-amber-300">Amber</span>
-            {% elif card.status == "Green" %}
-              <span class="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800 ring-1 ring-emerald-300">Green</span>
-            {% else %}
-              <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700 ring-1 ring-slate-300">Grey</span>
-            {% endif %}
-          </div>
-
-          <div class="p-5 space-y-4">
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div class="rounded-xl bg-slate-50 p-4 ring-1 ring-slate-300">
-                <p class="text-xs font-semibold uppercase tracking-wide text-slate-700">
-                  AM Supervisor
-                </p>
-                {% if card.supervisors_am %}
-                  <div class="mt-2 space-y-1">
-                    {% for assignment in card.supervisors_am %}
-                      <p class="text-sm font-medium text-slate-900">
-                        {{ assignment.staff.full_name }}
-                      </p>
-                    {% endfor %}
-                  </div>
-                {% else %}
-                  <p class="mt-2 text-sm text-slate-600">None assigned</p>
-                {% endif %}
-              </div>
-
-              <div class="rounded-xl bg-slate-50 p-4 ring-1 ring-slate-300">
-                <p class="text-xs font-semibold uppercase tracking-wide text-slate-700">
-                  PM Supervisor
-                </p>
-                {% if card.supervisors_pm %}
-                  <div class="mt-2 space-y-1">
-                    {% for assignment in card.supervisors_pm %}
-                      <p class="text-sm font-medium text-slate-900">
-                        {{ assignment.staff.full_name }}
-                      </p>
-                    {% endfor %}
-                  </div>
-                {% else %}
-                  <p class="mt-2 text-sm text-slate-600">None assigned</p>
-                {% endif %}
-              </div>
-            </div>
-
-            <div class="space-y-2">
-              {% for iso_card in card.isolators %}
-                <div class="rounded-xl bg-slate-50 p-3 ring-1 ring-slate-300">
-                  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                    <div>
-                      <p class="text-sm font-semibold text-slate-900">
-                        {{ iso_card.isolator.name }}
-                      </p>
-                      <p class="text-xs text-slate-700">
-                        AM {{ iso_card.am_count }}/{{ iso_card.capacity }}
-                        · PM {{ iso_card.pm_count }}/{{ iso_card.capacity }}
-                      </p>
-                    </div>
-
-                    {% if iso_card.status == "Red" %}
-                      <span class="rounded-full bg-rose-100 px-2.5 py-1 text-xs font-semibold text-rose-800 ring-1 ring-rose-300">Red</span>
-                    {% elif iso_card.status == "Amber" %}
-                      <span class="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-800 ring-1 ring-amber-300">Amber</span>
-                    {% elif iso_card.status == "Green" %}
-                      <span class="rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-800 ring-1 ring-emerald-300">Green</span>
-                    {% else %}
-                      <span class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700 ring-1 ring-slate-300">Grey</span>
-                    {% endif %}
-                  </div>
-                </div>
-              {% endfor %}
-            </div>
-
-            <div class="pt-2">
-              <a
-                href="{% url 'daily_rota' date.year date.month date.day %}"
-                class="inline-flex w-full items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 transition"
-              >
-                Manage Cleanroom Assignments
-              </a>
-            </div>
-
-          </div>
-        </article>
-      {% endfor %}
-    </div>
-  </section>
-
-  <!-- WORK AREAS -->
-  <section class="space-y-4">
-    <div>
-      <h2 class="text-lg font-bold text-white">Operational Areas</h2>
-      <p class="mt-1 text-sm text-slate-300">
-        MAL, support rooms, visual inspection, and overlabelling coverage.
-      </p>
-    </div>
-
-    <div class="rounded-2xl bg-white shadow-sm ring-1 ring-slate-300 overflow-hidden">
-      <div class="overflow-x-auto">
-        <table class="min-w-full table-fixed divide-y divide-slate-200">
-          <thead class="bg-slate-100">
-            <tr>
-              <th class="w-28 px-3 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-slate-700">Status</th>
-              <th class="w-56 px-3 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-slate-700">Area</th>
-              <th class="w-36 px-3 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-slate-700">Cover</th>
-              <th class="px-3 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-slate-700">Assigned Staff</th>
-            </tr>
-          </thead>
-
-          <tbody class="divide-y divide-slate-200 bg-white">
-            {% for card in overview.work_area_cards %}
-              <tr class="align-top hover:bg-slate-50 transition">
-                <td class="px-3 py-3">
-                  {% if card.status == "Red" %}
-                    <span class="inline-flex items-center rounded-full bg-rose-100 px-3 py-1 text-sm font-semibold text-rose-800 ring-1 ring-rose-300">Red</span>
-                  {% elif card.status == "Amber" %}
-                    <span class="inline-flex items-center rounded-full bg-amber-100 px-3 py-1 text-sm font-semibold text-amber-800 ring-1 ring-amber-300">Amber</span>
-                  {% elif card.status == "Green" %}
-                    <span class="inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-sm font-semibold text-emerald-800 ring-1 ring-emerald-300">Green</span>
-                  {% else %}
-                    <span class="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-sm font-semibold text-slate-700 ring-1 ring-slate-300">Grey</span>
-                  {% endif %}
-                </td>
-
-                <td class="px-3 py-3">
-                  <p class="text-sm font-semibold text-slate-900">
-                    {{ card.area.name }}
-                  </p>
-                  <p class="text-xs text-slate-600">
-                    {{ card.area.get_area_type_display }}
-                  </p>
-                </td>
-
-                <td class="px-3 py-3">
-                  <div class="space-y-1.5 text-sm">
-                    <p class="font-semibold text-slate-900">
-                      AM {{ card.am_count }}{% if card.required_am %}/{{ card.required_am }}{% endif %}
-                    </p>
-                    {% if not card.required_am %}
-                      <p class="text-xs text-slate-400">No AM target</p>
-                    {% endif %}
-                    <p class="font-semibold text-slate-900">
-                      PM {{ card.pm_count }}{% if card.required_pm %}/{{ card.required_pm }}{% endif %}
-                    </p>
-                    {% if not card.required_pm %}
-                      <p class="text-xs text-slate-400">No PM target</p>
-                    {% endif %}
-                  </div>
-                </td>
-
-                <td class="px-3 py-3">
-                  <div class="space-y-2">
-                    <div class="flex flex-wrap items-center gap-2">
-                      <span class="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-slate-600 ring-1 ring-slate-200">AM</span>
-                      {% if card.am_assignments %}
-                        {% for assignment in card.am_assignments %}
-                          <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-800 ring-1 ring-slate-200">
-                            {{ assignment.staff.full_name }}
-                          </span>
-                        {% endfor %}
-                      {% else %}
-                        <span class="text-sm text-slate-500">No AM staff</span>
-                      {% endif %}
-                    </div>
-
-                    <div class="flex flex-wrap items-center gap-2">
-                      <span class="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-slate-600 ring-1 ring-slate-200">PM</span>
-                      {% if card.pm_assignments %}
-                        {% for assignment in card.pm_assignments %}
-                          <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-800 ring-1 ring-slate-200">
-                            {{ assignment.staff.full_name }}
-                          </span>
-                        {% endfor %}
-                      {% else %}
-                        <span class="text-sm text-slate-500">No PM staff</span>
-                      {% endif %}
-                    </div>
-                  </div>
-                </td>
-              </tr>
-            {% empty %}
-              <tr>
-                <td colspan="4" class="px-4 py-6 text-center text-sm text-slate-500">
-                  No operational work areas have been configured yet.
-                </td>
-              </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </section>
-
-  <!-- NEEDS ATTENTION -->
-  <section class="rounded-2xl bg-white shadow-sm ring-1 ring-slate-300 overflow-hidden">
-    <div class="border-b border-slate-200 p-5">
-      <h2 class="text-lg font-bold text-slate-900">Needs Attention</h2>
-      <p class="mt-1 text-sm text-slate-600">
-        Exceptions generated from staffing and coverage rules.
-      </p>
-    </div>
-
-    <div class="p-5">
-      {% if overview.issues %}
-        <div class="space-y-3">
-          {% for issue in overview.issues %}
-            <div
-              class="rounded-xl p-4 ring-1
-              {% if issue.severity == 'Red' %}
-                bg-rose-50 ring-rose-300 text-rose-900
-              {% elif issue.severity == 'Amber' %}
-                bg-amber-50 ring-amber-300 text-amber-900
+        <div class="fp-body">
+          <div class="fp-mal-col">
+            {% for area_card in overview.floorplan.mal_cards %}
+              {% if user.is_superuser or perms.rota.rota_manager %}
+                <a class="fp-area fp-area-mal" href="{% url 'work_area_assignment' date.year date.month date.day area_card.area.id %}">
               {% else %}
-                bg-slate-50 ring-slate-300 text-slate-800
-              {% endif %}"
-            >
-              <div class="flex items-start gap-3">
-                {% if issue.severity == "Red" %}
-                  <span class="mt-1.5 h-2.5 w-2.5 rounded-full bg-rose-500"></span>
-                {% elif issue.severity == "Amber" %}
-                  <span class="mt-1.5 h-2.5 w-2.5 rounded-full bg-amber-500"></span>
-                {% else %}
-                  <span class="mt-1.5 h-2.5 w-2.5 rounded-full bg-slate-500"></span>
-                {% endif %}
-
-                <div>
-                  <p class="text-sm font-semibold">
-                    {{ issue.severity }}
-                  </p>
-                  <p class="text-sm">
-                    {{ issue.message }}
-                  </p>
+                <div class="fp-area fp-area-mal">
+              {% endif %}
+                  <div class="fp-area-head">
+                    <span class="fp-area-name">{{ area_card.area.name }}</span>
+                    <span class="dot dot-{{ area_card.status|status_key }}"></span>
+                  </div>
+                  <div class="fp-area-stats">
+                    <div class="fp-area-stat">
+                      <div class="fp-area-stat-row">
+                        <span>AM</span>
+                        <span>{{ area_card.am_count }}/{{ area_card.required_am }}</span>
+                      </div>
+                      <div class="area-bar {% if area_card.status == 'Red' %}red{% elif area_card.status == 'Amber' %}amber{% endif %}">
+                        <span style="width: {% if area_card.am_count >= area_card.required_am %}100{% elif area_card.am_count %}55{% else %}6{% endif %}%"></span>
+                      </div>
+                    </div>
+                    <div class="fp-area-stat">
+                      <div class="fp-area-stat-row">
+                        <span>PM</span>
+                        <span>{{ area_card.pm_count }}/{{ area_card.required_pm }}</span>
+                      </div>
+                      <div class="area-bar {% if area_card.status == 'Red' %}red{% elif area_card.status == 'Amber' %}amber{% endif %}">
+                        <span style="width: {% if area_card.pm_count >= area_card.required_pm %}100{% elif area_card.pm_count %}55{% else %}6{% endif %}%"></span>
+                      </div>
+                    </div>
+                  </div>
+              {% if user.is_superuser or perms.rota.rota_manager %}
+                </a>
+              {% else %}
                 </div>
+              {% endif %}
+            {% empty %}
+              <div class="fp-area">
+                <div class="fp-area-head">
+                  <span class="fp-area-name">No MAL areas</span>
+                  <span class="dot dot-grey"></span>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+
+          <div class="fp-rooms">
+            {% for column in overview.floorplan.columns reversed %}
+              <div class="fp-col">
+                {% with area_card=column.visual_area_card %}
+                  {% if area_card %}
+                    {% if user.is_superuser or perms.rota.rota_manager %}
+                      <a class="fp-area fp-area-vi" href="{% url 'work_area_assignment' date.year date.month date.day area_card.area.id %}">
+                    {% else %}
+                      <div class="fp-area fp-area-vi">
+                    {% endif %}
+                        <div class="fp-area-head">
+                          <span class="fp-area-name">{{ area_card.area.name }}</span>
+                          <span class="dot dot-{{ area_card.status|status_key }}"></span>
+                        </div>
+                        <div class="fp-area-stats">
+                          <div class="fp-area-stat-row"><span>AM</span><span>{{ area_card.am_count }}/{{ area_card.required_am }}</span></div>
+                          <div class="fp-area-stat-row"><span>PM</span><span>{{ area_card.pm_count }}/{{ area_card.required_pm }}</span></div>
+                        </div>
+                    {% if user.is_superuser or perms.rota.rota_manager %}
+                      </a>
+                    {% else %}
+                      </div>
+                    {% endif %}
+                  {% else %}
+                    <div class="fp-area"><div class="fp-area-head"><span class="fp-area-name">Visual Inspection</span><span class="dot dot-grey"></span></div></div>
+                  {% endif %}
+                {% endwith %}
+
+                <div class="fp-cleanroom">
+                  <div class="fp-cleanroom-head">
+                    <div class="fp-cleanroom-title">
+                      <span class="fp-cleanroom-num">{{ column.room_card.room.number }}</span>
+                      <div>
+                        <div class="fp-cleanroom-name">{{ column.room_card.room.name }}</div>
+                        <div class="fp-cleanroom-meta">AM {{ column.room_card.am_operator_count }} &middot; PM {{ column.room_card.pm_operator_count }}</div>
+                      </div>
+                    </div>
+                    <span class="rag rag-{{ column.room_card.status|status_key }}">
+                      <span class="rag-glyph">{{ column.room_card.status|status_glyph }}</span>
+                      Sup
+                    </span>
+                  </div>
+
+                  {% if user.is_superuser or perms.rota.rota_manager and column.supervisor_edit_isolator_id %}
+                    <a
+                      class="fp-sup-strip fp-sup-link"
+                      href="{% url 'daily_rota' date.year date.month date.day %}?edit_isolator={{ column.supervisor_edit_isolator_id }}"
+                      title="Manage {{ column.room_card.room.name }} supervisors in Daily Assignments"
+                    >
+                  {% else %}
+                    <div class="fp-sup-strip">
+                  {% endif %}
+                    <div class="fp-sup-row">
+                      <span class="fp-sup-shift">AM</span>
+                      <span class="fp-sup-label">Sup</span>
+                      {% if column.room_card.supervisors_am %}
+                        {% for assignment in column.room_card.supervisors_am %}
+                          <span class="sup-chip">{{ assignment.staff.full_name }}</span>
+                        {% endfor %}
+                      {% else %}
+                        <span class="fp-sup-empty">unassigned</span>
+                      {% endif %}
+                    </div>
+                    <div class="fp-sup-row">
+                      <span class="fp-sup-shift">PM</span>
+                      <span class="fp-sup-label">Sup</span>
+                      {% if column.room_card.supervisors_pm %}
+                        {% for assignment in column.room_card.supervisors_pm %}
+                          <span class="sup-chip">{{ assignment.staff.full_name }}</span>
+                        {% endfor %}
+                      {% else %}
+                        <span class="fp-sup-empty">unassigned</span>
+                      {% endif %}
+                    </div>
+                    {% if user.is_superuser or perms.rota.rota_manager and column.supervisor_edit_isolator_id %}
+                      <span class="fp-sup-manage">Manage supervisors</span>
+                    {% endif %}
+                  {% if user.is_superuser or perms.rota.rota_manager and column.supervisor_edit_isolator_id %}
+                    </a>
+                  {% else %}
+                  </div>
+                  {% endif %}
+
+                  <div class="fp-room-grid fp-room-{{ column.layout }}">
+                    <div class="fp-rwall">
+                      <span class="fp-rwall-label">L Wall</span>
+                      <div class="fp-rwall-isos">
+                        {% for iso_card in column.left_wall %}
+                          <a class="iso-s" href="{% url 'daily_rota' date.year date.month date.day %}" title="Open Daily Assignments for {{ iso_card.isolator.name }}">
+                            <div class="iso-s-head">
+                              <span class="iso-s-name">{{ iso_card.isolator.name }}</span>
+                              <span class="iso-s-cap">AM {{ iso_card.am_count }} &middot; PM {{ iso_card.pm_count }}</span>
+                            </div>
+                            <div class="iso-s-cells">
+                              {% for section_card in iso_card.sections %}
+                                <span class="iso-cell {% if section_card.am_count and section_card.pm_count %}is-filled{% elif section_card.am_count or section_card.pm_count %}is-partial{% else %}is-empty{% endif %}">
+                                  <span class="iso-cell-shift">{{ section_card.section.section }} AM</span>
+                                  <span class="iso-cell-name">{% if section_card.am_assignments %}{{ section_card.am_assignments|staff_names }}{% else %}open{% endif %}</span>
+                                </span>
+                                <span class="iso-cell {% if section_card.pm_count %}is-filled{% else %}is-empty{% endif %}">
+                                  <span class="iso-cell-shift">{{ section_card.section.section }} PM</span>
+                                  <span class="iso-cell-name">{% if section_card.pm_assignments %}{{ section_card.pm_assignments|staff_names }}{% else %}open{% endif %}</span>
+                                </span>
+                              {% empty %}
+                                <span class="iso-cell is-empty">
+                                  <span class="iso-cell-shift">APS</span>
+                                  <span class="iso-cell-name">no active sections</span>
+                                </span>
+                              {% endfor %}
+                            </div>
+                          </a>
+                        {% empty %}
+                          <div class="iso-s">
+                            <div class="iso-s-head"><span class="iso-s-name">No isolators</span></div>
+                          </div>
+                        {% endfor %}
+                      </div>
+                    </div>
+
+                    <div class="fp-room-floor">
+                      <span class="fp-room-floor-label">Operating Floor</span>
+                    </div>
+
+                    {% if column.right_wall %}
+                      <div class="fp-rwall">
+                        <span class="fp-rwall-label">R Wall</span>
+                        <div class="fp-rwall-isos">
+                          {% for iso_card in column.right_wall %}
+                            <a class="iso-s" href="{% url 'daily_rota' date.year date.month date.day %}" title="Open Daily Assignments for {{ iso_card.isolator.name }}">
+                              <div class="iso-s-head">
+                                <span class="iso-s-name">{{ iso_card.isolator.name }}</span>
+                                <span class="iso-s-cap">AM {{ iso_card.am_count }} &middot; PM {{ iso_card.pm_count }}</span>
+                              </div>
+                              <div class="iso-s-cells">
+                                {% for section_card in iso_card.sections %}
+                                  <span class="iso-cell {% if section_card.am_count and section_card.pm_count %}is-filled{% elif section_card.am_count or section_card.pm_count %}is-partial{% else %}is-empty{% endif %}">
+                                    <span class="iso-cell-shift">{{ section_card.section.section }} AM</span>
+                                    <span class="iso-cell-name">{% if section_card.am_assignments %}{{ section_card.am_assignments|staff_names }}{% else %}open{% endif %}</span>
+                                  </span>
+                                  <span class="iso-cell {% if section_card.pm_count %}is-filled{% else %}is-empty{% endif %}">
+                                    <span class="iso-cell-shift">{{ section_card.section.section }} PM</span>
+                                    <span class="iso-cell-name">{% if section_card.pm_assignments %}{{ section_card.pm_assignments|staff_names }}{% else %}open{% endif %}</span>
+                                  </span>
+                                {% empty %}
+                                  <span class="iso-cell is-empty">
+                                    <span class="iso-cell-shift">APS</span>
+                                    <span class="iso-cell-name">no active sections</span>
+                                  </span>
+                                {% endfor %}
+                              </div>
+                            </a>
+                          {% endfor %}
+                        </div>
+                      </div>
+                    {% endif %}
+                  </div>
+                </div>
+
+                {% with area_card=column.support_area_card %}
+                  {% if area_card %}
+                    {% if user.is_superuser or perms.rota.rota_manager %}
+                      <a class="fp-area fp-area-support" href="{% url 'work_area_assignment' date.year date.month date.day area_card.area.id %}">
+                    {% else %}
+                      <div class="fp-area fp-area-support">
+                    {% endif %}
+                        <div class="fp-area-head">
+                          <span class="fp-area-name">{{ area_card.area.name }}</span>
+                          <span class="dot dot-{{ area_card.status|status_key }}"></span>
+                        </div>
+                        <div class="fp-area-stats">
+                          <div class="fp-area-stat-row"><span>AM</span><span>{{ area_card.am_count }}/{{ area_card.required_am }}</span></div>
+                          <div class="fp-area-stat-row"><span>PM</span><span>{{ area_card.pm_count }}/{{ area_card.required_pm }}</span></div>
+                        </div>
+                    {% if user.is_superuser or perms.rota.rota_manager %}
+                      </a>
+                    {% else %}
+                      </div>
+                    {% endif %}
+                  {% else %}
+                    <div class="fp-area"><div class="fp-area-head"><span class="fp-area-name">Support Room</span><span class="dot dot-grey"></span></div></div>
+                  {% endif %}
+                {% endwith %}
+              </div>
+
+              {% if not forloop.last %}
+                <div class="fp-pal" aria-label="PAL chamber">
+                  <div class="fp-pal-chip">PAL</div>
+                  <div class="fp-pal-wall"></div>
+                  <div class="fp-pal-chip">PAL</div>
+                </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+
+          <div class="fp-right-col">
+            <div class="fp-aux"><span class="fp-aux-label">Corridor Store</span><span class="fp-aux-meta">5 m2</span></div>
+            <div class="fp-aux"><span class="fp-aux-label">Operations Office</span><span class="fp-aux-meta">27 m2</span></div>
+            <div class="fp-aux"><span class="fp-aux-label">Training Suite</span><span class="fp-aux-meta">17 m2</span></div>
+            <div class="fp-aux"><span class="fp-aux-label">Airlock</span><span class="fp-aux-meta">15 m2</span></div>
+          </div>
+        </div>
+
+        <div class="fp-corridor">
+          <span>Circulation &middot; Exit Corridor</span>
+          <span>35 m2</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="content-deck-row">
+    <section class="card publish {% if rotaday.status == 'PUBLISHED' %}is-published{% endif %}">
+      <div class="card-head">
+        <div>
+          <div class="card-title">
+            {% if rotaday.status == "PUBLISHED" %}Published v{{ rotaday.publish_version }}{% else %}Draft rota{% endif %}
+          </div>
+          <div class="card-sub">
+            {% if rotaday.published_at %}{{ rotaday.published_at }}{% else %}Not yet sent to staff{% endif %}
+          </div>
+        </div>
+        <span class="dot {% if rotaday.status == 'PUBLISHED' %}dot-green{% else %}dot-amber{% endif %}"></span>
+      </div>
+
+      <div class="card-body">
+        <div class="publish-checks">
+          <div class="check {% if overview.suite_summary.red_issue_count == 0 %}check-pass{% else %}check-fail{% endif %}">
+            <span class="check-icon">{% if overview.suite_summary.red_issue_count == 0 %}ok{% else %}x{% endif %}</span>
+            <span>No red coverage gaps</span>
+            <span class="check-count">{{ overview.suite_summary.red_issue_count }} red</span>
+          </div>
+          <div class="check {% if overview.suite_summary.amber_issue_count == 0 %}check-pass{% else %}check-warn{% endif %}">
+            <span class="check-icon">{% if overview.suite_summary.amber_issue_count == 0 %}ok{% else %}!{% endif %}</span>
+            <span>Amber warnings visible</span>
+            <span class="check-count">{{ overview.suite_summary.amber_issue_count }} amber</span>
+          </div>
+          <div class="check check-pass">
+            <span class="check-icon">ok</span>
+            <span>APS validation enforced</span>
+            <span class="check-count">backend</span>
+          </div>
+          <div class="check {% if overview.suite_summary.total_assignments %}check-pass{% else %}check-warn{% endif %}">
+            <span class="check-icon">{% if overview.suite_summary.total_assignments %}ok{% else %}!{% endif %}</span>
+            <span>At least one assignment</span>
+            <span class="check-count">{{ overview.suite_summary.total_assignments }}</span>
+          </div>
+        </div>
+
+        {% if user.is_superuser or perms.rota.rota_manager %}
+          <form method="post" action="{% url 'publish_rota_day' rotaday.id %}">
+            {% csrf_token %}
+            {% if rotaday.status == "PUBLISHED" %}
+              <textarea class="publish-reason" name="reason" rows="2" placeholder="Reason for republishing (optional)"></textarea>
+            {% endif %}
+            <button type="submit" class="btn btn-publish" style="width: 100%;">
+              {% if rotaday.status == "PUBLISHED" %}Republish and notify{% else %}Publish rota{% endif %}
+            </button>
+          </form>
+        {% else %}
+          <p class="empty-copy">You have view-only access to publishing controls.</p>
+        {% endif %}
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-head">
+        <div>
+          <div class="card-title">Needs Attention</div>
+          <div class="card-sub">{{ overview.suite_summary.issue_count }} issue{{ overview.suite_summary.issue_count|pluralize }}</div>
+        </div>
+        {% if overview.suite_summary.red_issue_count %}
+          <span class="rag rag-red"><span class="rag-glyph">x</span>{{ overview.suite_summary.red_issue_count }}</span>
+        {% endif %}
+      </div>
+
+      <div class="issues">
+        {% if overview.issues %}
+          {% for issue in overview.issues|slice:":8" %}
+            <div class="issue issue-{{ issue.severity|status_key }}">
+              <div class="issue-icon">{{ issue.severity|status_glyph }}</div>
+              <div>
+                <div class="issue-msg">{{ issue.message }}</div>
+                {% if issue.source %}<div class="issue-loc">{{ issue.source }}</div>{% endif %}
               </div>
             </div>
           {% endfor %}
+          {% if overview.issues|length > 8 %}
+            <div class="card-body empty-copy">+ {{ overview.issues|length|add:"-8" }} more</div>
+          {% endif %}
+        {% else %}
+          <div class="card-body">
+            <span class="rag rag-green"><span class="rag-glyph">ok</span>all clear</span>
+            <p class="sk-panel-sub">No staffing exceptions detected.</p>
+          </div>
+        {% endif %}
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-head">
+        <div>
+          <div class="card-title">Change log</div>
+          <div class="card-sub">latest first &middot; audit trail</div>
         </div>
-      {% else %}
-        <div class="rounded-xl bg-emerald-50 p-4 ring-1 ring-emerald-300 text-emerald-900">
-          <p class="text-sm font-semibold">No issues detected.</p>
-          <p class="mt-1 text-sm">The suite overview has not detected any staffing exceptions.</p>
-        </div>
-      {% endif %}
+        <span class="rag rag-grey"><span class="rag-glyph">-</span>{{ rotaday.audit_events.count }}</span>
+      </div>
+
+      <div class="activity">
+        {% for event in rotaday.audit_events.all|slice:":8" %}
+          <div class="activity-row">
+            <span class="activity-time">{{ event.timestamp|date:"H:i" }}</span>
+            <div class="activity-text">
+              {{ event.summary }}
+              {% if event.actor %}<strong> &middot; {{ event.actor }}</strong>{% endif %}
+            </div>
+          </div>
+        {% empty %}
+          <div class="card-body empty-copy">No changes logged yet.</div>
+        {% endfor %}
+      </div>
+    </section>
+  </div>
+
+  <section class="sk-panel">
+    <div class="sk-panel-head">
+      <div>
+        <h2 class="sk-panel-title">Operational Areas</h2>
+        <p class="sk-panel-sub">MAL, support rooms, visual inspection, and overlabelling coverage by AM/PM block.</p>
+      </div>
+    </div>
+    <div class="sk-panel-body">
+      <div class="area-deck">
+        {% for area_card in overview.work_area_cards %}
+          <article class="area-tile">
+            <div class="area-tile-head">
+              <div>
+                <div class="area-tile-name">{{ area_card.area.name }}</div>
+                <div class="area-tile-type">{{ area_card.area.get_area_type_display }}</div>
+              </div>
+              <span class="rag rag-{{ area_card.status|status_key }}">
+                <span class="rag-glyph">{{ area_card.status|status_glyph }}</span>
+                {{ area_card.status }}
+              </span>
+            </div>
+
+            <div class="shift-summaries">
+              <div class="shift-summary">
+                <div class="shift-summary-head"><span>AM</span><span>{{ area_card.am_count }}{% if area_card.required_am %}/{{ area_card.required_am }}{% endif %}</span></div>
+                <div class="name-pills">
+                  {% for assignment in area_card.am_assignments %}
+                    <span class="name-pill">{{ assignment.staff.full_name }}</span>
+                  {% empty %}
+                    <span class="empty-copy">No AM staff</span>
+                  {% endfor %}
+                </div>
+              </div>
+              <div class="shift-summary">
+                <div class="shift-summary-head"><span>PM</span><span>{{ area_card.pm_count }}{% if area_card.required_pm %}/{{ area_card.required_pm }}{% endif %}</span></div>
+                <div class="name-pills">
+                  {% for assignment in area_card.pm_assignments %}
+                    <span class="name-pill">{{ assignment.staff.full_name }}</span>
+                  {% empty %}
+                    <span class="empty-copy">No PM staff</span>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+
+            {% if user.is_superuser or perms.rota.rota_manager %}
+              <a class="btn btn-outline" href="{% url 'work_area_assignment' date.year date.month date.day area_card.area.id %}">Manage Area</a>
+            {% endif %}
+          </article>
+        {% empty %}
+          <p class="empty-copy">No operational work areas have been configured yet.</p>
+        {% endfor %}
+      </div>
     </div>
   </section>
-
 </div>
 {% endblock content %}

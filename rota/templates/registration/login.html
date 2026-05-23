@@ -1,140 +1,56 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Sign in | Skedaddle</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+{% extends "rota/base.html" %}
 
-    <!-- Tailwind -->
-    <link rel="stylesheet" href="{% static 'rota/css/tailwind.css' %}" />
-    <!-- Optional: keep if you still use it elsewhere -->
-    <link rel="stylesheet" href="{% static 'rota/css/main.css' %}" />
-  </head>
+{% block title %}Sign in - Skedaddle{% endblock %}
+{% block topbar_title %}Sign in{% endblock %}
 
-  <body class="min-h-screen bg-slate-100 text-slate-900">
-    <div class="min-h-screen flex items-center justify-center px-4 py-10">
-      <div class="w-full max-w-md">
-
-        <!-- Brand / Header -->
-        <div class="mb-6 rounded-3xl bg-gradient-to-r from-emerald-600 to-teal-600 p-6 text-white shadow">
-          <div class="text-sm font-semibold tracking-wide uppercase text-emerald-50/90">
-            Skedaddle
-          </div>
-          <h1 class="mt-1 text-2xl font-semibold tracking-tight">
-            Sign in
-          </h1>
-          <p class="mt-1 text-sm text-emerald-50/90">
-            Use your rota account to access the cleanroom rota.
-          </p>
-        </div>
-
-        <!-- Card -->
-        <div class="rounded-2xl bg-white shadow-xl ring-1 ring-slate-200 p-6">
-          {% if form.non_field_errors %}
-            <div class="mb-4 rounded-xl bg-rose-50 p-4 ring-1 ring-rose-200 text-rose-900">
-              <p class="text-sm font-semibold">Sign-in error</p>
-              <div class="mt-1 text-sm text-rose-800">
-                {% for error in form.non_field_errors %}
-                  <div>{{ error }}</div>
-                {% endfor %}
-              </div>
-            </div>
-          {% endif %}
-
-          <form method="post" action="" class="space-y-4">
-            {% csrf_token %}
-
-            <!-- USERNAME -->
-            <div>
-              <label
-                for="{{ form.username.id_for_label }}"
-                class="block text-sm font-semibold text-slate-700"
-              >
-                Username
-              </label>
-
-              <div class="mt-1">
-                {{ form.username }}
-              </div>
-
-              {% if form.username.errors %}
-                <ul class="mt-2 rounded-lg bg-rose-50 p-3 text-sm text-rose-800 ring-1 ring-rose-200">
-                  {% for e in form.username.errors %}
-                    <li>{{ e }}</li>
-                  {% endfor %}
-                </ul>
-              {% endif %}
-            </div>
-
-            <!-- PASSWORD -->
-            <div>
-              <label
-                for="{{ form.password.id_for_label }}"
-                class="block text-sm font-semibold text-slate-700"
-              >
-                Password
-              </label>
-
-              <div class="mt-1">
-                {{ form.password }}
-              </div>
-
-              {% if form.password.errors %}
-                <ul class="mt-2 rounded-lg bg-rose-50 p-3 text-sm text-rose-800 ring-1 ring-rose-200">
-                  {% for e in form.password.errors %}
-                    <li>{{ e }}</li>
-                  {% endfor %}
-                </ul>
-              {% endif %}
-            </div>
-
-            {% if next %}
-              <input type="hidden" name="next" value="{{ next }}" />
-            {% endif %}
-
-            <!-- ACTIONS -->
-            <div class="pt-2">
-              <button
-                type="submit"
-                class="w-full inline-flex items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold
-                       bg-emerald-600 text-white hover:bg-emerald-700 transition
-                       focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
-              >
-                Sign in
-              </button>
-
-              <p class="mt-4 text-xs text-slate-500">
-                Forgotten your password? Contact your system administrator.
-              </p>
-            </div>
-          </form>
-        </div>
-
-        <!-- Footer note -->
-        <p class="mt-6 text-center text-xs text-slate-500">
-          Skedaddle is designed for clear, safe, and auditable rota access.
-        </p>
-
+{% block content %}
+<div class="sk-page" style="max-width: 460px;">
+  <section class="sk-panel">
+    <div class="sk-panel-head">
+      <div>
+        <p class="eyebrow">Skedaddle</p>
+        <h1 class="sk-title">Sign in</h1>
+        <p class="sk-panel-sub">Use your rota account to access the cleanroom rota.</p>
       </div>
     </div>
 
-    <!-- Optional: quick form field styling without changing the Django form -->
-    <style>
-      /* Keep this tiny: it just makes Django auth fields match Tailwind */
-      input[type="text"], input[type="password"]{
-        width:100%;
-        border-radius:0.75rem;
-        border:1px solid rgb(203 213 225);
-        padding:0.55rem 0.75rem;
-        font-size:0.875rem;
-        line-height:1.25rem;
-      }
-      input[type="text"]:focus, input[type="password"]:focus{
-        outline:none;
-        border-color:rgb(16 185 129);
-        box-shadow:0 0 0 2px rgba(16,185,129,.35);
-      }
-    </style>
-  </body>
-</html>
+    <div class="sk-panel-body">
+      {% if form.non_field_errors %}
+        <div class="message error">
+          {% for error in form.non_field_errors %}
+            <div>{{ error }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      <form method="post" action="" class="form-stack">
+        {% csrf_token %}
+
+        <p>
+          <label for="{{ form.username.id_for_label }}">Username</label>
+          {{ form.username }}
+          {% if form.username.errors %}
+            <span class="message error">{{ form.username.errors }}</span>
+          {% endif %}
+        </p>
+
+        <p>
+          <label for="{{ form.password.id_for_label }}">Password</label>
+          {{ form.password }}
+          {% if form.password.errors %}
+            <span class="message error">{{ form.password.errors }}</span>
+          {% endif %}
+        </p>
+
+        {% if next %}
+          <input type="hidden" name="next" value="{{ next }}">
+        {% endif %}
+
+        <button type="submit" class="btn btn-primary" style="width: 100%;">Sign in</button>
+      </form>
+
+      <p class="sk-panel-sub" style="margin-top: 14px;">Forgotten your password? Contact your system administrator.</p>
+    </div>
+  </section>
+</div>
+{% endblock content %}

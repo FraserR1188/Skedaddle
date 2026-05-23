@@ -1,150 +1,75 @@
-{# rota/partials/isolator_duties_modal.html #}
-
 <div
   id="modal-duties-{{ iso.id }}"
-  class="fixed inset-0 z-50 hidden"
+  class="sk-modal-root fixed inset-0 z-50 hidden"
   aria-hidden="true"
   role="dialog"
   aria-modal="true"
   aria-labelledby="modal-duties-title-{{ iso.id }}"
 >
-  <!-- Backdrop -->
-  <div class="absolute inset-0 bg-slate-900/60" data-close-modal></div>
+  <div class="sk-modal-backdrop" data-close-modal></div>
 
-  <!-- Dialog wrapper -->
-  <div class="relative mx-auto w-full max-w-2xl px-4 py-10">
-    <div class="rounded-2xl bg-white shadow-xl ring-1 ring-slate-200 overflow-hidden">
-
-      <!-- Header -->
-      <div class="flex items-start justify-between gap-4 p-5 border-b border-slate-200">
+  <div class="sk-modal-wrap" style="max-width: 760px;">
+    <div class="sk-modal">
+      <div class="sk-modal-head">
         <div>
-          <h2
-            id="modal-duties-title-{{ iso.id }}"
-            class="text-lg font-semibold text-slate-900"
-          >
-            Duties – {{ iso.name }}
-          </h2>
-          <p class="mt-1 text-sm text-slate-500">{{ date }}</p>
+          <h2 id="modal-duties-title-{{ iso.id }}" class="sk-modal-title">Duties - {{ iso.name }}</h2>
+          <div class="sk-modal-sub">{{ date }}</div>
         </div>
-
-        <button
-          type="button"
-          class="inline-flex items-center justify-center rounded-lg px-3 py-2 text-sm font-semibold
-                 bg-slate-100 hover:bg-slate-200 transition"
-          data-close-modal
-          aria-label="Close"
-        >
-          ✕
-        </button>
+        <button type="button" class="btn btn-outline btn-icon" data-close-modal aria-label="Close">x</button>
       </div>
 
-      <!-- Body -->
-      <div class="p-5 space-y-6">
-
+      <div class="sk-modal-body">
         {% if iso.operator_assignments_am or iso.operator_assignments_pm %}
-
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-            <!-- AM -->
-            <div class="rounded-xl bg-slate-50 ring-1 ring-slate-200 p-4">
-              <div class="text-xs font-semibold uppercase tracking-wide text-slate-600">
-                AM
+          <div class="sk-grid-2">
+            <div class="sk-panel">
+              <div class="sk-panel-head">
+                <h3 class="sk-panel-title">AM Duties</h3>
               </div>
-
-              {% if iso.operator_assignments_am %}
-                <ul class="mt-3 space-y-3">
+              <div class="sk-panel-body">
+                <div class="person-picker" style="max-height: none;">
                   {% for a in iso.operator_assignments_am %}
-                    <li class="rounded-lg bg-white ring-1 ring-slate-200 p-3">
-                      <div class="text-sm font-semibold text-slate-900">
-                        {{ a.staff.full_name }}
-                        <span class="ml-1 text-xs font-normal text-slate-500">
-                          ({{ a.staff.get_role_display }})
-                        </span>
+                    <div class="person-tile">
+                      <div>
+                        <div class="person-name">{{ a.staff.full_name }}</div>
+                        <div class="person-meta">{{ a.staff.get_role_display }} &middot; {{ a.isolator_section_display }}</div>
                       </div>
-
-                      <div class="mt-1 text-sm text-slate-600">
-                        Block:
-                        <span class="font-medium text-slate-800">
-                          {{ a.shift_block }}
-                        </span>
-                      </div>
-
-                      <div class="mt-1 text-sm text-slate-600">
-                        Section:
-                        <span class="font-medium text-slate-800">
-                          {{ a.isolator_section_display }}
-                        </span>
-                      </div>
-                    </li>
+                      <span class="rag rag-grey"><span class="rag-glyph">-</span>{{ a.shift_block }}</span>
+                    </div>
+                  {% empty %}
+                    <p class="empty-copy">No AM duties assigned.</p>
                   {% endfor %}
-                </ul>
-              {% else %}
-                <p class="mt-3 text-sm text-slate-500">
-                  No AM duties assigned.
-                </p>
-              {% endif %}
-            </div>
-
-            <!-- PM -->
-            <div class="rounded-xl bg-slate-50 ring-1 ring-slate-200 p-4">
-              <div class="text-xs font-semibold uppercase tracking-wide text-slate-600">
-                PM
+                </div>
               </div>
-
-              {% if iso.operator_assignments_pm %}
-                <ul class="mt-3 space-y-3">
-                  {% for a in iso.operator_assignments_pm %}
-                    <li class="rounded-lg bg-white ring-1 ring-slate-200 p-3">
-                      <div class="text-sm font-semibold text-slate-900">
-                        {{ a.staff.full_name }}
-                        <span class="ml-1 text-xs font-normal text-slate-500">
-                          ({{ a.staff.get_role_display }})
-                        </span>
-                      </div>
-
-                      <div class="mt-1 text-sm text-slate-600">
-                        Block:
-                        <span class="font-medium text-slate-800">
-                          {{ a.shift_block }}
-                        </span>
-                      </div>
-
-                      <div class="mt-1 text-sm text-slate-600">
-                        Section:
-                        <span class="font-medium text-slate-800">
-                          {{ a.isolator_section_display }}
-                        </span>
-                      </div>
-                    </li>
-                  {% endfor %}
-                </ul>
-              {% else %}
-                <p class="mt-3 text-sm text-slate-500">
-                  No PM duties assigned.
-                </p>
-              {% endif %}
             </div>
 
+            <div class="sk-panel">
+              <div class="sk-panel-head">
+                <h3 class="sk-panel-title">PM Duties</h3>
+              </div>
+              <div class="sk-panel-body">
+                <div class="person-picker" style="max-height: none;">
+                  {% for a in iso.operator_assignments_pm %}
+                    <div class="person-tile">
+                      <div>
+                        <div class="person-name">{{ a.staff.full_name }}</div>
+                        <div class="person-meta">{{ a.staff.get_role_display }} &middot; {{ a.isolator_section_display }}</div>
+                      </div>
+                      <span class="rag rag-grey"><span class="rag-glyph">-</span>{{ a.shift_block }}</span>
+                    </div>
+                  {% empty %}
+                    <p class="empty-copy">No PM duties assigned.</p>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
           </div>
-
         {% else %}
-          <div class="rounded-xl bg-slate-50 ring-1 ring-slate-200 p-4 text-sm text-slate-700">
-            <strong>No duties assigned yet.</strong>
-          </div>
+          <div class="message">No duties assigned yet.</div>
         {% endif %}
+      </div>
 
-        <!-- Actions -->
-        <div class="flex justify-end">
-          <button
-            type="button"
-            class="inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold
-                   bg-slate-900 text-white hover:bg-slate-800 transition"
-            data-close-modal
-          >
-            Close
-          </button>
-        </div>
-
+      <div class="sk-modal-foot">
+        <button type="button" class="btn btn-primary" data-close-modal>Close</button>
       </div>
     </div>
   </div>

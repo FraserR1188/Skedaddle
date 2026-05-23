@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from collections import defaultdict
 
 from rota.models import Assignment, CleanRoom, WorkArea
@@ -34,6 +35,21 @@ def _issue(severity: str, message: str, source: str = "") -> dict:
         "message": message,
         "source": source,
     }
+
+
+def _room_number_from_area_name(name: str) -> int | None:
+    match = re.search(r"(\d+)\s*$", name)
+    if not match:
+        return None
+    return int(match.group(1))
+
+
+def _section_status(am_count: int, pm_count: int) -> str:
+    if am_count and pm_count:
+        return "Green"
+    if am_count or pm_count:
+        return "Amber"
+    return "Red"
 
 
 def build_suite_overview(rotaday):
@@ -99,7 +115,7 @@ def build_suite_overview(rotaday):
     cleanroom_cards = []
 
     cleanrooms = (
-        CleanRoom.objects.prefetch_related("isolators")
+        CleanRoom.objects.prefetch_related("isolators__sections")
         .all()
         .order_by("number", "name")
     )
@@ -159,6 +175,33 @@ def build_suite_overview(rotaday):
 
             all_issues.extend(isolator_issues)
 
+            section_cards = []
+            active_sections = [
+                section for section in isolator.sections.all() if section.is_active
+            ]
+
+            for section in active_sections:
+                section_am = [
+                    assignment
+                    for assignment in am_assignments
+                    if assignment.isolator_section_id == section.id
+                ]
+                section_pm = [
+                    assignment
+                    for assignment in pm_assignments
+                    if assignment.isolator_section_id == section.id
+                ]
+                section_cards.append(
+                    {
+                        "section": section,
+                        "am_assignments": section_am,
+                        "pm_assignments": section_pm,
+                        "am_count": len(section_am),
+                        "pm_count": len(section_pm),
+                        "status": _section_status(len(section_am), len(section_pm)),
+                    }
+                )
+
             isolator_cards.append(
                 {
                     "isolator": isolator,
@@ -168,6 +211,7 @@ def build_suite_overview(rotaday):
                     "capacity": MAX_ISOLATOR_STAFF_PER_BLOCK,
                     "am_assignments": am_assignments,
                     "pm_assignments": pm_assignments,
+                    "sections": section_cards,
                     "issues": isolator_issues,
                 }
             )
@@ -248,6 +292,8 @@ def build_suite_overview(rotaday):
         )
 
     work_area_cards = []
+    work_area_by_room_type = {}
+    mal_work_area_cards = []
 
     work_areas = WorkArea.objects.filter(is_active=True).order_by(
         "sort_order",
@@ -317,20 +363,33 @@ def build_suite_overview(rotaday):
 
         all_issues.extend(area_issues)
 
-        work_area_cards.append(
-            {
-                "area": area,
-                "status": area_status,
-                "required_am": required_am,
-                "required_pm": required_pm,
-                "am_count": am_count,
-                "pm_count": pm_count,
-                "am_assignments": am_assignments,
-                "pm_assignments": pm_assignments,
-                "has_fixed_requirement": has_fixed_requirement,
-                "issues": area_issues,
-            }
-        )
+        work_area_card = {
+            "area": area,
+            "status": area_status,
+            "required_am": required_am,
+            "required_pm": required_pm,
+            "am_count": am_count,
+            "pm_count": pm_count,
+            "am_assignments": am_assignments,
+            "pm_assignments": pm_assignments,
+            "has_fixed_requirement": has_fixed_requirement,
+            "issues": area_issues,
+        }
+
+        work_area_cards.append(work_area_card)
+
+        room_number = _room_number_from_area_name(area.name)
+
+        if room_number and area.area_type in {
+            WorkArea.AreaType.SUPPORT_ROOM,
+            WorkArea.AreaType.VISUAL_INSPECTION,
+        }:
+            work_area_by_room_type[(room_number, area.area_type)] = work_area_card
+        elif area.area_type in {
+            WorkArea.AreaType.MAL,
+            WorkArea.AreaType.OVERLABELLING,
+        }:
+            mal_work_area_cards.append(work_area_card)
 
     required_work_area_cards = [
         card for card in work_area_cards if card["has_fixed_requirement"]
@@ -380,6 +439,50 @@ def build_suite_overview(rotaday):
         "issue_count": len(all_issues),
     }
 
+    isolator_slot_total = 0
+    isolator_slot_filled = 0
+    floorplan_columns = []
+
+    for cleanroom_card in cleanroom_cards:
+        room = cleanroom_card["room"]
+        isolator_cards = cleanroom_card["isolators"]
+
+        for isolator_card in isolator_cards:
+            for section_card in isolator_card["sections"]:
+                isolator_slot_total += 2
+                isolator_slot_filled += min(section_card["am_count"], 1)
+                isolator_slot_filled += min(section_card["pm_count"], 1)
+
+        if len(isolator_cards) > 2:
+            right_wall = isolator_cards[:2]
+            left_wall = isolator_cards[2:]
+            layout = "split"
+        else:
+            left_wall = isolator_cards
+            right_wall = []
+            layout = "left"
+
+        floorplan_columns.append(
+            {
+                "room_card": cleanroom_card,
+                "visual_area_card": work_area_by_room_type.get(
+                    (room.number, WorkArea.AreaType.VISUAL_INSPECTION)
+                ),
+                "support_area_card": work_area_by_room_type.get(
+                    (room.number, WorkArea.AreaType.SUPPORT_ROOM)
+                ),
+                "left_wall": left_wall,
+                "right_wall": right_wall,
+                "layout": layout,
+                "supervisor_edit_isolator_id": (
+                    isolator_cards[0]["isolator"].id if isolator_cards else None
+                ),
+            }
+        )
+
+    suite_summary["isolator_slot_total"] = isolator_slot_total
+    suite_summary["isolator_slot_filled"] = isolator_slot_filled
+
     return {
         "suite_summary": suite_summary,
         "issues": all_issues,
@@ -387,4 +490,8 @@ def build_suite_overview(rotaday):
         "amber_issues": amber_issues,
         "cleanroom_cards": cleanroom_cards,
         "work_area_cards": work_area_cards,
+        "floorplan": {
+            "columns": floorplan_columns,
+            "mal_cards": mal_work_area_cards,
+        },
     }
