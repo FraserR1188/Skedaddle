@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import date as date_type
+import re
 from typing import Optional
 
 from django.db import models
@@ -9,6 +10,10 @@ from django.utils import timezone
 
 from rota.models import StaffMember
 from .models import OperatorValidation, IsolatorSection
+
+
+ISOLATOR_SIDE_SUFFIX_RE = re.compile(r"(?:^|[\s_-])([LR])$", re.IGNORECASE)
+ISOLATOR_NUMBER_RE = re.compile(r"\b(?:iso|isolator)\s*(\d+)\b", re.IGNORECASE)
 
 
 @dataclass(frozen=True)
@@ -20,6 +25,72 @@ class ValidationResult:
 
 def _as_date(d: Optional[date_type]) -> date_type:
     return d or timezone.localdate()
+
+
+def isolator_declared_side(isolator) -> Optional[str]:
+    """
+    Some live isolator rows are already side-specific, e.g. "Isolator 1 R".
+    For those rows the APS target is the matching side only, not both L and R.
+    Generic rows such as "Isolator 1" still expose both sections.
+    """
+    match = ISOLATOR_SIDE_SUFFIX_RE.search(isolator.name.strip())
+    if not match:
+        return None
+    return match.group(1).upper()
+
+
+def isolator_base_label(isolator) -> str:
+    """
+    Returns the logical isolator label for APS display, without a trailing side.
+    """
+    name = ISOLATOR_SIDE_SUFFIX_RE.sub("", isolator.name.strip()).strip(" -_")
+    number_match = ISOLATOR_NUMBER_RE.search(name)
+    if number_match:
+        return f"Iso {number_match.group(1)}"
+    return name or isolator.name
+
+
+def _isolator_sort_number(isolator) -> int:
+    match = ISOLATOR_NUMBER_RE.search(isolator.name)
+    if not match:
+        return 9999
+    return int(match.group(1))
+
+
+def is_aps_target_section(section: IsolatorSection) -> bool:
+    """
+    True when a section should appear as an APS validation target.
+
+    This prevents side-named isolator rows from doubling the matrix:
+    "Isolator 1 L" contributes L only and "Isolator 1 R" contributes R only.
+    """
+    declared_side = isolator_declared_side(section.isolator)
+    return declared_side is None or section.section == declared_side
+
+
+def aps_section_sort_key(section: IsolatorSection) -> tuple:
+    side_order = {
+        IsolatorSection.SectionType.LEFT: 0,
+        IsolatorSection.SectionType.RIGHT: 1,
+    }
+    return (
+        _isolator_sort_number(section.isolator),
+        side_order.get(section.section, 99),
+        section.isolator.clean_room.number,
+        section.isolator.order,
+        section.id,
+    )
+
+
+def aps_target_sections_from(sections) -> list[IsolatorSection]:
+    return sorted(
+        [section for section in sections if section.is_active and is_aps_target_section(section)],
+        key=aps_section_sort_key,
+    )
+
+
+def aps_target_sections_for_isolator(isolator) -> list[IsolatorSection]:
+    return aps_target_sections_from(isolator.sections.all())
 
 
 def get_operator_validation(
