@@ -9,6 +9,43 @@ from rota.models import Assignment, CleanRoom, WorkArea
 MAX_ISOLATOR_STAFF_PER_BLOCK = 6
 
 
+def build_isolator_display_layout(cleanrooms):
+    """
+    Build a presentation layout for cleanrooms and isolators.
+
+    The layout intentionally keeps the floor plan compact by showing a single
+    visible isolator on odd-numbered rooms and a left/right pair on even-numbered
+    rooms, which matches the requested suite map.
+    """
+
+    room_cards = []
+    display_number = 1
+
+    for room in cleanrooms:
+        isolators = list(room.isolators.all().order_by("order", "name"))
+
+        if room.number % 2 == 1:
+            left_wall = isolators[:1]
+            right_wall = []
+        else:
+            left_wall = isolators[:1]
+            right_wall = isolators[1:2]
+
+        for isolator in left_wall + right_wall:
+            isolator.display_label = f"Iso {display_number}"
+            display_number += 1
+
+        room_cards.append(
+            {
+                "room": room,
+                "left_wall": left_wall,
+                "right_wall": right_wall,
+            }
+        )
+
+    return room_cards
+
+
 def _worst_status(statuses: list[str]) -> str:
     """
     Returns the most severe status from a list.
@@ -120,7 +157,13 @@ def build_suite_overview(rotaday):
         .order_by("number", "name")
     )
 
-    for room in cleanrooms:
+    display_rooms = build_isolator_display_layout(cleanrooms)
+
+    # Map room id -> layout (left/right isolator model lists) for floorplan assembly
+    room_layout_by_id = {layout["room"].id: layout for layout in display_rooms}
+
+    for room_card_layout in display_rooms:
+        room = room_card_layout["room"]
         room_issues = []
         isolator_cards = []
 
@@ -204,6 +247,9 @@ def build_suite_overview(rotaday):
 
             isolator_cards.append(
                 {
+                    "id": isolator.id,
+                    "name": isolator.name,
+                    "display_label": getattr(isolator, "display_label", None),
                     "isolator": isolator,
                     "status": isolator_status,
                     "am_count": am_count,
@@ -443,6 +489,12 @@ def build_suite_overview(rotaday):
     isolator_slot_filled = 0
     floorplan_columns = []
 
+    # Build a mapping of isolator id -> isolator_card dict for lookup
+    isolator_card_by_id = {}
+    for crc in cleanroom_cards:
+        for ic in crc["isolators"]:
+            isolator_card_by_id[ic["id"]] = ic
+
     for cleanroom_card in cleanroom_cards:
         room = cleanroom_card["room"]
         isolator_cards = cleanroom_card["isolators"]
@@ -453,14 +505,16 @@ def build_suite_overview(rotaday):
                 isolator_slot_filled += min(section_card["am_count"], 1)
                 isolator_slot_filled += min(section_card["pm_count"], 1)
 
-        if len(isolator_cards) > 2:
-            right_wall = isolator_cards[:2]
-            left_wall = isolator_cards[2:]
-            layout = "split"
-        else:
-            left_wall = isolator_cards
-            right_wall = []
-            layout = "left"
+        # Use the display layout calculated earlier to determine which isolators
+        # appear on the left and right walls for this room. Then map those
+        # isolator model objects to the isolator_card dicts we built above.
+        room_layout = room_layout_by_id.get(room.id, {"left_wall": [], "right_wall": []})
+
+        left_wall_models = room_layout.get("left_wall", [])
+        right_wall_models = room_layout.get("right_wall", [])
+
+        left_wall = [isolator_card_by_id.get(i.id) for i in left_wall_models if isolator_card_by_id.get(i.id)]
+        right_wall = [isolator_card_by_id.get(i.id) for i in right_wall_models if isolator_card_by_id.get(i.id)]
 
         floorplan_columns.append(
             {
@@ -473,9 +527,9 @@ def build_suite_overview(rotaday):
                 ),
                 "left_wall": left_wall,
                 "right_wall": right_wall,
-                "layout": layout,
+                "layout": "split" if right_wall else "left",
                 "supervisor_edit_isolator_id": (
-                    isolator_cards[0]["isolator"].id if isolator_cards else None
+                    left_wall[0]["id"] if left_wall and left_wall[0] else None
                 ),
             }
         )

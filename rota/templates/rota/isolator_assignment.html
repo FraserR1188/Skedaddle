@@ -1,0 +1,203 @@
+{% extends "rota/base.html" %}
+
+{% block title %}Isolator Assignment - {{ isolator.name }} - {{ date }}{% endblock %}
+{% block topbar_title %}Isolator{% endblock %}
+{% block topbar_context %} <span aria-hidden="true">/</span> {{ isolator.display_label|default:isolator.name }}{% endblock %}
+
+{% block topbar_actions %}
+  <div class="date-pager" aria-label="Date navigation">
+    <a href="{% url 'isolator_assignment' prev_date.year prev_date.month prev_date.day isolator.id %}" title="Previous day">
+      <svg class="sk-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="m15 6-6 6 6 6"></path>
+      </svg>
+    </a>
+    <div class="date-main">
+      <div class="date-day">{{ date|date:"l" }} &middot; {{ rotaday.get_status_display }}</div>
+      <div class="date-full">{{ date|date:"j M Y" }}</div>
+    </div>
+    <a href="{% url 'isolator_assignment' next_date.year next_date.month next_date.day isolator.id %}" title="Next day">
+      <svg class="sk-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="m9 6 6 6-6 6"></path>
+      </svg>
+    </a>
+  </div>
+{% endblock %}
+
+{% block content %}
+<div class="sk-page is-wide">
+  <div class="sk-page-head">
+    <div>
+      <p class="eyebrow">Skedaddle Isolator Assignment</p>
+      <h1 class="sk-title">{{ isolator.display_label|default:isolator.name }}</h1>
+      <p class="sk-subtitle">{{ clean_room.name }} &middot; Assign AM and PM staff for this isolator using a dedicated page instead of a modal.</p>
+    </div>
+
+    <div class="sk-actions">
+      <a class="btn btn-outline" href="{% url 'suite_overview' date.year date.month date.day %}">Suite Overview</a>
+      <a class="btn btn-primary" href="{% url 'daily_rota' date.year date.month date.day %}">Assignments</a>
+    </div>
+  </div>
+
+  <section class="status-bar">
+    <div class="stat">
+      <div class="stat-label">Cleanroom</div>
+      <div class="stat-value" style="font-size: 18px;">{{ clean_room.name }}</div>
+      <div class="stat-meta">{{ clean_room.get_area_type_display|default:"Operational area" }}</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">AM operators</div>
+      <div class="stat-value">{{ existing_am|length }}</div>
+      <div class="stat-meta">Currently assigned</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">PM operators</div>
+      <div class="stat-value">{{ existing_pm|length }}</div>
+      <div class="stat-meta">Currently assigned</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Room supervisors</div>
+      <div class="stat-value" style="font-size: 18px;">AM {{ room_supervisors_am|length }} / PM {{ room_supervisors_pm|length }}</div>
+      <div class="stat-meta">Inherited from the room</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Validation</div>
+      <div class="stat-value" style="font-size: 18px;">Backend enforced</div>
+      <div class="stat-meta">Assignment.clean() and APS validation</div>
+    </div>
+  </section>
+
+  <section class="sk-grid-2">
+    <div class="sk-panel">
+      <div class="sk-panel-head">
+        <div>
+          <h2 class="sk-panel-title">Current Operators</h2>
+          <p class="sk-panel-sub">Existing AM/PM assignment state for this isolator.</p>
+        </div>
+      </div>
+      <div class="sk-panel-body">
+        <div class="shift-summaries">
+          <div class="shift-summary">
+            <div class="shift-summary-head"><span>AM</span><span>{{ existing_am|length }}</span></div>
+            <div class="name-pills">
+              {% for assignment in existing_am %}
+                <span class="name-pill">{{ assignment.staff.full_name }} ({{ assignment.isolator_section_display }})</span>
+              {% empty %}
+                <span class="empty-copy">No AM operators assigned.</span>
+              {% endfor %}
+            </div>
+          </div>
+          <div class="shift-summary">
+            <div class="shift-summary-head"><span>PM</span><span>{{ existing_pm|length }}</span></div>
+            <div class="name-pills">
+              {% for assignment in existing_pm %}
+                <span class="name-pill">{{ assignment.staff.full_name }} ({{ assignment.isolator_section_display }})</span>
+              {% empty %}
+                <span class="empty-copy">No PM operators assigned.</span>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sk-panel">
+      <div class="sk-panel-head">
+        <div>
+          <h2 class="sk-panel-title">Room Supervisors</h2>
+          <p class="sk-panel-sub">Selected at cleanroom level and kept in sync with Daily Assignments.</p>
+        </div>
+      </div>
+      <div class="sk-panel-body">
+        <div class="shift-summaries">
+          <div class="shift-summary">
+            <div class="shift-summary-head"><span>AM</span><span>{{ room_supervisors_am|length }}</span></div>
+            <div class="name-pills">
+              {% for assignment in room_supervisors_am %}
+                <span class="name-pill">{{ assignment.staff.full_name }}</span>
+              {% empty %}
+                <span class="empty-copy">No AM supervisors assigned.</span>
+              {% endfor %}
+            </div>
+          </div>
+          <div class="shift-summary">
+            <div class="shift-summary-head"><span>PM</span><span>{{ room_supervisors_pm|length }}</span></div>
+            <div class="name-pills">
+              {% for assignment in room_supervisors_pm %}
+                <span class="name-pill">{{ assignment.staff.full_name }}</span>
+              {% empty %}
+                <span class="empty-copy">No PM supervisors assigned.</span>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {% if user.is_superuser or perms.rota.rota_manager %}
+    <form method="post" class="sk-panel">
+      {% csrf_token %}
+      <div class="sk-panel-head">
+        <div>
+          <h2 class="sk-panel-title">Edit Assignments</h2>
+          <p class="sk-panel-sub">Choose a staff member, AM/PM block, and isolator section. Maximum 6 operators per shift.</p>
+        </div>
+      </div>
+
+      <div class="sk-panel-body">
+        <div class="form-grid">
+          {% for slot in operator_slots %}
+            <div class="form-row">
+              <label class="field-label">Operator {{ forloop.counter }}</label>
+
+              <select name="op{{ forloop.counter }}_staff" class="sk-select">
+                <option value="">None</option>
+                {% for staff in staff_list %}
+                  {% if staff.role == "OPERATIVE" or staff.role == "SUPERVISOR" %}
+                    <option value="{{ staff.id }}" {% if slot and slot.staff.id == staff.id %}selected{% endif %}>
+                      {{ staff.full_name }}{% if staff.crew %} - {{ staff.crew.name }}{% endif %}
+                    </option>
+                  {% endif %}
+                {% endfor %}
+              </select>
+
+              <select name="op{{ forloop.counter }}_block" class="sk-select">
+                <option value="">Block</option>
+                <option value="AM" {% if slot and slot.shift_block == "AM" %}selected{% endif %}>AM</option>
+                <option value="PM" {% if slot and slot.shift_block == "PM" %}selected{% endif %}>PM</option>
+              </select>
+
+              <select name="op{{ forloop.counter }}_section" class="sk-select" {% if not active_sections %}disabled{% endif %}>
+                <option value="">Section</option>
+                {% for section in active_sections %}
+                  <option value="{{ section.id }}" {% if slot and slot.isolator_section_id == section.id %}selected{% endif %}>
+                    {{ section.get_section_display }}
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="sk-panel-head">
+        <div>
+          <h2 class="sk-panel-title">Validation Notes</h2>
+          <p class="sk-panel-sub">Assignment.clean() still prevents invalid room, isolator, section, and APS combinations.</p>
+        </div>
+      </div>
+
+      <div class="sk-modal-foot">
+        <a class="btn btn-outline" href="{% url 'daily_rota' date.year date.month date.day %}">Cancel</a>
+        <button type="submit" class="btn btn-success">Save Assignments</button>
+      </div>
+    </form>
+  {% else %}
+    <section class="sk-panel">
+      <div class="sk-panel-body">
+        <p class="empty-copy">You have view-only access to this rota.</p>
+      </div>
+    </section>
+  {% endif %}
+</div>
+{% endblock content %}

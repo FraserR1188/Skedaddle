@@ -1,99 +1,338 @@
 {% extends "rota/base.html" %}
-{% load validation_extras %}
+{% load static %}
+
+{% block title %}APS Validation Matrix - Skedaddle{% endblock %}
+{% block topbar_title %}APS Validations{% endblock %}
+
+{% block extra_head %}
+  <link rel="stylesheet" href="{% static 'validation/css/aps.css' %}">
+{% endblock %}
 
 {% block content %}
-<h1>APS / Validation</h1>
-
-<form method="get" style="display:flex; gap:0.5rem; align-items:center; margin: 0.75rem 0;">
-  <input type="text" name="q" value="{{ q }}" placeholder="Search staff..." />
-
-  <label style="display:flex; gap:0.25rem; align-items:center;">
-    <input type="checkbox" name="active" value="1" {% if active_only %}checked{% endif %}>
-    Active only
-  </label>
-
-  <button type="submit">Filter</button>
-</form>
-
-<div class="validation-matrix" style="overflow:auto; border:1px solid #ccc; border-radius:10px;">
-    <div style="overflow:auto; border:1px solid rgba(255,255,255,0.15); border-radius:10px;">
-    <table style="min-width: 1200px; width:100%; border-collapse: collapse;">
-        <thead>
-        <tr>
-            <th style="position:sticky; left:0; z-index:2; background:#0b1220; padding:10px; text-align:left; border-bottom:1px solid rgba(255,255,255,0.15);">
-            Staff
-            </th>
-
-            {% for s in sections %}
-            <th style="background:#0b1220; padding:10px; text-align:left; border-bottom:1px solid rgba(255,255,255,0.15); white-space:nowrap;">
-                {{ s.isolator.name }} {{ s.get_section_display }}
-            </th>
-            {% endfor %}
-        </tr>
-        </thead>
-
-        <tbody>
-        {% for person in staff %}
-            <tr>
-            <td style="position:sticky; left:0; z-index:1; background:#0b1220; padding:10px; border-bottom:1px solid rgba(255,255,255,0.08); white-space:nowrap;">
-                <strong>{{ person.full_name }}</strong>
-                {% if person.crew %}<span style="opacity:0.7;">({{ person.crew }})</span>{% endif %}
-            </td>
-
-            {% for s in sections %}
-                {# row is the dict of {section_id: OperatorValidation} for this person #}
-                {% with row=vmap|get_item:person.id %}
-                {# ov is the OperatorValidation object for this specific section (or None) #}
-                {% with ov=row|get_item:s.id %}
-                    <td style="padding:10px; border-bottom:1px solid rgba(255,255,255,0.08); vertical-align:top; white-space:nowrap;">
-
-                    <div style="margin-bottom:6px; opacity:0.85;">
-                        Current:
-                        <strong>
-                        {% if ov %}{{ ov.get_status_display }}{% else %}—{% endif %}
-                        </strong>
-                        {% if ov and ov.expires_on %}
-                        <span style="opacity:0.7;">(exp {{ ov.expires_on }})</span>
-                        {% endif %}
-                    </div>
-
-                    <form method="post" style="display:flex; gap:6px; align-items:center;">
-                        {% csrf_token %}
-                        <input type="hidden" name="operator_id" value="{{ person.id }}">
-                        <input type="hidden" name="section_id" value="{{ s.id }}">
-
-                        <select name="status">
-                        {% for key, label in status_choices %}
-                            <option value="{{ key }}" {% if ov and ov.status == key %}selected{% endif %}>
-                            {{ label }}
-                            </option>
-                        {% endfor %}
-                        </select>
-
-                        <input
-                        type="date"
-                        name="expires_on"
-                        value="{% if ov and ov.expires_on %}{{ ov.expires_on|date:'Y-m-d' }}{% endif %}"
-                        title="Expiry (optional)"
-                        />
-
-                        <button type="submit">Save</button>
-                    </form>
-
-                    </td>
-                {% endwith %}
-                {% endwith %}
-            {% endfor %}
-            </tr>
-        {% empty %}
-            <tr>
-            <td colspan="{{ sections|length|add:1 }}" style="padding:10px;">
-                No staff found.
-            </td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+<div class="aps-page">
+  <div class="sk-page-head aps-page-head">
+    <div>
+      <p class="eyebrow">APS / Validation</p>
+      <h1 class="sk-title">Section Clearance Matrix</h1>
+      <p class="sk-subtitle">Only current, valid APS records are treated as cleared for isolator assignment.</p>
     </div>
+    <div class="aps-date-chip">
+      <span>Today</span>
+      <strong>{{ today|date:"d M Y" }}</strong>
+    </div>
+  </div>
+
+  <div class="aps-metabar">
+    <div class="aps-meta">
+      <span class="aps-meta-label">Operators</span>
+      <span class="aps-meta-value">{{ staff_rows|length }}</span>
+      <span class="aps-meta-sub">/ {{ total_staff }}</span>
+    </div>
+    <div class="aps-meta">
+      <span class="aps-meta-label">Sections</span>
+      <span class="aps-meta-value">{{ total_sides }}</span>
+      <span class="aps-meta-sub">active</span>
+    </div>
+    <div class="aps-meta">
+      <span class="aps-meta-label">Cells</span>
+      <span class="aps-meta-value">{{ totals.cells }}</span>
+      <span class="aps-meta-sub">shown</span>
+    </div>
+    <div class="aps-meta aps-meta-valid">
+      <span class="aps-meta-label">Can work</span>
+      <span class="aps-meta-value">{{ totals.valid }}</span>
+      <span class="aps-meta-sub">{{ totals.valid_percent }}%</span>
+    </div>
+    <div class="aps-meta aps-meta-train">
+      <span class="aps-meta-label">Training</span>
+      <span class="aps-meta-value">{{ totals.training }}</span>
+      <span class="aps-meta-sub">blocked</span>
+    </div>
+    <div class="aps-meta aps-meta-expiring">
+      <span class="aps-meta-label">Expiry risk</span>
+      <span class="aps-meta-value">{{ totals.expiring }}</span>
+      <span class="aps-meta-sub">{{ totals.expired }} expired</span>
+    </div>
+  </div>
+
+  <form method="get" class="aps-toolbar">
+    <input type="hidden" name="role" value="{{ role_filter }}">
+    <input type="hidden" name="sort" value="{{ sort }}">
+
+    <div class="aps-search">
+      <span class="search-icon" aria-hidden="true">
+        <svg class="sk-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="7"></circle>
+          <path d="m20 20-3.5-3.5"></path>
+        </svg>
+      </span>
+      <input name="q" type="search" value="{{ q }}" placeholder="Find operator or crew">
+    </div>
+
+    <label class="aps-active-toggle">
+      <input type="checkbox" name="active" value="1" {% if active_only %}checked{% endif %}>
+      Active only
+    </label>
+
+    <button type="submit" class="btn btn-primary">Filter</button>
+
+    <div class="shift-toggle aps-roles" aria-label="Role filter">
+      <button type="submit" name="role" value="ALL" class="{% if role_filter == 'ALL' %}is-active{% endif %}">
+        All <span>{{ role_counts.ALL }}</span>
+      </button>
+      <button type="submit" name="role" value="OPERATIVE" class="{% if role_filter == 'OPERATIVE' %}is-active{% endif %}">
+        Operatives <span>{{ role_counts.OPERATIVE }}</span>
+      </button>
+      <button type="submit" name="role" value="SUPERVISOR" class="{% if role_filter == 'SUPERVISOR' %}is-active{% endif %}">
+        Supervisors <span>{{ role_counts.SUPERVISOR }}</span>
+      </button>
+    </div>
+
+    <div class="aps-sort">
+      <span class="aps-sort-label">Sort</span>
+      <div class="shift-toggle">
+        {% for key, label in sort_choices %}
+          <button type="submit" name="sort" value="{{ key }}" class="{% if sort == key %}is-active{% endif %}">
+            {{ label }}
+          </button>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="aps-toolbar-spacer"></div>
+
+    <div class="aps-legend" aria-label="Status legend">
+      <span class="aps-legend-chip aps-cell-valid">V Valid</span>
+      <span class="aps-legend-chip aps-cell-in-training">T Training</span>
+      <span class="aps-legend-chip aps-cell-restricted">R Restricted</span>
+      <span class="aps-legend-chip aps-cell-suspended">S Suspended</span>
+      <span class="aps-legend-chip aps-cell-none">. None</span>
+    </div>
+  </form>
+
+  {% if columns %}
+    <div class="aps-table-wrap">
+      <div class="aps-table" style="--cols: {{ columns|length }};">
+        <div class="aps-row aps-row-head">
+          <div class="aps-name-cell aps-head-name">
+            <span class="aps-head-eyebrow">Operator</span>
+          </div>
+
+          {% for column in columns %}
+            <div class="aps-head-cell {% if column.side_label == 'R' %}is-rside{% else %}is-lside{% endif %}">
+              <span class="aps-head-iso">{{ column.section.isolator.name }}</span>
+              <span class="aps-head-side">{{ column.side_label }}</span>
+              <span class="aps-head-stats">
+                <span class="aps-head-stat-v">{{ column.stats.valid }}</span>
+                {% if column.stats.training %}
+                  <span class="aps-head-stat-t">+{{ column.stats.training }}t</span>
+                {% endif %}
+              </span>
+              <span class="aps-head-room">{{ column.room_label }}</span>
+            </div>
+          {% endfor %}
+
+          <div class="aps-cov-cell aps-head-cov">Coverage</div>
+        </div>
+
+        {% for row in staff_rows %}
+          <div class="aps-row">
+            <div class="aps-name-cell">
+              <span class="aps-avatar {% if row.person.role == 'SUPERVISOR' %}is-sup{% endif %}">{{ row.initials }}</span>
+              <span class="aps-name-block">
+                <span class="aps-name">{{ row.person.full_name }}</span>
+                <span class="aps-name-meta">
+                  <span class="aps-crew">{% if row.person.crew %}Crew {{ row.person.crew }}{% else %}No crew{% endif %}</span>
+                  <span class="aps-role">{% if row.person.role == 'SUPERVISOR' %}Supervisor{% else %}Operative{% endif %}</span>
+                </span>
+              </span>
+            </div>
+
+            {% for cell in row.cells %}
+              <button
+                type="button"
+                class="aps-cell aps-cell-{{ cell.status_class }}{% if cell.expiry_band %} aps-band-{{ cell.expiry_band }}{% endif %}{% if cell.can_work %} is-cleared{% else %} is-blocked{% endif %}"
+                data-aps-cell
+                data-operator-id="{{ row.person.id }}"
+                data-operator-name="{{ row.person.full_name }}"
+                data-operator-code="{{ row.person.id }}"
+                data-section-id="{{ cell.section.id }}"
+                data-section-label="{{ cell.section_label }}"
+                data-current-status="{{ cell.status_label }}"
+                data-current-status-key="{{ cell.status_key }}"
+                data-current-short="{{ cell.status_short }}"
+                data-status-class="{{ cell.status_class }}"
+                data-glyph="{{ cell.glyph }}"
+                data-detail="{{ cell.detail }}"
+                data-expiry="{% if cell.ov and cell.ov.expires_on %}{{ cell.ov.expires_on|date:'Y-m-d' }}{% endif %}"
+                aria-label="{{ row.person.full_name }} - {{ cell.section_label }}: {{ cell.status_label }}"
+                title="{{ row.person.full_name }} - {{ cell.section_label }}: {{ cell.status_label }}. {{ cell.detail }}"
+              >
+                <span class="aps-cell-glyph">{{ cell.glyph }}</span>
+                {% if cell.expiry_band %}<span class="aps-cell-band"></span>{% endif %}
+              </button>
+            {% endfor %}
+
+            <div class="aps-cov-cell">
+              <span class="aps-cov-num">{{ row.valid_count }}<span class="aps-cov-total">/{{ total_sides }}</span></span>
+              <span class="aps-cov-bar">
+                <span class="aps-cov-bar-v" style="width: {{ row.valid_percent }}%;"></span>
+                {% if row.training_count %}
+                  <span class="aps-cov-bar-t" style="left: {{ row.valid_percent }}%; width: {{ row.training_percent }}%;"></span>
+                {% endif %}
+              </span>
+              {% if row.expired_count %}
+                <span class="aps-cov-warn" title="{{ row.expired_count }} expired validation(s)">EXP {{ row.expired_count }}</span>
+              {% elif row.expiring_count %}
+                <span class="aps-cov-warn" title="{{ row.expiring_count }} validation(s) expiring within 30 days">DUE {{ row.expiring_count }}</span>
+              {% endif %}
+            </div>
+          </div>
+        {% empty %}
+          <div class="aps-empty-row">No staff found.</div>
+        {% endfor %}
+      </div>
+    </div>
+  {% else %}
+    <div class="message">No active isolator sections found.</div>
+  {% endif %}
 </div>
-{% endblock %}
+
+<div id="apsStatusPopover" class="aps-pop hidden" aria-hidden="true">
+  <form method="post" action="{% url 'validation:validation_quick_update' %}">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="set_status">
+    <input type="hidden" name="operator_id" id="apsOperatorId">
+    <input type="hidden" name="section_id" id="apsSectionId">
+
+    <div class="aps-pop-head">
+      <div>
+        <div class="aps-pop-name" id="apsPopName"></div>
+        <div class="aps-pop-sec" id="apsPopSection"></div>
+      </div>
+      <button type="button" class="aps-pop-close" id="apsPopClose" aria-label="Close">x</button>
+    </div>
+
+    <div class="aps-pop-current">
+      <span class="aps-pop-current-label">Current</span>
+      <span id="apsPopBadge" class="aps-badge aps-badge-none">. None</span>
+      <span id="apsPopDetail" class="aps-pop-current-meta"></span>
+    </div>
+
+    <div class="aps-pop-field">
+      <label for="apsExpiry">Expiry date</label>
+      <input
+        type="date"
+        name="expires_on"
+        id="apsExpiry"
+        value="{{ default_expiry|date:'Y-m-d' }}"
+        data-default="{{ default_expiry|date:'Y-m-d' }}"
+      >
+    </div>
+
+    <div class="aps-pop-opts">
+      {% for option in status_options %}
+        <button
+          type="submit"
+          name="status"
+          value="{{ option.value }}"
+          class="aps-pop-opt aps-pop-opt-{{ option.class }}"
+          data-status-option
+        >
+          <span class="aps-pop-opt-glyph">{{ option.glyph }}</span>
+          <span class="aps-pop-opt-body">
+            <span class="aps-pop-opt-label">{{ option.label }}</span>
+            <span class="aps-pop-opt-sub">{{ option.sub }}</span>
+          </span>
+        </button>
+      {% endfor %}
+    </div>
+  </form>
+</div>
+
+<script>
+  (function () {
+    const popover = document.getElementById("apsStatusPopover");
+    if (!popover) return;
+
+    const operatorId = document.getElementById("apsOperatorId");
+    const sectionId = document.getElementById("apsSectionId");
+    const nameEl = document.getElementById("apsPopName");
+    const sectionEl = document.getElementById("apsPopSection");
+    const badgeEl = document.getElementById("apsPopBadge");
+    const detailEl = document.getElementById("apsPopDetail");
+    const expiryEl = document.getElementById("apsExpiry");
+    const closeEl = document.getElementById("apsPopClose");
+    const statusButtons = popover.querySelectorAll("[data-status-option]");
+
+    function positionPopover(source) {
+      const rect = source.getBoundingClientRect();
+      const margin = 8;
+      const width = popover.offsetWidth || 320;
+      const height = popover.offsetHeight || 360;
+      let left = rect.left - 130;
+      let top = rect.bottom + 6;
+
+      left = Math.max(margin, Math.min(left, window.innerWidth - width - margin));
+      if (top + height > window.innerHeight - margin) {
+        top = Math.max(margin, rect.top - height - 6);
+      }
+
+      popover.style.left = `${left}px`;
+      popover.style.top = `${top}px`;
+    }
+
+    function openPopover(source) {
+      const statusKey = source.dataset.currentStatusKey || "NONE";
+      const statusClass = source.dataset.statusClass || "none";
+      const glyph = source.dataset.glyph || ".";
+
+      operatorId.value = source.dataset.operatorId;
+      sectionId.value = source.dataset.sectionId;
+      nameEl.textContent = source.dataset.operatorName;
+      sectionEl.textContent = source.dataset.sectionLabel;
+      detailEl.textContent = source.dataset.detail;
+      badgeEl.className = `aps-badge aps-badge-${statusClass}`;
+      badgeEl.textContent = `${glyph} ${source.dataset.currentStatus || "Not validated"}`;
+      expiryEl.value = source.dataset.expiry || expiryEl.dataset.default;
+
+      statusButtons.forEach((button) => {
+        const isCurrent = button.value === statusKey;
+        button.disabled = isCurrent;
+        button.classList.toggle("is-current", isCurrent);
+      });
+
+      popover.style.visibility = "hidden";
+      popover.classList.remove("hidden");
+      popover.setAttribute("aria-hidden", "false");
+      positionPopover(source);
+      popover.style.visibility = "";
+    }
+
+    function closePopover() {
+      popover.classList.add("hidden");
+      popover.setAttribute("aria-hidden", "true");
+    }
+
+    document.addEventListener("click", (event) => {
+      const source = event.target.closest("[data-aps-cell]");
+      if (source) {
+        event.preventDefault();
+        openPopover(source);
+        return;
+      }
+
+      if (!popover.classList.contains("hidden") && !event.target.closest("#apsStatusPopover")) {
+        closePopover();
+      }
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") closePopover();
+    });
+
+    window.addEventListener("resize", closePopover);
+    closeEl.addEventListener("click", closePopover);
+  })();
+</script>
+{% endblock content %}

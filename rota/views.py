@@ -28,7 +28,7 @@ from .models import (
     StaffMember,
     WorkArea,
 )
-from .services.suite_overview import build_suite_overview
+from .services.suite_overview import build_isolator_display_layout, build_suite_overview
 
 
 # ------------------------------------------------------------
@@ -421,14 +421,14 @@ def daily_rota(request, year, month, day):
         "number",
         "name",
     )
+    display_rooms = build_isolator_display_layout(cleanrooms)
     rooms_grid = []
 
-    for room in cleanrooms:
+    for room_card_layout in display_rooms:
+        room = room_card_layout["room"]
         isolators = list(room.isolators.all().order_by("order", "name"))
-
-        # Keep your existing split logic for now.
-        right_wall = isolators[:2]
-        left_wall = isolators[2:4]
+        left_wall = room_card_layout["left_wall"]
+        right_wall = room_card_layout["right_wall"]
 
         for isolator in left_wall + right_wall:
             isolator.active_sections = [
@@ -456,6 +456,23 @@ def daily_rota(request, year, month, day):
             isolator.operator_assignments = ops
             isolator.operator_slots = ops + [None] * max(0, 6 - len(ops))
             isolator.has_assignments = bool(ops)
+
+            # Build a section -> {AM, PM} assignment mapping to make templates
+            # render Left/Right in the requested top/bottom order depending
+            # on which wall the isolator is displayed on.
+            section_map = {}
+            for section in isolator.active_sections:
+                am = [a for a in isolator_assignments.get(isolator.id, []) if a.shift_block == Assignment.ShiftBlock.AM and a.isolator_section_id == section.id]
+                pm = [a for a in isolator_assignments.get(isolator.id, []) if a.shift_block == Assignment.ShiftBlock.PM and a.isolator_section_id == section.id]
+                section_map[section.section] = {
+                    "section": section,
+                    "am_assignments": am,
+                    "pm_assignments": pm,
+                    "am_count": len(am),
+                    "pm_count": len(pm),
+                }
+
+            isolator.section_map = section_map
 
         supervisor_bucket = room_supervisors_by_room.get(
             room.id,
@@ -512,6 +529,245 @@ def daily_rota(request, year, month, day):
     context.update(date_navigation_context(target_date))
 
     return render(request, "rota/daily_rota.html", context)
+
+
+@login_required
+@permission_required("rota.rota_viewer", raise_exception=True)
+def isolator_assignment(request, year, month, day, isolator_id):
+    target_date = date(int(year), int(month), int(day))
+    rotaday, _ = RotaDay.objects.get_or_create(date=target_date)
+
+    isolator = get_object_or_404(
+        Isolator.objects.select_related("clean_room"),
+        pk=isolator_id,
+    )
+
+    shift_templates = list(ShiftTemplate.objects.all().order_by("start_time"))
+    if not shift_templates:
+        messages.error(request, "No shift templates configured.")
+        today = date.today()
+        return redirect("daily_rota", year=today.year, month=today.month, day=today.day)
+
+    assignments_qs = (
+        Assignment.objects.filter(rotaday=rotaday, isolator=isolator)
+        .select_related(
+            "staff",
+            "staff__crew",
+            "clean_room",
+            "isolator",
+            "isolator_section",
+            "work_area",
+            "shift",
+        )
+    )
+
+    existing_assignments = list(assignments_qs.order_by("staff__first_name", "staff__last_name"))
+    existing_am = [
+        assignment
+        for assignment in existing_assignments
+        if assignment.shift_block == Assignment.ShiftBlock.AM
+    ]
+    existing_pm = [
+        assignment
+        for assignment in existing_assignments
+        if assignment.shift_block == Assignment.ShiftBlock.PM
+    ]
+
+    supervisor_assignments = (
+        Assignment.objects.filter(
+            rotaday=rotaday,
+            clean_room=isolator.clean_room,
+            location_type=Assignment.LocationType.ROOM,
+            is_room_supervisor=True,
+        )
+        .select_related("staff", "staff__crew", "shift")
+        .order_by("shift_block", "staff__first_name", "staff__last_name")
+    )
+
+    selected_am_ids = [assignment.staff_id for assignment in existing_am]
+    selected_pm_ids = [assignment.staff_id for assignment in existing_pm]
+    selected_am_sections = [assignment.isolator_section_id for assignment in existing_am]
+    selected_pm_sections = [assignment.isolator_section_id for assignment in existing_pm]
+    operator_slots = existing_assignments + [None] * max(0, 6 - len(existing_assignments))
+
+    staff_list = (
+        StaffMember.objects.filter(is_active=True)
+        .select_related("crew")
+        .order_by("crew__sort_order", "crew__name", "first_name", "last_name")
+    )
+    operators = staff_list.filter(role="OPERATIVE")
+    supervisors = staff_list.filter(role="SUPERVISOR")
+
+    active_sections = list(isolator.sections.filter(is_active=True).order_by("section"))
+    section_choices = {
+        section.id: section for section in active_sections
+    }
+
+    if request.method == "POST":
+        if not is_rota_manager(request.user):
+            raise PermissionDenied("You do not have permission to edit the rota.")
+
+        chosen_ops = []
+        for index in range(1, 7):
+            staff_id = (request.POST.get(f"op{index}_staff") or "").strip()
+            block = (request.POST.get(f"op{index}_block") or "").strip().upper()
+            section_id = (request.POST.get(f"op{index}_section") or "").strip()
+
+            if staff_id and block and not section_id:
+                messages.error(
+                    request,
+                    (
+                        f"Operator {index} requires an isolator section when "
+                        "staff and shift block are selected."
+                    ),
+                )
+                return redirect("isolator_assignment", year=year, month=month, day=day, isolator_id=isolator.id)
+
+            if staff_id and block and section_id:
+                chosen_ops.append((int(staff_id), block, int(section_id)))
+
+        seen = set()
+        chosen_ops = [
+            item
+            for item in chosen_ops
+            if not ((item[0], item[1]) in seen or seen.add((item[0], item[1])))
+        ]
+
+        selected_pairs = {(staff_id, block) for staff_id, block, _ in chosen_ops}
+
+        allowed_qs = (
+            Assignment.objects.filter(rotaday=rotaday, isolator=isolator)
+            .filter(location_type=Assignment.LocationType.ISOLATOR)
+            .values_list("id", flat=True)
+        )
+
+        conflicts = Assignment.objects.none()
+        if selected_pairs:
+            conflict_q = models.Q()
+            for staff_id, block in selected_pairs:
+                conflict_q |= models.Q(staff_id=staff_id, shift_block=block)
+            conflicts = (
+                Assignment.objects.filter(rotaday=rotaday)
+                .filter(conflict_q)
+                .exclude(id__in=allowed_qs)
+                .select_related("staff", "clean_room", "isolator", "work_area")
+            )
+
+        if conflicts.exists():
+            for assignment in conflicts:
+                messages.error(
+                    request,
+                    (
+                        f"{assignment.staff.full_name} is already assigned to "
+                        f"{assignment_location_label(assignment)} "
+                        f"({assignment.shift_block})."
+                    ),
+                )
+            return redirect("isolator_assignment", year=year, month=month, day=day, isolator_id=isolator.id)
+
+        before_json = {
+            "isolator": isolator.name,
+            "AM": [assignment.staff.full_name for assignment in existing_am],
+            "PM": [assignment.staff.full_name for assignment in existing_pm],
+        }
+
+        try:
+            with transaction.atomic():
+                Assignment.objects.filter(
+                    rotaday=rotaday,
+                    isolator=isolator,
+                    location_type=Assignment.LocationType.ISOLATOR,
+                ).delete()
+
+                for staff_id, block, section_id in chosen_ops:
+                    assignment = Assignment(
+                        rotaday=rotaday,
+                        staff_id=staff_id,
+                        clean_room=isolator.clean_room,
+                        isolator=isolator,
+                        isolator_section_id=section_id,
+                        shift=shift_for_block(block),
+                        location_type=Assignment.LocationType.ISOLATOR,
+                        shift_block=block,
+                    )
+                    assignment.full_clean()
+                    assignment.save()
+
+                after_staff_am = (
+                    StaffMember.objects.filter(
+                        id__in=[staff_id for staff_id, block, _ in chosen_ops if block == Assignment.ShiftBlock.AM]
+                    )
+                    .order_by("crew__sort_order", "crew__name", "first_name", "last_name")
+                    .values_list("first_name", "last_name")
+                )
+                after_staff_pm = (
+                    StaffMember.objects.filter(
+                        id__in=[staff_id for staff_id, block, _ in chosen_ops if block == Assignment.ShiftBlock.PM]
+                    )
+                    .order_by("crew__sort_order", "crew__name", "first_name", "last_name")
+                    .values_list("first_name", "last_name")
+                )
+
+                after_json = {
+                    "isolator": isolator.name,
+                    "AM": [f"{first_name} {last_name}".strip() for first_name, last_name in after_staff_am],
+                    "PM": [f"{first_name} {last_name}".strip() for first_name, last_name in after_staff_pm],
+                }
+
+                RotaDayAuditEvent.objects.create(
+                    rotaday=rotaday,
+                    event_type=RotaDayAuditEvent.ASSIGNMENT_UPDATED,
+                    actor=request.user,
+                    summary=f"Updated isolator assignments for {isolator.name}.",
+                    before_json=before_json,
+                    after_json=after_json,
+                )
+
+        except IntegrityError:
+            messages.error(
+                request,
+                (
+                    "Conflict detected while saving: one or more people are already "
+                    "assigned in that AM/PM block."
+                ),
+            )
+            return redirect("isolator_assignment", year=year, month=month, day=day, isolator_id=isolator.id)
+
+        except ValidationError as exc:
+            add_validation_messages(request, exc)
+            return redirect("isolator_assignment", year=year, month=month, day=day, isolator_id=isolator.id)
+
+        messages.success(request, f"Assignments updated for {isolator.name}.")
+        return redirect("daily_rota", year=year, month=month, day=day)
+
+    context = {
+        "date": target_date,
+        "today": date.today(),
+        "rotaday": rotaday,
+        "isolator": isolator,
+        "clean_room": isolator.clean_room,
+        "staff_list": staff_list,
+        "operators": operators,
+        "supervisors": supervisors,
+        "active_sections": active_sections,
+        "existing_am": existing_am,
+        "existing_pm": existing_pm,
+        "operator_slots": operator_slots,
+        "selected_am_ids": selected_am_ids,
+        "selected_pm_ids": selected_pm_ids,
+        "selected_am_sections": selected_am_sections,
+        "selected_pm_sections": selected_pm_sections,
+        "room_supervisors_am": list(
+            supervisor_assignments.filter(shift_block=Assignment.ShiftBlock.AM)
+        ),
+        "room_supervisors_pm": list(
+            supervisor_assignments.filter(shift_block=Assignment.ShiftBlock.PM)
+        ),
+        "overview": build_suite_overview(rotaday),
+    }
+    context.update(date_navigation_context(target_date))
+
+    return render(request, "rota/isolator_assignment.html", context)
 
 
 # ------------------------------------------------------------

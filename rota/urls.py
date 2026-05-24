@@ -5,6 +5,11 @@ urlpatterns = [
     path("", views.home, name="home"),
     path("calendar/<int:year>/<int:month>/", views.monthly_calendar, name="monthly_calendar"),
     path("day/<int:year>/<int:month>/<int:day>/", views.daily_rota, name="daily_rota"),
+    path(
+        "day/<int:year>/<int:month>/<int:day>/isolator/<int:isolator_id>/",
+        views.isolator_assignment,
+        name="isolator_assignment",
+    ),
     path("staff/", views.staff_list, name="staff_list"),
     path("staff/add/", views.staff_create, name="staff_create"),
     path("staff/search/", views.staff_search, name="staff_search"),

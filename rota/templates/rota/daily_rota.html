@@ -242,9 +242,31 @@
                 <div class="iso-card">
                   <div class="iso-card-head">
                     <div>
-                      <div class="iso-card-name">{{ iso.name }}</div>
+                      <div class="iso-card-name">{{ iso.display_label|default:iso.name }}</div>
                       <div class="iso-card-meta">AM {{ iso.operator_assignments_am|length }} &middot; PM {{ iso.operator_assignments_pm|length }}</div>
                     </div>
+                  </div>
+
+                  <div class="iso-mini-sections">
+                    {% comment %}Left wall: show R above L{% endcomment %}
+                    {% if iso.section_map.R %}
+                      <div class="mini-section mini-top">
+                        <div class="mini-title">R</div>
+                        <div class="mini-body">
+                          <div class="mini-row">AM: {% if iso.section_map.R.am_assignments %}{{ iso.section_map.R.am_assignments|staff_names }}{% else %}open{% endif %}</div>
+                          <div class="mini-row">PM: {% if iso.section_map.R.pm_assignments %}{{ iso.section_map.R.pm_assignments|staff_names }}{% else %}open{% endif %}</div>
+                        </div>
+                      </div>
+                    {% endif %}
+                    {% if iso.section_map.L %}
+                      <div class="mini-section mini-bottom">
+                        <div class="mini-title">L</div>
+                        <div class="mini-body">
+                          <div class="mini-row">AM: {% if iso.section_map.L.am_assignments %}{{ iso.section_map.L.am_assignments|staff_names }}{% else %}open{% endif %}</div>
+                          <div class="mini-row">PM: {% if iso.section_map.L.pm_assignments %}{{ iso.section_map.L.pm_assignments|staff_names }}{% else %}open{% endif %}</div>
+                        </div>
+                      </div>
+                    {% endif %}
                   </div>
 
                   <div class="shift-summaries">
@@ -273,11 +295,10 @@
                   <div class="iso-actions">
                     <button type="button" class="btn btn-outline" data-open-modal="modal-duties-{{ iso.id }}">Show Duties</button>
                     {% if user.is_superuser or perms.rota.rota_manager %}
-                      <button type="button" class="btn btn-success" data-open-modal="modal-isolator-{{ iso.id }}">Edit Assignments</button>
+                      <a class="btn btn-success" href="{% url 'isolator_assignment' date.year date.month date.day iso.id %}">Edit Assignments</a>
                     {% endif %}
                   </div>
 
-                  {% include "rota/partials/isolator_modal.html" with iso=iso room=block.room date=date staff_list=staff_list supervisors=supervisors %}
                   {% include "rota/partials/isolator_duties_modal.html" with iso=iso date=date %}
                 </div>
               {% empty %}
@@ -291,9 +312,31 @@
                 <div class="iso-card">
                   <div class="iso-card-head">
                     <div>
-                      <div class="iso-card-name">{{ iso.name }}</div>
+                      <div class="iso-card-name">{{ iso.display_label|default:iso.name }}</div>
                       <div class="iso-card-meta">AM {{ iso.operator_assignments_am|length }} &middot; PM {{ iso.operator_assignments_pm|length }}</div>
                     </div>
+                  </div>
+
+                  <div class="iso-mini-sections">
+                    {% comment %}Right wall: show L above R{% endcomment %}
+                    {% if iso.section_map.L %}
+                      <div class="mini-section mini-top">
+                        <div class="mini-title">L</div>
+                        <div class="mini-body">
+                          <div class="mini-row">AM: {% if iso.section_map.L.am_assignments %}{{ iso.section_map.L.am_assignments|staff_names }}{% else %}open{% endif %}</div>
+                          <div class="mini-row">PM: {% if iso.section_map.L.pm_assignments %}{{ iso.section_map.L.pm_assignments|staff_names }}{% else %}open{% endif %}</div>
+                        </div>
+                      </div>
+                    {% endif %}
+                    {% if iso.section_map.R %}
+                      <div class="mini-section mini-bottom">
+                        <div class="mini-title">R</div>
+                        <div class="mini-body">
+                          <div class="mini-row">AM: {% if iso.section_map.R.am_assignments %}{{ iso.section_map.R.am_assignments|staff_names }}{% else %}open{% endif %}</div>
+                          <div class="mini-row">PM: {% if iso.section_map.R.pm_assignments %}{{ iso.section_map.R.pm_assignments|staff_names }}{% else %}open{% endif %}</div>
+                        </div>
+                      </div>
+                    {% endif %}
                   </div>
 
                   <div class="shift-summaries">
@@ -322,11 +365,10 @@
                   <div class="iso-actions">
                     <button type="button" class="btn btn-outline" data-open-modal="modal-duties-{{ iso.id }}">Show Duties</button>
                     {% if user.is_superuser or perms.rota.rota_manager %}
-                      <button type="button" class="btn btn-success" data-open-modal="modal-isolator-{{ iso.id }}">Edit Assignments</button>
+                      <a class="btn btn-success" href="{% url 'isolator_assignment' date.year date.month date.day iso.id %}">Edit Assignments</a>
                     {% endif %}
                   </div>
 
-                  {% include "rota/partials/isolator_modal.html" with iso=iso room=block.room date=date staff_list=staff_list supervisors=supervisors %}
                   {% include "rota/partials/isolator_duties_modal.html" with iso=iso date=date %}
                 </div>
               {% empty %}
@@ -369,15 +411,4 @@
   {% endif %}
 </div>
 
-{% if request.GET.edit_isolator %}
-  <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      var modal = document.getElementById("modal-isolator-{{ request.GET.edit_isolator|escapejs }}");
-      if (!modal) return;
-      modal.classList.remove("hidden");
-      modal.setAttribute("aria-hidden", "false");
-      document.documentElement.classList.add("overflow-hidden");
-    });
-  </script>
-{% endif %}
 {% endblock content %}

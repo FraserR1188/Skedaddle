@@ -193,6 +193,36 @@ class APSSectionAssignmentWorkflowTests(TestCase):
             Assignment.ShiftBlock.PM,
         )
 
+    def test_isolator_assignment_page_renders_and_saves(self):
+        url = reverse(
+            "isolator_assignment",
+            kwargs={"year": 2026, "month": 5, "day": 2, "isolator_id": self.isolator.id},
+        )
+
+        self.client.force_login(self.viewer_user)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+        self.client.force_login(self.manager_user)
+        post_response = self.client.post(
+            url,
+            self.build_post_data(
+                op1_staff=str(self.operator_left.id),
+                op1_block="AM",
+                op1_section=str(self.left_section.id),
+            ),
+        )
+
+        self.assertEqual(post_response.status_code, 302)
+        self.assertTrue(
+            Assignment.objects.filter(
+                rotaday=self.rotaday,
+                isolator=self.isolator,
+                staff=self.operator_left,
+                location_type=Assignment.LocationType.ISOLATOR,
+            ).exists()
+        )
+
     def test_manager_cannot_save_operator_row_without_section(self):
         self.client.force_login(self.manager_user)
 
