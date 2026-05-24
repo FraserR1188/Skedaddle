@@ -355,3 +355,30 @@ class APSSectionAssignmentWorkflowTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Section not recorded")
+
+    def test_anonymous_post_redirects_to_login(self):
+        response = self.client.post(self.url, self.build_post_data())
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("login", response.url.lower())
+
+    def test_superuser_can_save_assignments(self):
+        user_model = get_user_model()
+        superuser = user_model.objects.create_superuser(
+            username="super",
+            email="super@example.com",
+            password="testpass123",
+        )
+
+        self.client.force_login(superuser)
+
+        response = self.client.post(
+            self.url,
+            self.build_post_data(
+                op1_staff=str(self.operator_left.id),
+                op1_block="AM",
+                op1_section=str(self.left_section.id),
+            ),
+        )
+
+        self.assertEqual(response.status_code, 302)
+
