@@ -29,7 +29,7 @@ from .models import (
     WorkArea,
 )
 from .services.suite_overview import build_isolator_display_layout, build_suite_overview
-from validation.services import aps_target_sections_for_isolator
+from validation.services import aps_target_sections_for_isolator, isolator_base_label
 
 
 # ------------------------------------------------------------
@@ -540,6 +540,7 @@ def isolator_assignment(request, year, month, day, isolator_id):
         Isolator.objects.select_related("clean_room"),
         pk=isolator_id,
     )
+    isolator.display_label = isolator_base_label(isolator)
 
     shift_templates = list(ShiftTemplate.objects.all().order_by("start_time"))
     if not shift_templates:

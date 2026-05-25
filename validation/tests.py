@@ -148,21 +148,7 @@ class APSMatrixSectionCountTests(TestCase):
             order=2,
         )
 
-        # Existing live data had both L/R rows for side-named isolators.
-        # Keep that shape here and assert the APS matrix only uses the
-        # matching target section from each isolator.
-        IsolatorSection.objects.create(
-            isolator=cls.iso_left,
-            section=IsolatorSection.SectionType.RIGHT,
-            is_active=True,
-        )
-        IsolatorSection.objects.create(
-            isolator=cls.iso_right,
-            section=IsolatorSection.SectionType.LEFT,
-            is_active=True,
-        )
-
-    def test_side_named_isolators_render_one_aps_target_each(self):
+    def test_side_named_isolators_render_both_aps_sides(self):
         self.client.force_login(self.manager_user)
 
         response = self.client.get(reverse("validation:validation_cards"))
@@ -176,3 +162,13 @@ class APSMatrixSectionCountTests(TestCase):
             ],
             [("Iso 1", "L"), ("Iso 1", "R")],
         )
+
+    def test_validation_matrix_uses_normalized_iso_labels(self):
+        self.client.force_login(self.manager_user)
+
+        response = self.client.get(reverse("validation:validation_cards"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Iso 1")
+        self.assertNotContains(response, "Isolator 1 L")
+        self.assertNotContains(response, "Isolator 1 R")

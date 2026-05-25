@@ -1,6 +1,6 @@
 {% extends "rota/base.html" %}
 
-{% block title %}Isolator Assignment - {{ isolator.name }} - {{ date }}{% endblock %}
+{% block title %}Isolator Assignment - {{ isolator.display_label|default:isolator.name }} - {{ date }}{% endblock %}
 {% block topbar_title %}Isolator{% endblock %}
 {% block topbar_context %} <span aria-hidden="true">/</span> {{ isolator.display_label|default:isolator.name }}{% endblock %}
 

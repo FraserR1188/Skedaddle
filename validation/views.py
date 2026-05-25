@@ -13,7 +13,7 @@ from django.views.decorators.http import require_POST
 from rota.models import StaffMember
 from .forms import OperatorValidationForm
 from .models import IsolatorSection, OperatorValidation
-from .services import aps_target_sections_from, isolator_base_label
+from .services import aps_matrix_sections_from, isolator_base_label
 
 
 EXPIRING_SOON_DAYS = 30
@@ -119,7 +119,7 @@ def _build_validation_matrix_context(request):
     )
     staff_ids = [p.id for p in staff]
 
-    sections = aps_target_sections_from(
+    sections = aps_matrix_sections_from(
         IsolatorSection.objects.filter(is_active=True)
         .select_related("isolator", "isolator__clean_room")
         .order_by("isolator__clean_room__number", "isolator__order", "section", "id")

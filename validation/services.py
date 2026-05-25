@@ -61,11 +61,10 @@ def is_aps_target_section(section: IsolatorSection) -> bool:
     """
     True when a section should appear as an APS validation target.
 
-    This prevents side-named isolator rows from doubling the matrix:
-    "Isolator 1 L" contributes L only and "Isolator 1 R" contributes R only.
+    APS always exposes both Left and Right sides for each active isolator
+    section so the matrix matches the assignment layout.
     """
-    declared_side = isolator_declared_side(section.isolator)
-    return declared_side is None or section.section == declared_side
+    return section.is_active
 
 
 def aps_section_sort_key(section: IsolatorSection) -> tuple:
@@ -87,6 +86,38 @@ def aps_target_sections_from(sections) -> list[IsolatorSection]:
         [section for section in sections if section.is_active and is_aps_target_section(section)],
         key=aps_section_sort_key,
     )
+
+
+def aps_matrix_sections_from(sections) -> list[IsolatorSection]:
+    """
+    Return one L/R pair per logical isolator for the APS matrix.
+
+    Side-suffixed isolator rows can carry duplicate physical sections, so the
+    matrix groups by the normalized isolator label and keeps the first active
+    section seen for each side.
+    """
+    grouped: dict[str, dict[str, IsolatorSection]] = {}
+    order: list[str] = []
+
+    for section in aps_target_sections_from(sections):
+        group_key = isolator_base_label(section.isolator)
+        side_bucket = grouped.setdefault(group_key, {})
+        if group_key not in order:
+            order.append(group_key)
+        side_bucket.setdefault(section.section, section)
+
+    matrix_sections: list[IsolatorSection] = []
+    for group_key in order:
+        side_bucket = grouped[group_key]
+        for side in (
+            IsolatorSection.SectionType.LEFT,
+            IsolatorSection.SectionType.RIGHT,
+        ):
+            section = side_bucket.get(side)
+            if section:
+                matrix_sections.append(section)
+
+    return matrix_sections
 
 
 def aps_target_sections_for_isolator(isolator) -> list[IsolatorSection]:
