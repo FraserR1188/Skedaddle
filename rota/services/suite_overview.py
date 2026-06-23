@@ -4,6 +4,7 @@ import re
 from collections import defaultdict
 
 from rota.models import Assignment, CleanRoom, WorkArea
+from validation.services import aps_target_sections_for_isolator
 
 
 MAX_ISOLATOR_STAFF_PER_BLOCK = 6
@@ -219,9 +220,7 @@ def build_suite_overview(rotaday):
             all_issues.extend(isolator_issues)
 
             section_cards = []
-            active_sections = [
-                section for section in isolator.sections.all() if section.is_active
-            ]
+            active_sections = aps_target_sections_for_isolator(isolator)
 
             for section in active_sections:
                 section_am = [

@@ -14,7 +14,7 @@ Skedaddle is an internal rota and validation management system designed for the
 Medicines Manufacturing Centre (MMC) which is an aseptic manufacturing
 environment/facility.
 
-The platform provides a visual structure for AM/PM shift allocation, isolator
+The platform provides a visual structure for shift allocation, isolator
 assignment control, operator validation tracking and controlled publication workflows
 to support a compliant, efficient rota management within a regulated healthcare
 setting.

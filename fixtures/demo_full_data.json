@@ -1,0 +1,4747 @@
+[
+  {
+    "model": "auth.user",
+    "fields": {
+      "password": "pbkdf2_sha256$1000000$5Vbn0yLlhPGz5rOaGZUFVv$kRFMmwLRJ9paBd6d/6zhaIn+NRDcewunZpMzIsB2pq4=",
+      "last_login": "2026-06-19T13:33:45.692Z",
+      "is_superuser": true,
+      "username": "demo_admin",
+      "first_name": "",
+      "last_name": "",
+      "email": "demo_admin@example.com",
+      "is_staff": true,
+      "is_active": true,
+      "date_joined": "2026-01-12T14:16:57.155Z",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "rota.cleanroom",
+    "pk": 1,
+    "fields": {
+      "number": 1,
+      "name": "Cleanroom 1"
+    }
+  },
+  {
+    "model": "rota.cleanroom",
+    "pk": 2,
+    "fields": {
+      "number": 2,
+      "name": "Cleanroom 2"
+    }
+  },
+  {
+    "model": "rota.cleanroom",
+    "pk": 3,
+    "fields": {
+      "number": 3,
+      "name": "Cleanroom 3"
+    }
+  },
+  {
+    "model": "rota.cleanroom",
+    "pk": 4,
+    "fields": {
+      "number": 4,
+      "name": "Cleanroom 4"
+    }
+  },
+  {
+    "model": "rota.isolator",
+    "pk": 1,
+    "fields": {
+      "clean_room": 1,
+      "name": "Isolator 1 R",
+      "order": 0
+    }
+  },
+  {
+    "model": "rota.isolator",
+    "pk": 2,
+    "fields": {
+      "clean_room": 1,
+      "name": "Isolator 1 L",
+      "order": 1
+    }
+  },
+  {
+    "model": "rota.isolator",
+    "pk": 3,
+    "fields": {
+      "clean_room": 1,
+      "name": "Isolator 2 R",
+      "order": 2
+    }
+  },
+  {
+    "model": "rota.isolator",
+    "pk": 4,
+    "fields": {
+      "clean_room": 1,
+      "name": "Isolator 2 L",
+      "order": 2
+    }
+  },
+  {
+    "model": "rota.isolator",
+    "pk": 7,
+    "fields": {
+      "clean_room": 2,
+      "name": "Isolator 3 L",
+      "order": 1
+    }
+  },
+  {
+    "model": "rota.isolator",
+    "pk": 8,
+    "fields": {
+      "clean_room": 2,
+      "name": "Isolator 3 R",
+      "order": 0
+    }
+  },
+  {
+    "model": "rota.isolator",
+    "pk": 13,
+    "fields": {
+      "clean_room": 3,
+      "name": "Isolator 4 L",
+      "order": 0
+    }
+  },
+  {
+    "model": "rota.isolator",
+    "pk": 14,
+    "fields": {
+      "clean_room": 3,
+      "name": "Isolator 4 R",
+      "order": 1
+    }
+  },
+  {
+    "model": "rota.isolator",
+    "pk": 15,
+    "fields": {
+      "clean_room": 3,
+      "name": "Isolator 5 R",
+      "order": 2
+    }
+  },
+  {
+    "model": "rota.isolator",
+    "pk": 16,
+    "fields": {
+      "clean_room": 3,
+      "name": "Isolator 5 L",
+      "order": 4
+    }
+  },
+  {
+    "model": "rota.isolator",
+    "pk": 17,
+    "fields": {
+      "clean_room": 4,
+      "name": "Isolator 6 R",
+      "order": 0
+    }
+  },
+  {
+    "model": "rota.isolator",
+    "pk": 18,
+    "fields": {
+      "clean_room": 4,
+      "name": "Isolator 6 L",
+      "order": 1
+    }
+  },
+  {
+    "model": "rota.crew",
+    "pk": 1,
+    "fields": {
+      "name": "Crew A",
+      "sort_order": 0
+    }
+  },
+  {
+    "model": "rota.crew",
+    "pk": 2,
+    "fields": {
+      "name": "Crew B",
+      "sort_order": 0
+    }
+  },
+  {
+    "model": "rota.crew",
+    "pk": 3,
+    "fields": {
+      "name": "Crew C",
+      "sort_order": 0
+    }
+  },
+  {
+    "model": "rota.staffmember",
+    "pk": 1,
+    "fields": {
+      "first_name": "Arin",
+      "last_name": "Powell",
+      "email": "arinpowell@nhs.net",
+      "role": "OPERATIVE",
+      "crew": 1,
+      "is_active": true
+    }
+  },
+  {
+    "model": "rota.staffmember",
+    "pk": 2,
+    "fields": {
+      "first_name": "Morton",
+      "last_name": "Ibbot",
+      "email": "mortonibbot@nhs.net",
+      "role": "OPERATIVE",
+      "crew": 1,
+      "is_active": true
+    }
+  },
+  {
+    "model": "rota.staffmember",
+    "pk": 3,
+    "fields": {
+      "first_name": "Guy",
+      "last_name": "Selby",
+      "email": "guyselby@nhs.net",
+      "role": "OPERATIVE",
+      "crew": 1,
+      "is_active": true
+    }
+  },
+  {
+    "model": "rota.staffmember",
+    "pk": 4,
+    "fields": {
+      "first_name": "Chester",
+      "last_name": "Low",
+      "email": "chesterlow@nhs.net",
+      "role": "OPERATIVE",
+      "crew": 1,
+      "is_active": true
+    }
+  },
+  {
+    "model": "rota.staffmember",
+    "pk": 5,
+    "fields": {
+      "first_name": "Rudyard",
+      "last_name": "Garrard",
+      "email": "rgarrad@nhs.net",
+      "role": "OPERATIVE",
+      "crew": 1,
+      "is_active": true
+    }
+  },
+  {
+    "model": "rota.staffmember",
+    "pk": 6,
+    "fields": {
+      "first_name": "Jervis",
+      "last_name": "Curtis",
+      "email": "jcurtis@nhs.net",
+      "role": "OPERATIVE",
+      "crew": 1,
+      "is_active": true
+    }
+  },
+  {
+    "model": "rota.staffmember",
+    "pk": 7,
+    "fields": {
+      "first_name": "Conway",
+      "last_name": "York",
+      "email": "cyork@nhs.net",
+      "role": "OPERATIVE",
+      "crew": 1,
+      "is_active": true
+    }
+  },
+  {
+    "model": "rota.staffmember",
+    "pk": 8,
+    "fields": {
+      "first_name": "Baylor",
+      "last_name": "Tarvis",
+      "email": "btarvis@nhs.net",
+      "role": "OPERATIVE",
+      "crew": 1,
+      "is_active": true
+    }
+  },
+  {
+    "model": "rota.staffmember",
+    "pk": 9,
+    "fields": {
+      "first_name": "Landon",
+      "last_name": "Symonds",
+      "email": "lsymonds@nhs.net",
+      "role": "SUPERVISOR",
+      "crew": 1,
+      "is_active": true
+    }
+  },
+  {
+    "model": "rota.staffmember",
+    "pk": 10,
+    "fields": {
+      "first_name": "Kelcey",
+      "last_name": "Pender",
+      "email": "kpender@nhs.net",
+      "role": "SUPERVISOR",
+      "crew": 1,
+      "is_active": true
+    }
+  },
+  {
+    "model": "rota.staffmember",
+    "pk": 11,
+    "fields": {
+      "first_name": "Dana",
+      "last_name": "Debenham",
+      "email": "ddebenham@nhs.net",
+      "role": "OPERATIVE",
+      "crew": 2,
+      "is_active": true
+    }
+  },
+  {
+    "model": "rota.staffmember",
+    "pk": 12,
+    "fields": {
+      "first_name": "Shaye",
+      "last_name": "Bristol",
+      "email": "sbristol@nhs.net",
+      "role": "OPERATIVE",
+      "crew": 2,
+      "is_active": true
+    }
+  },
+  {
+    "model": "rota.staffmember",
+    "pk": 13,
+    "fields": {
+      "first_name": "Driskoll",
+      "last_name": "Oliver",
+      "email": "doliver@nhs.net",
+      "role": "OPERATIVE",
+      "crew": 2,
+      "is_active": true
+    }
+  },
+  {
+    "model": "rota.staffmember",
+    "pk": 14,
+    "fields": {
+      "first_name": "Ulysses",
+      "last_name": "Ayers",
+      "email": "uayers@nhs.net",
+      "role": "OPERATIVE",
+      "crew": 2,
+      "is_active": true
+    }
+  },
+  {
+    "model": "rota.staffmember",
+    "pk": 15,
+    "fields": {
+      "first_name": "Herman",
+      "last_name": "Wilcox",
+      "email": "hwilcox@nhs.net",
+      "role": "SUPERVISOR",
+      "crew": 2,
+      "is_active": true
+    }
+  },
+  {
+    "model": "rota.staffmember",
+    "pk": 16,
+    "fields": {
+      "first_name": "Kester",
+      "last_name": "Penner",
+      "email": "kpenner@nhs.net",
+      "role": "SUPERVISOR",
+      "crew": 2,
+      "is_active": true
+    }
+  },
+  {
+    "model": "rota.shifttemplate",
+    "pk": 1,
+    "fields": {
+      "name": "Early",
+      "start_time": "07:00:00",
+      "end_time": "15:00:00"
+    }
+  },
+  {
+    "model": "rota.shifttemplate",
+    "pk": 2,
+    "fields": {
+      "name": "Core",
+      "start_time": "09:00:00",
+      "end_time": "17:00:00"
+    }
+  },
+  {
+    "model": "rota.shifttemplate",
+    "pk": 3,
+    "fields": {
+      "name": "Late",
+      "start_time": "12:00:00",
+      "end_time": "20:00:00"
+    }
+  },
+  {
+    "model": "rota.workarea",
+    "pk": 2,
+    "fields": {
+      "name": "Clean MAL",
+      "area_type": "MAL",
+      "sort_order": 10,
+      "is_active": true,
+      "required_staff_am": 2,
+      "required_staff_pm": 2,
+      "requires_supervisor": false,
+      "requires_validation": false
+    }
+  },
+  {
+    "model": "rota.workarea",
+    "pk": 3,
+    "fields": {
+      "name": "Dirty MAL",
+      "area_type": "MAL",
+      "sort_order": 20,
+      "is_active": true,
+      "required_staff_am": 2,
+      "required_staff_pm": 2,
+      "requires_supervisor": false,
+      "requires_validation": false
+    }
+  },
+  {
+    "model": "rota.workarea",
+    "pk": 4,
+    "fields": {
+      "name": "Support Room 1",
+      "area_type": "SUPPORT_ROOM",
+      "sort_order": 30,
+      "is_active": true,
+      "required_staff_am": 2,
+      "required_staff_pm": 2,
+      "requires_supervisor": false,
+      "requires_validation": false
+    }
+  },
+  {
+    "model": "rota.workarea",
+    "pk": 5,
+    "fields": {
+      "name": "Support Room 2",
+      "area_type": "SUPPORT_ROOM",
+      "sort_order": 40,
+      "is_active": true,
+      "required_staff_am": 2,
+      "required_staff_pm": 2,
+      "requires_supervisor": false,
+      "requires_validation": false
+    }
+  },
+  {
+    "model": "rota.workarea",
+    "pk": 6,
+    "fields": {
+      "name": "Support Room 3",
+      "area_type": "SUPPORT_ROOM",
+      "sort_order": 50,
+      "is_active": true,
+      "required_staff_am": 2,
+      "required_staff_pm": 2,
+      "requires_supervisor": false,
+      "requires_validation": false
+    }
+  },
+  {
+    "model": "rota.workarea",
+    "pk": 7,
+    "fields": {
+      "name": "Support Room 4",
+      "area_type": "SUPPORT_ROOM",
+      "sort_order": 60,
+      "is_active": true,
+      "required_staff_am": 2,
+      "required_staff_pm": 2,
+      "requires_supervisor": false,
+      "requires_validation": false
+    }
+  },
+  {
+    "model": "rota.workarea",
+    "pk": 8,
+    "fields": {
+      "name": "Visual Inspection 1",
+      "area_type": "VISUAL_INSPECTION",
+      "sort_order": 70,
+      "is_active": true,
+      "required_staff_am": 2,
+      "required_staff_pm": 2,
+      "requires_supervisor": false,
+      "requires_validation": false
+    }
+  },
+  {
+    "model": "rota.workarea",
+    "pk": 9,
+    "fields": {
+      "name": "Visual Inspection 2",
+      "area_type": "VISUAL_INSPECTION",
+      "sort_order": 80,
+      "is_active": true,
+      "required_staff_am": 2,
+      "required_staff_pm": 2,
+      "requires_supervisor": false,
+      "requires_validation": false
+    }
+  },
+  {
+    "model": "rota.workarea",
+    "pk": 10,
+    "fields": {
+      "name": "Visual Inspection 3",
+      "area_type": "VISUAL_INSPECTION",
+      "sort_order": 90,
+      "is_active": true,
+      "required_staff_am": 2,
+      "required_staff_pm": 2,
+      "requires_supervisor": false,
+      "requires_validation": false
+    }
+  },
+  {
+    "model": "rota.workarea",
+    "pk": 11,
+    "fields": {
+      "name": "Visual Inspection 4",
+      "area_type": "VISUAL_INSPECTION",
+      "sort_order": 100,
+      "is_active": true,
+      "required_staff_am": 2,
+      "required_staff_pm": 2,
+      "requires_supervisor": false,
+      "requires_validation": false
+    }
+  },
+  {
+    "model": "rota.workarea",
+    "pk": 12,
+    "fields": {
+      "name": "Overlabelling",
+      "area_type": "OVERLABELLING",
+      "sort_order": 110,
+      "is_active": true,
+      "required_staff_am": 2,
+      "required_staff_pm": 2,
+      "requires_supervisor": false,
+      "requires_validation": false
+    }
+  },
+  {
+    "model": "rota.rotaday",
+    "pk": 1,
+    "fields": {
+      "date": "2026-01-12",
+      "status": "PUBLISHED",
+      "published_at": "2026-01-12T16:38:22.516Z",
+      "published_by": ["robfr"],
+      "publish_version": 2
+    }
+  },
+  {
+    "model": "rota.rotaday",
+    "pk": 2,
+    "fields": {
+      "date": "2026-01-13",
+      "status": "DRAFT",
+      "published_at": null,
+      "published_by": null,
+      "publish_version": 0
+    }
+  },
+  {
+    "model": "rota.rotaday",
+    "pk": 3,
+    "fields": {
+      "date": "2026-01-14",
+      "status": "DRAFT",
+      "published_at": null,
+      "published_by": null,
+      "publish_version": 0
+    }
+  },
+  {
+    "model": "rota.rotaday",
+    "pk": 4,
+    "fields": {
+      "date": "2026-01-15",
+      "status": "DRAFT",
+      "published_at": null,
+      "published_by": null,
+      "publish_version": 0
+    }
+  },
+  {
+    "model": "rota.rotaday",
+    "pk": 5,
+    "fields": {
+      "date": "2026-01-17",
+      "status": "DRAFT",
+      "published_at": null,
+      "published_by": null,
+      "publish_version": 0
+    }
+  },
+  {
+    "model": "rota.rotaday",
+    "pk": 6,
+    "fields": {
+      "date": "2026-01-26",
+      "status": "PUBLISHED",
+      "published_at": "2026-01-26T05:55:50.451Z",
+      "published_by": ["robfr"],
+      "publish_version": 1
+    }
+  },
+  {
+    "model": "rota.rotaday",
+    "pk": 7,
+    "fields": {
+      "date": "2026-02-16",
+      "status": "DRAFT",
+      "published_at": null,
+      "published_by": null,
+      "publish_version": 0
+    }
+  },
+  {
+    "model": "rota.rotaday",
+    "pk": 8,
+    "fields": {
+      "date": "2026-02-17",
+      "status": "DRAFT",
+      "published_at": null,
+      "published_by": null,
+      "publish_version": 0
+    }
+  },
+  {
+    "model": "rota.rotaday",
+    "pk": 9,
+    "fields": {
+      "date": "2026-04-29",
+      "status": "DRAFT",
+      "published_at": null,
+      "published_by": null,
+      "publish_version": 0
+    }
+  },
+  {
+    "model": "rota.rotaday",
+    "pk": 10,
+    "fields": {
+      "date": "2026-05-02",
+      "status": "DRAFT",
+      "published_at": null,
+      "published_by": null,
+      "publish_version": 0
+    }
+  },
+  {
+    "model": "rota.rotaday",
+    "pk": 11,
+    "fields": {
+      "date": "2026-05-23",
+      "status": "DRAFT",
+      "published_at": null,
+      "published_by": null,
+      "publish_version": 0
+    }
+  },
+  {
+    "model": "rota.rotaday",
+    "pk": 12,
+    "fields": {
+      "date": "2026-05-24",
+      "status": "DRAFT",
+      "published_at": null,
+      "published_by": null,
+      "publish_version": 0
+    }
+  },
+  {
+    "model": "rota.rotaday",
+    "pk": 13,
+    "fields": {
+      "date": "2026-05-25",
+      "status": "DRAFT",
+      "published_at": null,
+      "published_by": null,
+      "publish_version": 0
+    }
+  },
+  {
+    "model": "rota.rotaday",
+    "pk": 14,
+    "fields": {
+      "date": "2026-06-19",
+      "status": "DRAFT",
+      "published_at": null,
+      "published_by": null,
+      "publish_version": 0
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 1,
+    "fields": {
+      "rotaday": 1,
+      "event_type": "ASSIGNMENT_CREATED",
+      "timestamp": "2026-01-12T16:08:02.253Z",
+      "actor": null,
+      "summary": "Assigned Arin Powell to Cleanroom 1 � Isolator 1 R (Early)",
+      "before_json": null,
+      "after_json": {
+        "staff_id": 1,
+        "staff_name": "Arin Powell",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": 1,
+        "isolator_name": "Isolator 1 R",
+        "shift_id": 1,
+        "shift_name": "Early"
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 2,
+    "fields": {
+      "rotaday": 1,
+      "event_type": "ASSIGNMENT_DELETED",
+      "timestamp": "2026-01-12T16:12:02.572Z",
+      "actor": null,
+      "summary": "Removed assignment for Arin Powell from Cleanroom 1",
+      "before_json": {
+        "staff_id": 1,
+        "staff_name": "Arin Powell",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": 1,
+        "isolator_name": "Isolator 1 R",
+        "shift_id": 1,
+        "shift_name": "Early"
+      },
+      "after_json": null
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 3,
+    "fields": {
+      "rotaday": 1,
+      "event_type": "ASSIGNMENT_CREATED",
+      "timestamp": "2026-01-12T16:12:02.580Z",
+      "actor": null,
+      "summary": "Assigned Arin Powell to Cleanroom 1 � Isolator 1 R (Early)",
+      "before_json": null,
+      "after_json": {
+        "staff_id": 1,
+        "staff_name": "Arin Powell",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": 1,
+        "isolator_name": "Isolator 1 R",
+        "shift_id": 1,
+        "shift_name": "Early"
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 4,
+    "fields": {
+      "rotaday": 1,
+      "event_type": "ASSIGNMENT_CREATED",
+      "timestamp": "2026-01-12T16:12:02.587Z",
+      "actor": null,
+      "summary": "Assigned Baylor Tarvis to Cleanroom 1 � Isolator 1 R (Early)",
+      "before_json": null,
+      "after_json": {
+        "staff_id": 8,
+        "staff_name": "Baylor Tarvis",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": 1,
+        "isolator_name": "Isolator 1 R",
+        "shift_id": 1,
+        "shift_name": "Early"
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 5,
+    "fields": {
+      "rotaday": 1,
+      "event_type": "ASSIGNMENT_DELETED",
+      "timestamp": "2026-01-12T16:12:28.614Z",
+      "actor": null,
+      "summary": "Removed assignment for Baylor Tarvis from Cleanroom 1",
+      "before_json": {
+        "staff_id": 8,
+        "staff_name": "Baylor Tarvis",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": 1,
+        "isolator_name": "Isolator 1 R",
+        "shift_id": 1,
+        "shift_name": "Early"
+      },
+      "after_json": null
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 6,
+    "fields": {
+      "rotaday": 1,
+      "event_type": "ASSIGNMENT_DELETED",
+      "timestamp": "2026-01-12T16:12:28.615Z",
+      "actor": null,
+      "summary": "Removed assignment for Arin Powell from Cleanroom 1",
+      "before_json": {
+        "staff_id": 1,
+        "staff_name": "Arin Powell",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": 1,
+        "isolator_name": "Isolator 1 R",
+        "shift_id": 1,
+        "shift_name": "Early"
+      },
+      "after_json": null
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 7,
+    "fields": {
+      "rotaday": 1,
+      "event_type": "ASSIGNMENT_CREATED",
+      "timestamp": "2026-01-12T16:12:28.622Z",
+      "actor": null,
+      "summary": "Assigned Arin Powell to Cleanroom 1 � Isolator 1 R (Early)",
+      "before_json": null,
+      "after_json": {
+        "staff_id": 1,
+        "staff_name": "Arin Powell",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": 1,
+        "isolator_name": "Isolator 1 R",
+        "shift_id": 1,
+        "shift_name": "Early"
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 8,
+    "fields": {
+      "rotaday": 1,
+      "event_type": "ASSIGNMENT_CREATED",
+      "timestamp": "2026-01-12T16:12:28.629Z",
+      "actor": null,
+      "summary": "Assigned Baylor Tarvis to Cleanroom 1 � Isolator 1 R (Early)",
+      "before_json": null,
+      "after_json": {
+        "staff_id": 8,
+        "staff_name": "Baylor Tarvis",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": 1,
+        "isolator_name": "Isolator 1 R",
+        "shift_id": 1,
+        "shift_name": "Early"
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 9,
+    "fields": {
+      "rotaday": 1,
+      "event_type": "ASSIGNMENT_CREATED",
+      "timestamp": "2026-01-12T16:12:28.639Z",
+      "actor": null,
+      "summary": "Assigned Dana Debenham to Cleanroom 1 � Isolator 1 R (Late)",
+      "before_json": null,
+      "after_json": {
+        "staff_id": 11,
+        "staff_name": "Dana Debenham",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": 1,
+        "isolator_name": "Isolator 1 R",
+        "shift_id": 3,
+        "shift_name": "Late"
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 10,
+    "fields": {
+      "rotaday": 1,
+      "event_type": "ASSIGNMENT_CREATED",
+      "timestamp": "2026-01-12T16:12:28.648Z",
+      "actor": null,
+      "summary": "Assigned Driskoll Oliver to Cleanroom 1 � Isolator 1 R (Late)",
+      "before_json": null,
+      "after_json": {
+        "staff_id": 13,
+        "staff_name": "Driskoll Oliver",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": 1,
+        "isolator_name": "Isolator 1 R",
+        "shift_id": 3,
+        "shift_name": "Late"
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 11,
+    "fields": {
+      "rotaday": 1,
+      "event_type": "ASSIGNMENT_CREATED",
+      "timestamp": "2026-01-12T16:12:28.655Z",
+      "actor": null,
+      "summary": "Assigned Herman Wilcox to Cleanroom 1 (Early)",
+      "before_json": null,
+      "after_json": {
+        "staff_id": 15,
+        "staff_name": "Herman Wilcox",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": null,
+        "isolator_name": null,
+        "shift_id": 1,
+        "shift_name": "Early"
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 12,
+    "fields": {
+      "rotaday": 1,
+      "event_type": "ASSIGNMENT_CREATED",
+      "timestamp": "2026-01-12T16:12:28.662Z",
+      "actor": null,
+      "summary": "Assigned Kelcey Pender to Cleanroom 1 (Early)",
+      "before_json": null,
+      "after_json": {
+        "staff_id": 10,
+        "staff_name": "Kelcey Pender",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": null,
+        "isolator_name": null,
+        "shift_id": 1,
+        "shift_name": "Early"
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 13,
+    "fields": {
+      "rotaday": 1,
+      "event_type": "ASSIGNMENT_CREATED",
+      "timestamp": "2026-01-12T16:15:34.624Z",
+      "actor": null,
+      "summary": "Assigned Guy Selby to Cleanroom 1 � Isolator 1 L (Early)",
+      "before_json": null,
+      "after_json": {
+        "staff_id": 3,
+        "staff_name": "Guy Selby",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": 2,
+        "isolator_name": "Isolator 1 L",
+        "shift_id": 1,
+        "shift_name": "Early"
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 14,
+    "fields": {
+      "rotaday": 1,
+      "event_type": "ASSIGNMENT_CREATED",
+      "timestamp": "2026-01-12T16:15:34.631Z",
+      "actor": null,
+      "summary": "Assigned Jervis Curtis to Cleanroom 1 � Isolator 1 L (Early)",
+      "before_json": null,
+      "after_json": {
+        "staff_id": 6,
+        "staff_name": "Jervis Curtis",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": 2,
+        "isolator_name": "Isolator 1 L",
+        "shift_id": 1,
+        "shift_name": "Early"
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 15,
+    "fields": {
+      "rotaday": 1,
+      "event_type": "ASSIGNMENT_DELETED",
+      "timestamp": "2026-01-12T16:24:59.145Z",
+      "actor": null,
+      "summary": "Removed assignment for Kelcey Pender from Cleanroom 1",
+      "before_json": {
+        "staff_id": 10,
+        "staff_name": "Kelcey Pender",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": null,
+        "isolator_name": null,
+        "shift_id": 1,
+        "shift_name": "Early"
+      },
+      "after_json": null
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 16,
+    "fields": {
+      "rotaday": 1,
+      "event_type": "ASSIGNMENT_DELETED",
+      "timestamp": "2026-01-12T16:24:59.146Z",
+      "actor": null,
+      "summary": "Removed assignment for Herman Wilcox from Cleanroom 1",
+      "before_json": {
+        "staff_id": 15,
+        "staff_name": "Herman Wilcox",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": null,
+        "isolator_name": null,
+        "shift_id": 1,
+        "shift_name": "Early"
+      },
+      "after_json": null
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 17,
+    "fields": {
+      "rotaday": 1,
+      "event_type": "ASSIGNMENT_CREATED",
+      "timestamp": "2026-01-12T16:24:59.150Z",
+      "actor": null,
+      "summary": "Assigned Herman Wilcox to Cleanroom 1 (Early)",
+      "before_json": null,
+      "after_json": {
+        "staff_id": 15,
+        "staff_name": "Herman Wilcox",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": null,
+        "isolator_name": null,
+        "shift_id": 1,
+        "shift_name": "Early"
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 18,
+    "fields": {
+      "rotaday": 1,
+      "event_type": "ASSIGNMENT_DELETED",
+      "timestamp": "2026-01-12T16:25:07.264Z",
+      "actor": null,
+      "summary": "Removed assignment for Herman Wilcox from Cleanroom 1",
+      "before_json": {
+        "staff_id": 15,
+        "staff_name": "Herman Wilcox",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": null,
+        "isolator_name": null,
+        "shift_id": 1,
+        "shift_name": "Early"
+      },
+      "after_json": null
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 19,
+    "fields": {
+      "rotaday": 1,
+      "event_type": "ASSIGNMENT_CREATED",
+      "timestamp": "2026-01-12T16:25:07.271Z",
+      "actor": null,
+      "summary": "Assigned Herman Wilcox to Cleanroom 1 (Early)",
+      "before_json": null,
+      "after_json": {
+        "staff_id": 15,
+        "staff_name": "Herman Wilcox",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": null,
+        "isolator_name": null,
+        "shift_id": 1,
+        "shift_name": "Early"
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 20,
+    "fields": {
+      "rotaday": 1,
+      "event_type": "ASSIGNMENT_CREATED",
+      "timestamp": "2026-01-12T16:25:07.277Z",
+      "actor": null,
+      "summary": "Assigned Kelcey Pender to Cleanroom 1 (Early)",
+      "before_json": null,
+      "after_json": {
+        "staff_id": 10,
+        "staff_name": "Kelcey Pender",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": null,
+        "isolator_name": null,
+        "shift_id": 1,
+        "shift_name": "Early"
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 21,
+    "fields": {
+      "rotaday": 1,
+      "event_type": "ASSIGNMENT_CREATED",
+      "timestamp": "2026-01-12T16:35:52.571Z",
+      "actor": null,
+      "summary": "Assigned Chester Low to Cleanroom 1 � Isolator 2 L (Early)",
+      "before_json": null,
+      "after_json": {
+        "staff_id": 4,
+        "staff_name": "Chester Low",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": 4,
+        "isolator_name": "Isolator 2 L",
+        "shift_id": 1,
+        "shift_name": "Early"
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 22,
+    "fields": {
+      "rotaday": 1,
+      "event_type": "ASSIGNMENT_DELETED",
+      "timestamp": "2026-01-12T16:35:52.579Z",
+      "actor": null,
+      "summary": "Removed assignment for Kelcey Pender from Cleanroom 1",
+      "before_json": {
+        "staff_id": 10,
+        "staff_name": "Kelcey Pender",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": null,
+        "isolator_name": null,
+        "shift_id": 1,
+        "shift_name": "Early"
+      },
+      "after_json": null
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 23,
+    "fields": {
+      "rotaday": 1,
+      "event_type": "ASSIGNMENT_DELETED",
+      "timestamp": "2026-01-12T16:35:52.581Z",
+      "actor": null,
+      "summary": "Removed assignment for Herman Wilcox from Cleanroom 1",
+      "before_json": {
+        "staff_id": 15,
+        "staff_name": "Herman Wilcox",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": null,
+        "isolator_name": null,
+        "shift_id": 1,
+        "shift_name": "Early"
+      },
+      "after_json": null
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 24,
+    "fields": {
+      "rotaday": 1,
+      "event_type": "ASSIGNMENT_CREATED",
+      "timestamp": "2026-01-12T16:35:52.586Z",
+      "actor": null,
+      "summary": "Assigned Herman Wilcox to Cleanroom 1 (Early)",
+      "before_json": null,
+      "after_json": {
+        "staff_id": 15,
+        "staff_name": "Herman Wilcox",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": null,
+        "isolator_name": null,
+        "shift_id": 1,
+        "shift_name": "Early"
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 25,
+    "fields": {
+      "rotaday": 1,
+      "event_type": "ASSIGNMENT_CREATED",
+      "timestamp": "2026-01-12T16:35:52.592Z",
+      "actor": null,
+      "summary": "Assigned Kelcey Pender to Cleanroom 1 (Early)",
+      "before_json": null,
+      "after_json": {
+        "staff_id": 10,
+        "staff_name": "Kelcey Pender",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": null,
+        "isolator_name": null,
+        "shift_id": 1,
+        "shift_name": "Early"
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 26,
+    "fields": {
+      "rotaday": 1,
+      "event_type": "PUBLISHED",
+      "timestamp": "2026-01-12T16:36:49.222Z",
+      "actor": ["robfr"],
+      "summary": "Published rota",
+      "before_json": null,
+      "after_json": {
+        "publish_version": 1,
+        "published_at": "2026-01-12T16:36:49.219074+00:00"
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 27,
+    "fields": {
+      "rotaday": 1,
+      "event_type": "ASSIGNMENT_DELETED",
+      "timestamp": "2026-01-12T16:37:03.364Z",
+      "actor": null,
+      "summary": "Removed assignment for Chester Low from Cleanroom 1",
+      "before_json": {
+        "staff_id": 4,
+        "staff_name": "Chester Low",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": 4,
+        "isolator_name": "Isolator 2 L",
+        "shift_id": 1,
+        "shift_name": "Early"
+      },
+      "after_json": null
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 28,
+    "fields": {
+      "rotaday": 1,
+      "event_type": "ASSIGNMENT_CREATED",
+      "timestamp": "2026-01-12T16:37:03.373Z",
+      "actor": null,
+      "summary": "Assigned Chester Low to Cleanroom 1 � Isolator 2 L (Early)",
+      "before_json": null,
+      "after_json": {
+        "staff_id": 4,
+        "staff_name": "Chester Low",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": 4,
+        "isolator_name": "Isolator 2 L",
+        "shift_id": 1,
+        "shift_name": "Early"
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 29,
+    "fields": {
+      "rotaday": 1,
+      "event_type": "ASSIGNMENT_DELETED",
+      "timestamp": "2026-01-12T16:37:03.378Z",
+      "actor": null,
+      "summary": "Removed assignment for Kelcey Pender from Cleanroom 1",
+      "before_json": {
+        "staff_id": 10,
+        "staff_name": "Kelcey Pender",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": null,
+        "isolator_name": null,
+        "shift_id": 1,
+        "shift_name": "Early"
+      },
+      "after_json": null
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 30,
+    "fields": {
+      "rotaday": 1,
+      "event_type": "ASSIGNMENT_DELETED",
+      "timestamp": "2026-01-12T16:37:03.379Z",
+      "actor": null,
+      "summary": "Removed assignment for Herman Wilcox from Cleanroom 1",
+      "before_json": {
+        "staff_id": 15,
+        "staff_name": "Herman Wilcox",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": null,
+        "isolator_name": null,
+        "shift_id": 1,
+        "shift_name": "Early"
+      },
+      "after_json": null
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 31,
+    "fields": {
+      "rotaday": 1,
+      "event_type": "ASSIGNMENT_CREATED",
+      "timestamp": "2026-01-12T16:37:03.384Z",
+      "actor": null,
+      "summary": "Assigned Herman Wilcox to Cleanroom 1 (Early)",
+      "before_json": null,
+      "after_json": {
+        "staff_id": 15,
+        "staff_name": "Herman Wilcox",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": null,
+        "isolator_name": null,
+        "shift_id": 1,
+        "shift_name": "Early"
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 32,
+    "fields": {
+      "rotaday": 1,
+      "event_type": "ASSIGNMENT_CREATED",
+      "timestamp": "2026-01-12T16:37:03.390Z",
+      "actor": null,
+      "summary": "Assigned Kelcey Pender to Cleanroom 1 (Early)",
+      "before_json": null,
+      "after_json": {
+        "staff_id": 10,
+        "staff_name": "Kelcey Pender",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": null,
+        "isolator_name": null,
+        "shift_id": 1,
+        "shift_name": "Early"
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 33,
+    "fields": {
+      "rotaday": 1,
+      "event_type": "ASSIGNMENT_DELETED",
+      "timestamp": "2026-01-12T16:37:29.188Z",
+      "actor": null,
+      "summary": "Removed assignment for Kelcey Pender from Cleanroom 1",
+      "before_json": {
+        "staff_id": 10,
+        "staff_name": "Kelcey Pender",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": null,
+        "isolator_name": null,
+        "shift_id": 1,
+        "shift_name": "Early"
+      },
+      "after_json": null
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 34,
+    "fields": {
+      "rotaday": 1,
+      "event_type": "ASSIGNMENT_DELETED",
+      "timestamp": "2026-01-12T16:37:29.189Z",
+      "actor": null,
+      "summary": "Removed assignment for Herman Wilcox from Cleanroom 1",
+      "before_json": {
+        "staff_id": 15,
+        "staff_name": "Herman Wilcox",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": null,
+        "isolator_name": null,
+        "shift_id": 1,
+        "shift_name": "Early"
+      },
+      "after_json": null
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 35,
+    "fields": {
+      "rotaday": 1,
+      "event_type": "ASSIGNMENT_CREATED",
+      "timestamp": "2026-01-12T16:37:29.194Z",
+      "actor": null,
+      "summary": "Assigned Herman Wilcox to Cleanroom 1 (Early)",
+      "before_json": null,
+      "after_json": {
+        "staff_id": 15,
+        "staff_name": "Herman Wilcox",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": null,
+        "isolator_name": null,
+        "shift_id": 1,
+        "shift_name": "Early"
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 36,
+    "fields": {
+      "rotaday": 1,
+      "event_type": "ASSIGNMENT_CREATED",
+      "timestamp": "2026-01-12T16:37:29.201Z",
+      "actor": null,
+      "summary": "Assigned Kelcey Pender to Cleanroom 1 (Early)",
+      "before_json": null,
+      "after_json": {
+        "staff_id": 10,
+        "staff_name": "Kelcey Pender",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": null,
+        "isolator_name": null,
+        "shift_id": 1,
+        "shift_name": "Early"
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 37,
+    "fields": {
+      "rotaday": 1,
+      "event_type": "ASSIGNMENT_DELETED",
+      "timestamp": "2026-01-12T16:37:49.919Z",
+      "actor": null,
+      "summary": "Removed assignment for Kelcey Pender from Cleanroom 1",
+      "before_json": {
+        "staff_id": 10,
+        "staff_name": "Kelcey Pender",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": null,
+        "isolator_name": null,
+        "shift_id": 1,
+        "shift_name": "Early"
+      },
+      "after_json": null
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 38,
+    "fields": {
+      "rotaday": 1,
+      "event_type": "ASSIGNMENT_DELETED",
+      "timestamp": "2026-01-12T16:37:49.920Z",
+      "actor": null,
+      "summary": "Removed assignment for Herman Wilcox from Cleanroom 1",
+      "before_json": {
+        "staff_id": 15,
+        "staff_name": "Herman Wilcox",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": null,
+        "isolator_name": null,
+        "shift_id": 1,
+        "shift_name": "Early"
+      },
+      "after_json": null
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 39,
+    "fields": {
+      "rotaday": 1,
+      "event_type": "ASSIGNMENT_CREATED",
+      "timestamp": "2026-01-12T16:37:49.925Z",
+      "actor": null,
+      "summary": "Assigned Herman Wilcox to Cleanroom 1 (Early)",
+      "before_json": null,
+      "after_json": {
+        "staff_id": 15,
+        "staff_name": "Herman Wilcox",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": null,
+        "isolator_name": null,
+        "shift_id": 1,
+        "shift_name": "Early"
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 40,
+    "fields": {
+      "rotaday": 1,
+      "event_type": "ASSIGNMENT_CREATED",
+      "timestamp": "2026-01-12T16:37:49.929Z",
+      "actor": null,
+      "summary": "Assigned Kelcey Pender to Cleanroom 1 (Early)",
+      "before_json": null,
+      "after_json": {
+        "staff_id": 10,
+        "staff_name": "Kelcey Pender",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": null,
+        "isolator_name": null,
+        "shift_id": 1,
+        "shift_name": "Early"
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 41,
+    "fields": {
+      "rotaday": 1,
+      "event_type": "REPUBLISHED",
+      "timestamp": "2026-01-12T16:38:22.518Z",
+      "actor": ["robfr"],
+      "summary": "Republished rota: Check working",
+      "before_json": null,
+      "after_json": {
+        "publish_version": 2,
+        "published_at": "2026-01-12T16:38:22.516218+00:00"
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 42,
+    "fields": {
+      "rotaday": 1,
+      "event_type": "ASSIGNMENT_CREATED",
+      "timestamp": "2026-01-12T16:44:57.295Z",
+      "actor": null,
+      "summary": "Assigned Kester Penner to Cleanroom 1 � Isolator 2 R (Early)",
+      "before_json": null,
+      "after_json": {
+        "staff_id": 16,
+        "staff_name": "Kester Penner",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": 3,
+        "isolator_name": "Isolator 2 R",
+        "shift_id": 1,
+        "shift_name": "Early"
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 43,
+    "fields": {
+      "rotaday": 1,
+      "event_type": "ASSIGNMENT_DELETED",
+      "timestamp": "2026-01-12T16:44:57.299Z",
+      "actor": null,
+      "summary": "Removed assignment for Kelcey Pender from Cleanroom 1",
+      "before_json": {
+        "staff_id": 10,
+        "staff_name": "Kelcey Pender",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": null,
+        "isolator_name": null,
+        "shift_id": 1,
+        "shift_name": "Early"
+      },
+      "after_json": null
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 44,
+    "fields": {
+      "rotaday": 1,
+      "event_type": "ASSIGNMENT_DELETED",
+      "timestamp": "2026-01-12T16:44:57.300Z",
+      "actor": null,
+      "summary": "Removed assignment for Herman Wilcox from Cleanroom 1",
+      "before_json": {
+        "staff_id": 15,
+        "staff_name": "Herman Wilcox",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": null,
+        "isolator_name": null,
+        "shift_id": 1,
+        "shift_name": "Early"
+      },
+      "after_json": null
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 45,
+    "fields": {
+      "rotaday": 1,
+      "event_type": "ASSIGNMENT_CREATED",
+      "timestamp": "2026-01-12T16:44:57.305Z",
+      "actor": null,
+      "summary": "Assigned Herman Wilcox to Cleanroom 1 (Early)",
+      "before_json": null,
+      "after_json": {
+        "staff_id": 15,
+        "staff_name": "Herman Wilcox",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": null,
+        "isolator_name": null,
+        "shift_id": 1,
+        "shift_name": "Early"
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 46,
+    "fields": {
+      "rotaday": 1,
+      "event_type": "ASSIGNMENT_CREATED",
+      "timestamp": "2026-01-12T16:44:57.312Z",
+      "actor": null,
+      "summary": "Assigned Kelcey Pender to Cleanroom 1 (Early)",
+      "before_json": null,
+      "after_json": {
+        "staff_id": 10,
+        "staff_name": "Kelcey Pender",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": null,
+        "isolator_name": null,
+        "shift_id": 1,
+        "shift_name": "Early"
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 47,
+    "fields": {
+      "rotaday": 1,
+      "event_type": "ASSIGNMENT_CREATED",
+      "timestamp": "2026-01-12T16:45:21.090Z",
+      "actor": null,
+      "summary": "Assigned Landon Symonds to Cleanroom 3 � Isolator 4 L (Late)",
+      "before_json": null,
+      "after_json": {
+        "staff_id": 9,
+        "staff_name": "Landon Symonds",
+        "room_id": 3,
+        "room_name": "Cleanroom 3",
+        "isolator_id": 13,
+        "isolator_name": "Isolator 4 L",
+        "shift_id": 3,
+        "shift_name": "Late"
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 48,
+    "fields": {
+      "rotaday": 2,
+      "event_type": "ASSIGNMENT_CREATED",
+      "timestamp": "2026-01-12T16:45:48.805Z",
+      "actor": null,
+      "summary": "Assigned Arin Powell to Cleanroom 2 � Isolator 3 R (Early)",
+      "before_json": null,
+      "after_json": {
+        "staff_id": 1,
+        "staff_name": "Arin Powell",
+        "room_id": 2,
+        "room_name": "Cleanroom 2",
+        "isolator_id": 8,
+        "isolator_name": "Isolator 3 R",
+        "shift_id": 1,
+        "shift_name": "Early"
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 49,
+    "fields": {
+      "rotaday": 3,
+      "event_type": "ASSIGNMENT_CREATED",
+      "timestamp": "2026-01-12T16:46:04.960Z",
+      "actor": null,
+      "summary": "Assigned Arin Powell to Cleanroom 2 � Isolator 3 R (Early)",
+      "before_json": null,
+      "after_json": {
+        "staff_id": 1,
+        "staff_name": "Arin Powell",
+        "room_id": 2,
+        "room_name": "Cleanroom 2",
+        "isolator_id": 8,
+        "isolator_name": "Isolator 3 R",
+        "shift_id": 1,
+        "shift_name": "Early"
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 50,
+    "fields": {
+      "rotaday": 6,
+      "event_type": "ASSIGNMENT_CREATED",
+      "timestamp": "2026-01-26T05:55:39.809Z",
+      "actor": null,
+      "summary": "Assigned Arin Powell to Cleanroom 1 � Isolator 1 R (Early)",
+      "before_json": null,
+      "after_json": {
+        "staff_id": 1,
+        "staff_name": "Arin Powell",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": 1,
+        "isolator_name": "Isolator 1 R",
+        "shift_id": 1,
+        "shift_name": "Early"
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 51,
+    "fields": {
+      "rotaday": 6,
+      "event_type": "ASSIGNMENT_CREATED",
+      "timestamp": "2026-01-26T05:55:39.818Z",
+      "actor": null,
+      "summary": "Assigned Baylor Tarvis to Cleanroom 1 � Isolator 1 R (Early)",
+      "before_json": null,
+      "after_json": {
+        "staff_id": 8,
+        "staff_name": "Baylor Tarvis",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": 1,
+        "isolator_name": "Isolator 1 R",
+        "shift_id": 1,
+        "shift_name": "Early"
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 52,
+    "fields": {
+      "rotaday": 6,
+      "event_type": "ASSIGNMENT_CREATED",
+      "timestamp": "2026-01-26T05:55:39.827Z",
+      "actor": null,
+      "summary": "Assigned Dana Debenham to Cleanroom 1 � Isolator 1 R (Core)",
+      "before_json": null,
+      "after_json": {
+        "staff_id": 11,
+        "staff_name": "Dana Debenham",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": 1,
+        "isolator_name": "Isolator 1 R",
+        "shift_id": 2,
+        "shift_name": "Core"
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 53,
+    "fields": {
+      "rotaday": 6,
+      "event_type": "ASSIGNMENT_CREATED",
+      "timestamp": "2026-01-26T05:55:39.835Z",
+      "actor": null,
+      "summary": "Assigned Driskoll Oliver to Cleanroom 1 � Isolator 1 R (Core)",
+      "before_json": null,
+      "after_json": {
+        "staff_id": 13,
+        "staff_name": "Driskoll Oliver",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": 1,
+        "isolator_name": "Isolator 1 R",
+        "shift_id": 2,
+        "shift_name": "Core"
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 54,
+    "fields": {
+      "rotaday": 6,
+      "event_type": "ASSIGNMENT_CREATED",
+      "timestamp": "2026-01-26T05:55:39.843Z",
+      "actor": null,
+      "summary": "Assigned Herman Wilcox to Cleanroom 1 (Early)",
+      "before_json": null,
+      "after_json": {
+        "staff_id": 15,
+        "staff_name": "Herman Wilcox",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": null,
+        "isolator_name": null,
+        "shift_id": 1,
+        "shift_name": "Early"
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 55,
+    "fields": {
+      "rotaday": 6,
+      "event_type": "ASSIGNMENT_CREATED",
+      "timestamp": "2026-01-26T05:55:39.848Z",
+      "actor": null,
+      "summary": "Assigned Kelcey Pender to Cleanroom 1 (Early)",
+      "before_json": null,
+      "after_json": {
+        "staff_id": 10,
+        "staff_name": "Kelcey Pender",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": null,
+        "isolator_name": null,
+        "shift_id": 1,
+        "shift_name": "Early"
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 56,
+    "fields": {
+      "rotaday": 6,
+      "event_type": "PUBLISHED",
+      "timestamp": "2026-01-26T05:55:50.452Z",
+      "actor": ["robfr"],
+      "summary": "Published rota",
+      "before_json": null,
+      "after_json": {
+        "publish_version": 1,
+        "published_at": "2026-01-26T05:55:50.451454+00:00"
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 57,
+    "fields": {
+      "rotaday": 7,
+      "event_type": "ASSIGNMENT_CREATED",
+      "timestamp": "2026-02-16T09:47:16.492Z",
+      "actor": null,
+      "summary": "Assigned Arin Powell to Cleanroom 1 (Early)",
+      "before_json": null,
+      "after_json": {
+        "staff_id": 1,
+        "staff_name": "Arin Powell",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": null,
+        "isolator_name": null,
+        "shift_id": 1,
+        "shift_name": "Early"
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 58,
+    "fields": {
+      "rotaday": 7,
+      "event_type": "ASSIGNMENT_CREATED",
+      "timestamp": "2026-02-16T09:47:16.497Z",
+      "actor": null,
+      "summary": "Assigned Arin Powell to Cleanroom 1 (Early)",
+      "before_json": null,
+      "after_json": {
+        "staff_id": 1,
+        "staff_name": "Arin Powell",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": null,
+        "isolator_name": null,
+        "shift_id": 1,
+        "shift_name": "Early"
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 59,
+    "fields": {
+      "rotaday": 7,
+      "event_type": "ASSIGNMENT_DELETED",
+      "timestamp": "2026-02-16T09:47:48.998Z",
+      "actor": null,
+      "summary": "Removed assignment for Arin Powell from Cleanroom 1",
+      "before_json": {
+        "staff_id": 1,
+        "staff_name": "Arin Powell",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": null,
+        "isolator_name": null,
+        "shift_id": 1,
+        "shift_name": "Early"
+      },
+      "after_json": null
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 60,
+    "fields": {
+      "rotaday": 7,
+      "event_type": "ASSIGNMENT_DELETED",
+      "timestamp": "2026-02-16T09:47:48.999Z",
+      "actor": null,
+      "summary": "Removed assignment for Arin Powell from Cleanroom 1",
+      "before_json": {
+        "staff_id": 1,
+        "staff_name": "Arin Powell",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": null,
+        "isolator_name": null,
+        "shift_id": 1,
+        "shift_name": "Early"
+      },
+      "after_json": null
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 61,
+    "fields": {
+      "rotaday": 7,
+      "event_type": "ASSIGNMENT_CREATED",
+      "timestamp": "2026-02-16T09:47:49.005Z",
+      "actor": null,
+      "summary": "Assigned Arin Powell to Cleanroom 1 (Early)",
+      "before_json": null,
+      "after_json": {
+        "staff_id": 1,
+        "staff_name": "Arin Powell",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": null,
+        "isolator_name": null,
+        "shift_id": 1,
+        "shift_name": "Early"
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 62,
+    "fields": {
+      "rotaday": 7,
+      "event_type": "ASSIGNMENT_CREATED",
+      "timestamp": "2026-02-16T09:47:49.009Z",
+      "actor": null,
+      "summary": "Assigned Arin Powell to Cleanroom 1 (Early)",
+      "before_json": null,
+      "after_json": {
+        "staff_id": 1,
+        "staff_name": "Arin Powell",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": null,
+        "isolator_name": null,
+        "shift_id": 1,
+        "shift_name": "Early"
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 63,
+    "fields": {
+      "rotaday": 7,
+      "event_type": "ASSIGNMENT_CREATED",
+      "timestamp": "2026-02-16T10:45:58.480Z",
+      "actor": null,
+      "summary": "Assigned Guy Selby to Cleanroom 1 � Isolator 1 R (Early)",
+      "before_json": null,
+      "after_json": {
+        "staff_id": 3,
+        "staff_name": "Guy Selby",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": 1,
+        "isolator_name": "Isolator 1 R",
+        "shift_id": 1,
+        "shift_name": "Early"
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 64,
+    "fields": {
+      "rotaday": 7,
+      "event_type": "ASSIGNMENT_CREATED",
+      "timestamp": "2026-02-16T10:45:58.482Z",
+      "actor": null,
+      "summary": "Assigned Dana Debenham to Cleanroom 1 � Isolator 1 R (Late)",
+      "before_json": null,
+      "after_json": {
+        "staff_id": 11,
+        "staff_name": "Dana Debenham",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": 1,
+        "isolator_name": "Isolator 1 R",
+        "shift_id": 3,
+        "shift_name": "Late"
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 65,
+    "fields": {
+      "rotaday": 7,
+      "event_type": "ASSIGNMENT_DELETED",
+      "timestamp": "2026-02-16T10:45:58.486Z",
+      "actor": null,
+      "summary": "Removed assignment for Arin Powell from Cleanroom 1",
+      "before_json": {
+        "staff_id": 1,
+        "staff_name": "Arin Powell",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": null,
+        "isolator_name": null,
+        "shift_id": 1,
+        "shift_name": "Early"
+      },
+      "after_json": null
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 66,
+    "fields": {
+      "rotaday": 7,
+      "event_type": "ASSIGNMENT_DELETED",
+      "timestamp": "2026-02-16T10:45:58.487Z",
+      "actor": null,
+      "summary": "Removed assignment for Arin Powell from Cleanroom 1",
+      "before_json": {
+        "staff_id": 1,
+        "staff_name": "Arin Powell",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": null,
+        "isolator_name": null,
+        "shift_id": 1,
+        "shift_name": "Early"
+      },
+      "after_json": null
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 67,
+    "fields": {
+      "rotaday": 7,
+      "event_type": "ASSIGNMENT_CREATED",
+      "timestamp": "2026-02-16T11:05:54.873Z",
+      "actor": null,
+      "summary": "Assigned Guy Selby to Cleanroom 1 � Isolator 2 L (Late)",
+      "before_json": null,
+      "after_json": {
+        "staff_id": 3,
+        "staff_name": "Guy Selby",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": 4,
+        "isolator_name": "Isolator 2 L",
+        "shift_id": 3,
+        "shift_name": "Late"
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 68,
+    "fields": {
+      "rotaday": 7,
+      "event_type": "ASSIGNMENT_DELETED",
+      "timestamp": "2026-02-16T12:26:22.561Z",
+      "actor": null,
+      "summary": "Removed assignment for Dana Debenham from Cleanroom 1",
+      "before_json": {
+        "staff_id": 11,
+        "staff_name": "Dana Debenham",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": 1,
+        "isolator_name": "Isolator 1 R",
+        "shift_id": 3,
+        "shift_name": "Late"
+      },
+      "after_json": null
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 69,
+    "fields": {
+      "rotaday": 7,
+      "event_type": "ASSIGNMENT_DELETED",
+      "timestamp": "2026-02-16T12:26:22.563Z",
+      "actor": null,
+      "summary": "Removed assignment for Guy Selby from Cleanroom 1",
+      "before_json": {
+        "staff_id": 3,
+        "staff_name": "Guy Selby",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": 1,
+        "isolator_name": "Isolator 1 R",
+        "shift_id": 1,
+        "shift_name": "Early"
+      },
+      "after_json": null
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 70,
+    "fields": {
+      "rotaday": 7,
+      "event_type": "ASSIGNMENT_CREATED",
+      "timestamp": "2026-02-16T12:26:22.564Z",
+      "actor": null,
+      "summary": "Assigned Dana Debenham to Cleanroom 1 � Isolator 1 R (Late)",
+      "before_json": null,
+      "after_json": {
+        "staff_id": 11,
+        "staff_name": "Dana Debenham",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": 1,
+        "isolator_name": "Isolator 1 R",
+        "shift_id": 3,
+        "shift_name": "Late"
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 71,
+    "fields": {
+      "rotaday": 7,
+      "event_type": "ASSIGNMENT_CREATED",
+      "timestamp": "2026-02-16T12:26:22.566Z",
+      "actor": null,
+      "summary": "Assigned Guy Selby to Cleanroom 1 � Isolator 1 R (Early)",
+      "before_json": null,
+      "after_json": {
+        "staff_id": 3,
+        "staff_name": "Guy Selby",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": 1,
+        "isolator_name": "Isolator 1 R",
+        "shift_id": 1,
+        "shift_name": "Early"
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 72,
+    "fields": {
+      "rotaday": 7,
+      "event_type": "ASSIGNMENT_DELETED",
+      "timestamp": "2026-02-16T12:26:35.376Z",
+      "actor": null,
+      "summary": "Removed assignment for Guy Selby from Cleanroom 1",
+      "before_json": {
+        "staff_id": 3,
+        "staff_name": "Guy Selby",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": 1,
+        "isolator_name": "Isolator 1 R",
+        "shift_id": 1,
+        "shift_name": "Early"
+      },
+      "after_json": null
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 73,
+    "fields": {
+      "rotaday": 7,
+      "event_type": "ASSIGNMENT_DELETED",
+      "timestamp": "2026-02-16T12:26:35.377Z",
+      "actor": null,
+      "summary": "Removed assignment for Dana Debenham from Cleanroom 1",
+      "before_json": {
+        "staff_id": 11,
+        "staff_name": "Dana Debenham",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": 1,
+        "isolator_name": "Isolator 1 R",
+        "shift_id": 3,
+        "shift_name": "Late"
+      },
+      "after_json": null
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 74,
+    "fields": {
+      "rotaday": 7,
+      "event_type": "ASSIGNMENT_CREATED",
+      "timestamp": "2026-02-16T12:26:35.379Z",
+      "actor": null,
+      "summary": "Assigned Dana Debenham to Cleanroom 1 � Isolator 1 R (Late)",
+      "before_json": null,
+      "after_json": {
+        "staff_id": 11,
+        "staff_name": "Dana Debenham",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": 1,
+        "isolator_name": "Isolator 1 R",
+        "shift_id": 3,
+        "shift_name": "Late"
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 75,
+    "fields": {
+      "rotaday": 7,
+      "event_type": "ASSIGNMENT_CREATED",
+      "timestamp": "2026-02-16T12:26:35.380Z",
+      "actor": null,
+      "summary": "Assigned Guy Selby to Cleanroom 1 � Isolator 1 R (Early)",
+      "before_json": null,
+      "after_json": {
+        "staff_id": 3,
+        "staff_name": "Guy Selby",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": 1,
+        "isolator_name": "Isolator 1 R",
+        "shift_id": 1,
+        "shift_name": "Early"
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 76,
+    "fields": {
+      "rotaday": 7,
+      "event_type": "ASSIGNMENT_CREATED",
+      "timestamp": "2026-02-16T12:26:35.381Z",
+      "actor": null,
+      "summary": "Assigned Shaye Bristol to Cleanroom 1 � Isolator 1 R (Early)",
+      "before_json": null,
+      "after_json": {
+        "staff_id": 12,
+        "staff_name": "Shaye Bristol",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": 1,
+        "isolator_name": "Isolator 1 R",
+        "shift_id": 1,
+        "shift_name": "Early"
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 77,
+    "fields": {
+      "rotaday": 7,
+      "event_type": "ASSIGNMENT_DELETED",
+      "timestamp": "2026-02-16T12:26:50.370Z",
+      "actor": null,
+      "summary": "Removed assignment for Shaye Bristol from Cleanroom 1",
+      "before_json": {
+        "staff_id": 12,
+        "staff_name": "Shaye Bristol",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": 1,
+        "isolator_name": "Isolator 1 R",
+        "shift_id": 1,
+        "shift_name": "Early"
+      },
+      "after_json": null
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 78,
+    "fields": {
+      "rotaday": 7,
+      "event_type": "ASSIGNMENT_DELETED",
+      "timestamp": "2026-02-16T12:26:50.372Z",
+      "actor": null,
+      "summary": "Removed assignment for Guy Selby from Cleanroom 1",
+      "before_json": {
+        "staff_id": 3,
+        "staff_name": "Guy Selby",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": 1,
+        "isolator_name": "Isolator 1 R",
+        "shift_id": 1,
+        "shift_name": "Early"
+      },
+      "after_json": null
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 79,
+    "fields": {
+      "rotaday": 7,
+      "event_type": "ASSIGNMENT_DELETED",
+      "timestamp": "2026-02-16T12:26:50.373Z",
+      "actor": null,
+      "summary": "Removed assignment for Dana Debenham from Cleanroom 1",
+      "before_json": {
+        "staff_id": 11,
+        "staff_name": "Dana Debenham",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": 1,
+        "isolator_name": "Isolator 1 R",
+        "shift_id": 3,
+        "shift_name": "Late"
+      },
+      "after_json": null
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 80,
+    "fields": {
+      "rotaday": 7,
+      "event_type": "ASSIGNMENT_CREATED",
+      "timestamp": "2026-02-16T12:26:50.375Z",
+      "actor": null,
+      "summary": "Assigned Dana Debenham to Cleanroom 1 � Isolator 1 R (Late)",
+      "before_json": null,
+      "after_json": {
+        "staff_id": 11,
+        "staff_name": "Dana Debenham",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": 1,
+        "isolator_name": "Isolator 1 R",
+        "shift_id": 3,
+        "shift_name": "Late"
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 81,
+    "fields": {
+      "rotaday": 7,
+      "event_type": "ASSIGNMENT_CREATED",
+      "timestamp": "2026-02-16T12:26:50.376Z",
+      "actor": null,
+      "summary": "Assigned Guy Selby to Cleanroom 1 � Isolator 1 R (Early)",
+      "before_json": null,
+      "after_json": {
+        "staff_id": 3,
+        "staff_name": "Guy Selby",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": 1,
+        "isolator_name": "Isolator 1 R",
+        "shift_id": 1,
+        "shift_name": "Early"
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 82,
+    "fields": {
+      "rotaday": 7,
+      "event_type": "ASSIGNMENT_CREATED",
+      "timestamp": "2026-02-16T12:26:50.378Z",
+      "actor": null,
+      "summary": "Assigned Shaye Bristol to Cleanroom 1 � Isolator 1 R (Early)",
+      "before_json": null,
+      "after_json": {
+        "staff_id": 12,
+        "staff_name": "Shaye Bristol",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": 1,
+        "isolator_name": "Isolator 1 R",
+        "shift_id": 1,
+        "shift_name": "Early"
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 83,
+    "fields": {
+      "rotaday": 7,
+      "event_type": "ASSIGNMENT_CREATED",
+      "timestamp": "2026-02-16T12:26:50.379Z",
+      "actor": null,
+      "summary": "Assigned Ulysses Ayers to Cleanroom 1 � Isolator 1 R (Late)",
+      "before_json": null,
+      "after_json": {
+        "staff_id": 14,
+        "staff_name": "Ulysses Ayers",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": 1,
+        "isolator_name": "Isolator 1 R",
+        "shift_id": 3,
+        "shift_name": "Late"
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 84,
+    "fields": {
+      "rotaday": 9,
+      "event_type": "ASSIGNMENT_CREATED",
+      "timestamp": "2026-04-29T16:09:15.679Z",
+      "actor": null,
+      "summary": "Assigned Arin Powell to None (Early)",
+      "before_json": null,
+      "after_json": {
+        "staff_id": 1,
+        "staff_name": "Arin Powell",
+        "room_id": null,
+        "room_name": null,
+        "isolator_id": null,
+        "isolator_name": null,
+        "shift_id": 1,
+        "shift_name": "Early"
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 85,
+    "fields": {
+      "rotaday": 9,
+      "event_type": "ASSIGNMENT_CREATED",
+      "timestamp": "2026-04-29T16:09:15.680Z",
+      "actor": null,
+      "summary": "Assigned Baylor Tarvis to None (Early)",
+      "before_json": null,
+      "after_json": {
+        "staff_id": 8,
+        "staff_name": "Baylor Tarvis",
+        "room_id": null,
+        "room_name": null,
+        "isolator_id": null,
+        "isolator_name": null,
+        "shift_id": 1,
+        "shift_name": "Early"
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 86,
+    "fields": {
+      "rotaday": 9,
+      "event_type": "ASSIGNMENT_CREATED",
+      "timestamp": "2026-04-29T16:09:15.682Z",
+      "actor": null,
+      "summary": "Assigned Dana Debenham to None (Late)",
+      "before_json": null,
+      "after_json": {
+        "staff_id": 11,
+        "staff_name": "Dana Debenham",
+        "room_id": null,
+        "room_name": null,
+        "isolator_id": null,
+        "isolator_name": null,
+        "shift_id": 3,
+        "shift_name": "Late"
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 87,
+    "fields": {
+      "rotaday": 9,
+      "event_type": "ASSIGNMENT_CREATED",
+      "timestamp": "2026-04-29T16:09:15.683Z",
+      "actor": null,
+      "summary": "Assigned Driskoll Oliver to None (Late)",
+      "before_json": null,
+      "after_json": {
+        "staff_id": 13,
+        "staff_name": "Driskoll Oliver",
+        "room_id": null,
+        "room_name": null,
+        "isolator_id": null,
+        "isolator_name": null,
+        "shift_id": 3,
+        "shift_name": "Late"
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 88,
+    "fields": {
+      "rotaday": 9,
+      "event_type": "ASSIGNMENT_UPDATED",
+      "timestamp": "2026-04-29T16:09:15.684Z",
+      "actor": ["robfr"],
+      "summary": "Updated work-area assignments for Clean MAL.",
+      "before_json": {
+        "work_area": "Clean MAL",
+        "AM": [],
+        "PM": []
+      },
+      "after_json": {
+        "work_area": "Clean MAL",
+        "AM": ["Arin Powell", "Baylor Tarvis"],
+        "PM": ["Dana Debenham", "Driskoll Oliver"]
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 89,
+    "fields": {
+      "rotaday": 10,
+      "event_type": "ASSIGNMENT_CREATED",
+      "timestamp": "2026-05-02T17:04:14.693Z",
+      "actor": null,
+      "summary": "Assigned Arin Powell to None (Early)",
+      "before_json": null,
+      "after_json": {
+        "staff_id": 1,
+        "staff_name": "Arin Powell",
+        "room_id": null,
+        "room_name": null,
+        "isolator_id": null,
+        "isolator_name": null,
+        "shift_id": 1,
+        "shift_name": "Early"
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 90,
+    "fields": {
+      "rotaday": 10,
+      "event_type": "ASSIGNMENT_CREATED",
+      "timestamp": "2026-05-02T17:04:14.695Z",
+      "actor": null,
+      "summary": "Assigned Baylor Tarvis to None (Late)",
+      "before_json": null,
+      "after_json": {
+        "staff_id": 8,
+        "staff_name": "Baylor Tarvis",
+        "room_id": null,
+        "room_name": null,
+        "isolator_id": null,
+        "isolator_name": null,
+        "shift_id": 3,
+        "shift_name": "Late"
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 91,
+    "fields": {
+      "rotaday": 10,
+      "event_type": "ASSIGNMENT_UPDATED",
+      "timestamp": "2026-05-02T17:04:14.696Z",
+      "actor": ["robfr"],
+      "summary": "Updated work-area assignments for Clean MAL.",
+      "before_json": {
+        "work_area": "Clean MAL",
+        "AM": [],
+        "PM": []
+      },
+      "after_json": {
+        "work_area": "Clean MAL",
+        "AM": ["Arin Powell"],
+        "PM": ["Baylor Tarvis"]
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 92,
+    "fields": {
+      "rotaday": 11,
+      "event_type": "ASSIGNMENT_CREATED",
+      "timestamp": "2026-05-23T16:55:37.764Z",
+      "actor": null,
+      "summary": "Assigned Arin Powell to None (Early)",
+      "before_json": null,
+      "after_json": {
+        "staff_id": 1,
+        "staff_name": "Arin Powell",
+        "room_id": null,
+        "room_name": null,
+        "isolator_id": null,
+        "isolator_name": null,
+        "shift_id": 1,
+        "shift_name": "Early"
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 93,
+    "fields": {
+      "rotaday": 11,
+      "event_type": "ASSIGNMENT_CREATED",
+      "timestamp": "2026-05-23T16:55:37.767Z",
+      "actor": null,
+      "summary": "Assigned Baylor Tarvis to None (Late)",
+      "before_json": null,
+      "after_json": {
+        "staff_id": 8,
+        "staff_name": "Baylor Tarvis",
+        "room_id": null,
+        "room_name": null,
+        "isolator_id": null,
+        "isolator_name": null,
+        "shift_id": 3,
+        "shift_name": "Late"
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 94,
+    "fields": {
+      "rotaday": 11,
+      "event_type": "ASSIGNMENT_UPDATED",
+      "timestamp": "2026-05-23T16:55:37.767Z",
+      "actor": ["robfr"],
+      "summary": "Updated work-area assignments for Visual Inspection 4.",
+      "before_json": {
+        "work_area": "Visual Inspection 4",
+        "AM": [],
+        "PM": []
+      },
+      "after_json": {
+        "work_area": "Visual Inspection 4",
+        "AM": ["Arin Powell"],
+        "PM": ["Baylor Tarvis"]
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 95,
+    "fields": {
+      "rotaday": 14,
+      "event_type": "ASSIGNMENT_CREATED",
+      "timestamp": "2026-06-19T13:43:21.143Z",
+      "actor": null,
+      "summary": "Assigned Arin Powell to Cleanroom 1 � Isolator 1 R (Early)",
+      "before_json": null,
+      "after_json": {
+        "staff_id": 1,
+        "staff_name": "Arin Powell",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": 1,
+        "isolator_name": "Isolator 1 R",
+        "shift_id": 1,
+        "shift_name": "Early"
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 96,
+    "fields": {
+      "rotaday": 14,
+      "event_type": "ASSIGNMENT_CREATED",
+      "timestamp": "2026-06-19T13:43:21.146Z",
+      "actor": null,
+      "summary": "Assigned Baylor Tarvis to Cleanroom 1 � Isolator 1 R (Late)",
+      "before_json": null,
+      "after_json": {
+        "staff_id": 8,
+        "staff_name": "Baylor Tarvis",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": 1,
+        "isolator_name": "Isolator 1 R",
+        "shift_id": 3,
+        "shift_name": "Late"
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 97,
+    "fields": {
+      "rotaday": 14,
+      "event_type": "ASSIGNMENT_UPDATED",
+      "timestamp": "2026-06-19T13:43:21.147Z",
+      "actor": ["robfr"],
+      "summary": "Updated isolator assignments for Isolator 1 R.",
+      "before_json": {
+        "isolator": "Isolator 1 R",
+        "AM": [],
+        "PM": []
+      },
+      "after_json": {
+        "isolator": "Isolator 1 R",
+        "AM": ["Arin Powell"],
+        "PM": ["Baylor Tarvis"]
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 98,
+    "fields": {
+      "rotaday": 14,
+      "event_type": "ASSIGNMENT_DELETED",
+      "timestamp": "2026-06-19T13:44:00.938Z",
+      "actor": null,
+      "summary": "Removed assignment for Baylor Tarvis from Cleanroom 1",
+      "before_json": {
+        "staff_id": 8,
+        "staff_name": "Baylor Tarvis",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": 1,
+        "isolator_name": "Isolator 1 R",
+        "shift_id": 3,
+        "shift_name": "Late"
+      },
+      "after_json": null
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 99,
+    "fields": {
+      "rotaday": 14,
+      "event_type": "ASSIGNMENT_DELETED",
+      "timestamp": "2026-06-19T13:44:00.941Z",
+      "actor": null,
+      "summary": "Removed assignment for Arin Powell from Cleanroom 1",
+      "before_json": {
+        "staff_id": 1,
+        "staff_name": "Arin Powell",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": 1,
+        "isolator_name": "Isolator 1 R",
+        "shift_id": 1,
+        "shift_name": "Early"
+      },
+      "after_json": null
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 100,
+    "fields": {
+      "rotaday": 14,
+      "event_type": "ASSIGNMENT_CREATED",
+      "timestamp": "2026-06-19T13:44:00.944Z",
+      "actor": null,
+      "summary": "Assigned Arin Powell to Cleanroom 1 � Isolator 1 R (Early)",
+      "before_json": null,
+      "after_json": {
+        "staff_id": 1,
+        "staff_name": "Arin Powell",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": 1,
+        "isolator_name": "Isolator 1 R",
+        "shift_id": 1,
+        "shift_name": "Early"
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 101,
+    "fields": {
+      "rotaday": 14,
+      "event_type": "ASSIGNMENT_CREATED",
+      "timestamp": "2026-06-19T13:44:00.947Z",
+      "actor": null,
+      "summary": "Assigned Baylor Tarvis to Cleanroom 1 � Isolator 1 R (Late)",
+      "before_json": null,
+      "after_json": {
+        "staff_id": 8,
+        "staff_name": "Baylor Tarvis",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": 1,
+        "isolator_name": "Isolator 1 R",
+        "shift_id": 3,
+        "shift_name": "Late"
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 102,
+    "fields": {
+      "rotaday": 14,
+      "event_type": "ASSIGNMENT_UPDATED",
+      "timestamp": "2026-06-19T13:44:00.948Z",
+      "actor": ["robfr"],
+      "summary": "Updated isolator assignments for Isolator 1 R.",
+      "before_json": {
+        "isolator": "Isolator 1 R",
+        "AM": ["Arin Powell"],
+        "PM": ["Baylor Tarvis"]
+      },
+      "after_json": {
+        "isolator": "Isolator 1 R",
+        "AM": ["Arin Powell"],
+        "PM": ["Baylor Tarvis"]
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 103,
+    "fields": {
+      "rotaday": 14,
+      "event_type": "ASSIGNMENT_DELETED",
+      "timestamp": "2026-06-19T13:45:57.102Z",
+      "actor": null,
+      "summary": "Removed assignment for Baylor Tarvis from Cleanroom 1",
+      "before_json": {
+        "staff_id": 8,
+        "staff_name": "Baylor Tarvis",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": 1,
+        "isolator_name": "Isolator 1 R",
+        "shift_id": 3,
+        "shift_name": "Late"
+      },
+      "after_json": null
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 104,
+    "fields": {
+      "rotaday": 14,
+      "event_type": "ASSIGNMENT_DELETED",
+      "timestamp": "2026-06-19T13:45:57.103Z",
+      "actor": null,
+      "summary": "Removed assignment for Arin Powell from Cleanroom 1",
+      "before_json": {
+        "staff_id": 1,
+        "staff_name": "Arin Powell",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": 1,
+        "isolator_name": "Isolator 1 R",
+        "shift_id": 1,
+        "shift_name": "Early"
+      },
+      "after_json": null
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 105,
+    "fields": {
+      "rotaday": 14,
+      "event_type": "ASSIGNMENT_CREATED",
+      "timestamp": "2026-06-19T13:45:57.106Z",
+      "actor": null,
+      "summary": "Assigned Arin Powell to Cleanroom 1 � Isolator 1 R (Early)",
+      "before_json": null,
+      "after_json": {
+        "staff_id": 1,
+        "staff_name": "Arin Powell",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": 1,
+        "isolator_name": "Isolator 1 R",
+        "shift_id": 1,
+        "shift_name": "Early"
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 106,
+    "fields": {
+      "rotaday": 14,
+      "event_type": "ASSIGNMENT_CREATED",
+      "timestamp": "2026-06-19T13:45:57.109Z",
+      "actor": null,
+      "summary": "Assigned Baylor Tarvis to Cleanroom 1 � Isolator 1 R (Late)",
+      "before_json": null,
+      "after_json": {
+        "staff_id": 8,
+        "staff_name": "Baylor Tarvis",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": 1,
+        "isolator_name": "Isolator 1 R",
+        "shift_id": 3,
+        "shift_name": "Late"
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 107,
+    "fields": {
+      "rotaday": 14,
+      "event_type": "ASSIGNMENT_CREATED",
+      "timestamp": "2026-06-19T13:45:57.112Z",
+      "actor": null,
+      "summary": "Assigned Chester Low to Cleanroom 1 � Isolator 1 R (Early)",
+      "before_json": null,
+      "after_json": {
+        "staff_id": 4,
+        "staff_name": "Chester Low",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": 1,
+        "isolator_name": "Isolator 1 R",
+        "shift_id": 1,
+        "shift_name": "Early"
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 108,
+    "fields": {
+      "rotaday": 14,
+      "event_type": "ASSIGNMENT_CREATED",
+      "timestamp": "2026-06-19T13:45:57.115Z",
+      "actor": null,
+      "summary": "Assigned Conway York to Cleanroom 1 � Isolator 1 R (Early)",
+      "before_json": null,
+      "after_json": {
+        "staff_id": 7,
+        "staff_name": "Conway York",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": 1,
+        "isolator_name": "Isolator 1 R",
+        "shift_id": 1,
+        "shift_name": "Early"
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 109,
+    "fields": {
+      "rotaday": 14,
+      "event_type": "ASSIGNMENT_UPDATED",
+      "timestamp": "2026-06-19T13:45:57.116Z",
+      "actor": ["robfr"],
+      "summary": "Updated isolator assignments for Isolator 1 R.",
+      "before_json": {
+        "isolator": "Isolator 1 R",
+        "AM": ["Arin Powell"],
+        "PM": ["Baylor Tarvis"]
+      },
+      "after_json": {
+        "isolator": "Isolator 1 R",
+        "AM": ["Arin Powell", "Chester Low", "Conway York"],
+        "PM": ["Baylor Tarvis"]
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 110,
+    "fields": {
+      "rotaday": 14,
+      "event_type": "ASSIGNMENT_DELETED",
+      "timestamp": "2026-06-19T13:46:28.004Z",
+      "actor": null,
+      "summary": "Removed assignment for Conway York from Cleanroom 1",
+      "before_json": {
+        "staff_id": 7,
+        "staff_name": "Conway York",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": 1,
+        "isolator_name": "Isolator 1 R",
+        "shift_id": 1,
+        "shift_name": "Early"
+      },
+      "after_json": null
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 111,
+    "fields": {
+      "rotaday": 14,
+      "event_type": "ASSIGNMENT_DELETED",
+      "timestamp": "2026-06-19T13:46:28.006Z",
+      "actor": null,
+      "summary": "Removed assignment for Chester Low from Cleanroom 1",
+      "before_json": {
+        "staff_id": 4,
+        "staff_name": "Chester Low",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": 1,
+        "isolator_name": "Isolator 1 R",
+        "shift_id": 1,
+        "shift_name": "Early"
+      },
+      "after_json": null
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 112,
+    "fields": {
+      "rotaday": 14,
+      "event_type": "ASSIGNMENT_DELETED",
+      "timestamp": "2026-06-19T13:46:28.006Z",
+      "actor": null,
+      "summary": "Removed assignment for Baylor Tarvis from Cleanroom 1",
+      "before_json": {
+        "staff_id": 8,
+        "staff_name": "Baylor Tarvis",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": 1,
+        "isolator_name": "Isolator 1 R",
+        "shift_id": 3,
+        "shift_name": "Late"
+      },
+      "after_json": null
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 113,
+    "fields": {
+      "rotaday": 14,
+      "event_type": "ASSIGNMENT_DELETED",
+      "timestamp": "2026-06-19T13:46:28.007Z",
+      "actor": null,
+      "summary": "Removed assignment for Arin Powell from Cleanroom 1",
+      "before_json": {
+        "staff_id": 1,
+        "staff_name": "Arin Powell",
+        "room_id": 1,
+        "room_name": "Cleanroom 1",
+        "isolator_id": 1,
+        "isolator_name": "Isolator 1 R",
+        "shift_id": 1,
+        "shift_name": "Early"
+      },
+      "after_json": null
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 114,
+    "fields": {
+      "rotaday": 14,
+      "event_type": "ASSIGNMENT_UPDATED",
+      "timestamp": "2026-06-19T13:46:28.008Z",
+      "actor": ["robfr"],
+      "summary": "Updated isolator assignments for Isolator 1 R.",
+      "before_json": {
+        "isolator": "Isolator 1 R",
+        "AM": ["Arin Powell", "Chester Low", "Conway York"],
+        "PM": ["Baylor Tarvis"]
+      },
+      "after_json": {
+        "isolator": "Isolator 1 R",
+        "AM": [],
+        "PM": []
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 115,
+    "fields": {
+      "rotaday": 14,
+      "event_type": "ASSIGNMENT_CREATED",
+      "timestamp": "2026-06-19T13:47:28.241Z",
+      "actor": null,
+      "summary": "Assigned Arin Powell to Cleanroom 2 � Isolator 3 R (Early)",
+      "before_json": null,
+      "after_json": {
+        "staff_id": 1,
+        "staff_name": "Arin Powell",
+        "room_id": 2,
+        "room_name": "Cleanroom 2",
+        "isolator_id": 8,
+        "isolator_name": "Isolator 3 R",
+        "shift_id": 1,
+        "shift_name": "Early"
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 116,
+    "fields": {
+      "rotaday": 14,
+      "event_type": "ASSIGNMENT_CREATED",
+      "timestamp": "2026-06-19T13:47:28.244Z",
+      "actor": null,
+      "summary": "Assigned Baylor Tarvis to Cleanroom 2 � Isolator 3 R (Early)",
+      "before_json": null,
+      "after_json": {
+        "staff_id": 8,
+        "staff_name": "Baylor Tarvis",
+        "room_id": 2,
+        "room_name": "Cleanroom 2",
+        "isolator_id": 8,
+        "isolator_name": "Isolator 3 R",
+        "shift_id": 1,
+        "shift_name": "Early"
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 117,
+    "fields": {
+      "rotaday": 14,
+      "event_type": "ASSIGNMENT_CREATED",
+      "timestamp": "2026-06-19T13:47:28.247Z",
+      "actor": null,
+      "summary": "Assigned Chester Low to Cleanroom 2 � Isolator 3 R (Early)",
+      "before_json": null,
+      "after_json": {
+        "staff_id": 4,
+        "staff_name": "Chester Low",
+        "room_id": 2,
+        "room_name": "Cleanroom 2",
+        "isolator_id": 8,
+        "isolator_name": "Isolator 3 R",
+        "shift_id": 1,
+        "shift_name": "Early"
+      }
+    }
+  },
+  {
+    "model": "rota.rotadayauditevent",
+    "pk": 118,
+    "fields": {
+      "rotaday": 14,
+      "event_type": "ASSIGNMENT_UPDATED",
+      "timestamp": "2026-06-19T13:47:28.248Z",
+      "actor": ["robfr"],
+      "summary": "Updated isolator assignments for Isolator 3 R.",
+      "before_json": {
+        "isolator": "Isolator 3 R",
+        "AM": [],
+        "PM": []
+      },
+      "after_json": {
+        "isolator": "Isolator 3 R",
+        "AM": ["Arin Powell", "Baylor Tarvis", "Chester Low"],
+        "PM": []
+      }
+    }
+  },
+  {
+    "model": "rota.assignment",
+    "pk": 4,
+    "fields": {
+      "shift_block": "AM",
+      "rotaday": 1,
+      "staff": 1,
+      "clean_room": 1,
+      "isolator": 1,
+      "isolator_section": null,
+      "work_area": null,
+      "shift": 1,
+      "location_type": "ISOLATOR",
+      "notes": "",
+      "is_room_supervisor": false
+    }
+  },
+  {
+    "model": "rota.assignment",
+    "pk": 5,
+    "fields": {
+      "shift_block": "AM",
+      "rotaday": 1,
+      "staff": 8,
+      "clean_room": 1,
+      "isolator": 1,
+      "isolator_section": null,
+      "work_area": null,
+      "shift": 1,
+      "location_type": "ISOLATOR",
+      "notes": "",
+      "is_room_supervisor": false
+    }
+  },
+  {
+    "model": "rota.assignment",
+    "pk": 6,
+    "fields": {
+      "shift_block": "AM",
+      "rotaday": 1,
+      "staff": 11,
+      "clean_room": 1,
+      "isolator": 1,
+      "isolator_section": null,
+      "work_area": null,
+      "shift": 3,
+      "location_type": "ISOLATOR",
+      "notes": "",
+      "is_room_supervisor": false
+    }
+  },
+  {
+    "model": "rota.assignment",
+    "pk": 7,
+    "fields": {
+      "shift_block": "AM",
+      "rotaday": 1,
+      "staff": 13,
+      "clean_room": 1,
+      "isolator": 1,
+      "isolator_section": null,
+      "work_area": null,
+      "shift": 3,
+      "location_type": "ISOLATOR",
+      "notes": "",
+      "is_room_supervisor": false
+    }
+  },
+  {
+    "model": "rota.assignment",
+    "pk": 10,
+    "fields": {
+      "shift_block": "AM",
+      "rotaday": 1,
+      "staff": 3,
+      "clean_room": 1,
+      "isolator": 2,
+      "isolator_section": null,
+      "work_area": null,
+      "shift": 1,
+      "location_type": "ISOLATOR",
+      "notes": "",
+      "is_room_supervisor": false
+    }
+  },
+  {
+    "model": "rota.assignment",
+    "pk": 11,
+    "fields": {
+      "shift_block": "AM",
+      "rotaday": 1,
+      "staff": 6,
+      "clean_room": 1,
+      "isolator": 2,
+      "isolator_section": null,
+      "work_area": null,
+      "shift": 1,
+      "location_type": "ISOLATOR",
+      "notes": "",
+      "is_room_supervisor": false
+    }
+  },
+  {
+    "model": "rota.assignment",
+    "pk": 18,
+    "fields": {
+      "shift_block": "AM",
+      "rotaday": 1,
+      "staff": 4,
+      "clean_room": 1,
+      "isolator": 4,
+      "isolator_section": null,
+      "work_area": null,
+      "shift": 1,
+      "location_type": "ISOLATOR",
+      "notes": "",
+      "is_room_supervisor": false
+    }
+  },
+  {
+    "model": "rota.assignment",
+    "pk": 25,
+    "fields": {
+      "shift_block": "AM",
+      "rotaday": 1,
+      "staff": 16,
+      "clean_room": 1,
+      "isolator": 3,
+      "isolator_section": null,
+      "work_area": null,
+      "shift": 1,
+      "location_type": "ISOLATOR",
+      "notes": "",
+      "is_room_supervisor": false
+    }
+  },
+  {
+    "model": "rota.assignment",
+    "pk": 26,
+    "fields": {
+      "shift_block": "AM",
+      "rotaday": 1,
+      "staff": 15,
+      "clean_room": 1,
+      "isolator": null,
+      "isolator_section": null,
+      "work_area": null,
+      "shift": 1,
+      "location_type": "ROOM",
+      "notes": "",
+      "is_room_supervisor": true
+    }
+  },
+  {
+    "model": "rota.assignment",
+    "pk": 27,
+    "fields": {
+      "shift_block": "AM",
+      "rotaday": 1,
+      "staff": 10,
+      "clean_room": 1,
+      "isolator": null,
+      "isolator_section": null,
+      "work_area": null,
+      "shift": 1,
+      "location_type": "ROOM",
+      "notes": "",
+      "is_room_supervisor": true
+    }
+  },
+  {
+    "model": "rota.assignment",
+    "pk": 28,
+    "fields": {
+      "shift_block": "AM",
+      "rotaday": 1,
+      "staff": 9,
+      "clean_room": 3,
+      "isolator": 13,
+      "isolator_section": null,
+      "work_area": null,
+      "shift": 3,
+      "location_type": "ISOLATOR",
+      "notes": "",
+      "is_room_supervisor": false
+    }
+  },
+  {
+    "model": "rota.assignment",
+    "pk": 29,
+    "fields": {
+      "shift_block": "AM",
+      "rotaday": 2,
+      "staff": 1,
+      "clean_room": 2,
+      "isolator": 8,
+      "isolator_section": null,
+      "work_area": null,
+      "shift": 1,
+      "location_type": "ISOLATOR",
+      "notes": "",
+      "is_room_supervisor": false
+    }
+  },
+  {
+    "model": "rota.assignment",
+    "pk": 30,
+    "fields": {
+      "shift_block": "AM",
+      "rotaday": 3,
+      "staff": 1,
+      "clean_room": 2,
+      "isolator": 8,
+      "isolator_section": null,
+      "work_area": null,
+      "shift": 1,
+      "location_type": "ISOLATOR",
+      "notes": "",
+      "is_room_supervisor": false
+    }
+  },
+  {
+    "model": "rota.assignment",
+    "pk": 31,
+    "fields": {
+      "shift_block": "AM",
+      "rotaday": 6,
+      "staff": 1,
+      "clean_room": 1,
+      "isolator": 1,
+      "isolator_section": null,
+      "work_area": null,
+      "shift": 1,
+      "location_type": "ISOLATOR",
+      "notes": "",
+      "is_room_supervisor": false
+    }
+  },
+  {
+    "model": "rota.assignment",
+    "pk": 32,
+    "fields": {
+      "shift_block": "AM",
+      "rotaday": 6,
+      "staff": 8,
+      "clean_room": 1,
+      "isolator": 1,
+      "isolator_section": null,
+      "work_area": null,
+      "shift": 1,
+      "location_type": "ISOLATOR",
+      "notes": "",
+      "is_room_supervisor": false
+    }
+  },
+  {
+    "model": "rota.assignment",
+    "pk": 33,
+    "fields": {
+      "shift_block": "AM",
+      "rotaday": 6,
+      "staff": 11,
+      "clean_room": 1,
+      "isolator": 1,
+      "isolator_section": null,
+      "work_area": null,
+      "shift": 2,
+      "location_type": "ISOLATOR",
+      "notes": "",
+      "is_room_supervisor": false
+    }
+  },
+  {
+    "model": "rota.assignment",
+    "pk": 34,
+    "fields": {
+      "shift_block": "AM",
+      "rotaday": 6,
+      "staff": 13,
+      "clean_room": 1,
+      "isolator": 1,
+      "isolator_section": null,
+      "work_area": null,
+      "shift": 2,
+      "location_type": "ISOLATOR",
+      "notes": "",
+      "is_room_supervisor": false
+    }
+  },
+  {
+    "model": "rota.assignment",
+    "pk": 35,
+    "fields": {
+      "shift_block": "AM",
+      "rotaday": 6,
+      "staff": 15,
+      "clean_room": 1,
+      "isolator": null,
+      "isolator_section": null,
+      "work_area": null,
+      "shift": 1,
+      "location_type": "ROOM",
+      "notes": "",
+      "is_room_supervisor": true
+    }
+  },
+  {
+    "model": "rota.assignment",
+    "pk": 36,
+    "fields": {
+      "shift_block": "AM",
+      "rotaday": 6,
+      "staff": 10,
+      "clean_room": 1,
+      "isolator": null,
+      "isolator_section": null,
+      "work_area": null,
+      "shift": 1,
+      "location_type": "ROOM",
+      "notes": "",
+      "is_room_supervisor": true
+    }
+  },
+  {
+    "model": "rota.assignment",
+    "pk": 43,
+    "fields": {
+      "shift_block": "PM",
+      "rotaday": 7,
+      "staff": 3,
+      "clean_room": 1,
+      "isolator": 4,
+      "isolator_section": null,
+      "work_area": null,
+      "shift": 3,
+      "location_type": "ISOLATOR",
+      "notes": "",
+      "is_room_supervisor": false
+    }
+  },
+  {
+    "model": "rota.assignment",
+    "pk": 49,
+    "fields": {
+      "shift_block": "PM",
+      "rotaday": 7,
+      "staff": 11,
+      "clean_room": 1,
+      "isolator": 1,
+      "isolator_section": null,
+      "work_area": null,
+      "shift": 3,
+      "location_type": "ISOLATOR",
+      "notes": "",
+      "is_room_supervisor": false
+    }
+  },
+  {
+    "model": "rota.assignment",
+    "pk": 50,
+    "fields": {
+      "shift_block": "AM",
+      "rotaday": 7,
+      "staff": 3,
+      "clean_room": 1,
+      "isolator": 1,
+      "isolator_section": null,
+      "work_area": null,
+      "shift": 1,
+      "location_type": "ISOLATOR",
+      "notes": "",
+      "is_room_supervisor": false
+    }
+  },
+  {
+    "model": "rota.assignment",
+    "pk": 51,
+    "fields": {
+      "shift_block": "AM",
+      "rotaday": 7,
+      "staff": 12,
+      "clean_room": 1,
+      "isolator": 1,
+      "isolator_section": null,
+      "work_area": null,
+      "shift": 1,
+      "location_type": "ISOLATOR",
+      "notes": "",
+      "is_room_supervisor": false
+    }
+  },
+  {
+    "model": "rota.assignment",
+    "pk": 52,
+    "fields": {
+      "shift_block": "PM",
+      "rotaday": 7,
+      "staff": 14,
+      "clean_room": 1,
+      "isolator": 1,
+      "isolator_section": null,
+      "work_area": null,
+      "shift": 3,
+      "location_type": "ISOLATOR",
+      "notes": "",
+      "is_room_supervisor": false
+    }
+  },
+  {
+    "model": "rota.assignment",
+    "pk": 53,
+    "fields": {
+      "shift_block": "AM",
+      "rotaday": 9,
+      "staff": 1,
+      "clean_room": null,
+      "isolator": null,
+      "isolator_section": null,
+      "work_area": 2,
+      "shift": 1,
+      "location_type": "WORK_AREA",
+      "notes": "",
+      "is_room_supervisor": false
+    }
+  },
+  {
+    "model": "rota.assignment",
+    "pk": 54,
+    "fields": {
+      "shift_block": "AM",
+      "rotaday": 9,
+      "staff": 8,
+      "clean_room": null,
+      "isolator": null,
+      "isolator_section": null,
+      "work_area": 2,
+      "shift": 1,
+      "location_type": "WORK_AREA",
+      "notes": "",
+      "is_room_supervisor": false
+    }
+  },
+  {
+    "model": "rota.assignment",
+    "pk": 55,
+    "fields": {
+      "shift_block": "PM",
+      "rotaday": 9,
+      "staff": 11,
+      "clean_room": null,
+      "isolator": null,
+      "isolator_section": null,
+      "work_area": 2,
+      "shift": 3,
+      "location_type": "WORK_AREA",
+      "notes": "",
+      "is_room_supervisor": false
+    }
+  },
+  {
+    "model": "rota.assignment",
+    "pk": 56,
+    "fields": {
+      "shift_block": "PM",
+      "rotaday": 9,
+      "staff": 13,
+      "clean_room": null,
+      "isolator": null,
+      "isolator_section": null,
+      "work_area": 2,
+      "shift": 3,
+      "location_type": "WORK_AREA",
+      "notes": "",
+      "is_room_supervisor": false
+    }
+  },
+  {
+    "model": "rota.assignment",
+    "pk": 57,
+    "fields": {
+      "shift_block": "AM",
+      "rotaday": 10,
+      "staff": 1,
+      "clean_room": null,
+      "isolator": null,
+      "isolator_section": null,
+      "work_area": 2,
+      "shift": 1,
+      "location_type": "WORK_AREA",
+      "notes": "",
+      "is_room_supervisor": false
+    }
+  },
+  {
+    "model": "rota.assignment",
+    "pk": 58,
+    "fields": {
+      "shift_block": "PM",
+      "rotaday": 10,
+      "staff": 8,
+      "clean_room": null,
+      "isolator": null,
+      "isolator_section": null,
+      "work_area": 2,
+      "shift": 3,
+      "location_type": "WORK_AREA",
+      "notes": "",
+      "is_room_supervisor": false
+    }
+  },
+  {
+    "model": "rota.assignment",
+    "pk": 59,
+    "fields": {
+      "shift_block": "AM",
+      "rotaday": 11,
+      "staff": 1,
+      "clean_room": null,
+      "isolator": null,
+      "isolator_section": null,
+      "work_area": 11,
+      "shift": 1,
+      "location_type": "WORK_AREA",
+      "notes": "",
+      "is_room_supervisor": false
+    }
+  },
+  {
+    "model": "rota.assignment",
+    "pk": 60,
+    "fields": {
+      "shift_block": "PM",
+      "rotaday": 11,
+      "staff": 8,
+      "clean_room": null,
+      "isolator": null,
+      "isolator_section": null,
+      "work_area": 11,
+      "shift": 3,
+      "location_type": "WORK_AREA",
+      "notes": "",
+      "is_room_supervisor": false
+    }
+  },
+  {
+    "model": "rota.assignment",
+    "pk": 69,
+    "fields": {
+      "shift_block": "AM",
+      "rotaday": 14,
+      "staff": 1,
+      "clean_room": 2,
+      "isolator": 8,
+      "isolator_section": 9,
+      "work_area": null,
+      "shift": 1,
+      "location_type": "ISOLATOR",
+      "notes": "",
+      "is_room_supervisor": false
+    }
+  },
+  {
+    "model": "rota.assignment",
+    "pk": 70,
+    "fields": {
+      "shift_block": "AM",
+      "rotaday": 14,
+      "staff": 8,
+      "clean_room": 2,
+      "isolator": 8,
+      "isolator_section": 9,
+      "work_area": null,
+      "shift": 1,
+      "location_type": "ISOLATOR",
+      "notes": "",
+      "is_room_supervisor": false
+    }
+  },
+  {
+    "model": "rota.assignment",
+    "pk": 71,
+    "fields": {
+      "shift_block": "AM",
+      "rotaday": 14,
+      "staff": 4,
+      "clean_room": 2,
+      "isolator": 8,
+      "isolator_section": 9,
+      "work_area": null,
+      "shift": 1,
+      "location_type": "ISOLATOR",
+      "notes": "",
+      "is_room_supervisor": false
+    }
+  },
+  {
+    "model": "validation.isolatorsection",
+    "pk": 1,
+    "fields": {
+      "isolator": 1,
+      "section": "L",
+      "is_active": true
+    }
+  },
+  {
+    "model": "validation.isolatorsection",
+    "pk": 2,
+    "fields": {
+      "isolator": 1,
+      "section": "R",
+      "is_active": true
+    }
+  },
+  {
+    "model": "validation.isolatorsection",
+    "pk": 3,
+    "fields": {
+      "isolator": 2,
+      "section": "L",
+      "is_active": true
+    }
+  },
+  {
+    "model": "validation.isolatorsection",
+    "pk": 4,
+    "fields": {
+      "isolator": 2,
+      "section": "R",
+      "is_active": true
+    }
+  },
+  {
+    "model": "validation.isolatorsection",
+    "pk": 5,
+    "fields": {
+      "isolator": 3,
+      "section": "L",
+      "is_active": true
+    }
+  },
+  {
+    "model": "validation.isolatorsection",
+    "pk": 6,
+    "fields": {
+      "isolator": 3,
+      "section": "R",
+      "is_active": true
+    }
+  },
+  {
+    "model": "validation.isolatorsection",
+    "pk": 7,
+    "fields": {
+      "isolator": 4,
+      "section": "L",
+      "is_active": true
+    }
+  },
+  {
+    "model": "validation.isolatorsection",
+    "pk": 8,
+    "fields": {
+      "isolator": 4,
+      "section": "R",
+      "is_active": true
+    }
+  },
+  {
+    "model": "validation.isolatorsection",
+    "pk": 9,
+    "fields": {
+      "isolator": 8,
+      "section": "L",
+      "is_active": true
+    }
+  },
+  {
+    "model": "validation.isolatorsection",
+    "pk": 10,
+    "fields": {
+      "isolator": 8,
+      "section": "R",
+      "is_active": true
+    }
+  },
+  {
+    "model": "validation.isolatorsection",
+    "pk": 11,
+    "fields": {
+      "isolator": 7,
+      "section": "L",
+      "is_active": true
+    }
+  },
+  {
+    "model": "validation.isolatorsection",
+    "pk": 12,
+    "fields": {
+      "isolator": 7,
+      "section": "R",
+      "is_active": true
+    }
+  },
+  {
+    "model": "validation.isolatorsection",
+    "pk": 13,
+    "fields": {
+      "isolator": 13,
+      "section": "L",
+      "is_active": true
+    }
+  },
+  {
+    "model": "validation.isolatorsection",
+    "pk": 14,
+    "fields": {
+      "isolator": 13,
+      "section": "R",
+      "is_active": true
+    }
+  },
+  {
+    "model": "validation.isolatorsection",
+    "pk": 15,
+    "fields": {
+      "isolator": 14,
+      "section": "L",
+      "is_active": true
+    }
+  },
+  {
+    "model": "validation.isolatorsection",
+    "pk": 16,
+    "fields": {
+      "isolator": 14,
+      "section": "R",
+      "is_active": true
+    }
+  },
+  {
+    "model": "validation.isolatorsection",
+    "pk": 17,
+    "fields": {
+      "isolator": 15,
+      "section": "L",
+      "is_active": true
+    }
+  },
+  {
+    "model": "validation.isolatorsection",
+    "pk": 18,
+    "fields": {
+      "isolator": 15,
+      "section": "R",
+      "is_active": true
+    }
+  },
+  {
+    "model": "validation.isolatorsection",
+    "pk": 19,
+    "fields": {
+      "isolator": 16,
+      "section": "L",
+      "is_active": true
+    }
+  },
+  {
+    "model": "validation.isolatorsection",
+    "pk": 20,
+    "fields": {
+      "isolator": 16,
+      "section": "R",
+      "is_active": true
+    }
+  },
+  {
+    "model": "validation.isolatorsection",
+    "pk": 21,
+    "fields": {
+      "isolator": 17,
+      "section": "L",
+      "is_active": true
+    }
+  },
+  {
+    "model": "validation.isolatorsection",
+    "pk": 22,
+    "fields": {
+      "isolator": 17,
+      "section": "R",
+      "is_active": true
+    }
+  },
+  {
+    "model": "validation.isolatorsection",
+    "pk": 23,
+    "fields": {
+      "isolator": 18,
+      "section": "L",
+      "is_active": true
+    }
+  },
+  {
+    "model": "validation.isolatorsection",
+    "pk": 24,
+    "fields": {
+      "isolator": 18,
+      "section": "R",
+      "is_active": true
+    }
+  },
+  {
+    "model": "validation.operatorvalidation",
+    "pk": 2,
+    "fields": {
+      "operator": 1,
+      "isolator_section": 1,
+      "status": "VALID",
+      "valid_from": "2026-05-24",
+      "expires_on": "2026-11-23",
+      "assessed_by": "",
+      "evidence_ref": "",
+      "notes": "",
+      "created_at": "2026-05-24T15:56:42.894Z",
+      "updated_at": "2026-05-24T15:56:42.899Z"
+    }
+  },
+  {
+    "model": "validation.operatorvalidation",
+    "pk": 3,
+    "fields": {
+      "operator": 1,
+      "isolator_section": 3,
+      "status": "VALID",
+      "valid_from": "2026-05-24",
+      "expires_on": "2026-11-23",
+      "assessed_by": "",
+      "evidence_ref": "",
+      "notes": "",
+      "created_at": "2026-05-24T16:06:53.089Z",
+      "updated_at": "2026-05-24T16:06:53.093Z"
+    }
+  },
+  {
+    "model": "validation.operatorvalidation",
+    "pk": 4,
+    "fields": {
+      "operator": 1,
+      "isolator_section": 2,
+      "status": "VALID",
+      "valid_from": "2026-06-19",
+      "expires_on": "2026-12-19",
+      "assessed_by": "",
+      "evidence_ref": "",
+      "notes": "",
+      "created_at": "2026-05-24T16:07:08.588Z",
+      "updated_at": "2026-06-19T13:43:51.436Z"
+    }
+  },
+  {
+    "model": "validation.operatorvalidation",
+    "pk": 5,
+    "fields": {
+      "operator": 8,
+      "isolator_section": 3,
+      "status": "VALID",
+      "valid_from": "2026-05-24",
+      "expires_on": "2026-11-23",
+      "assessed_by": "",
+      "evidence_ref": "",
+      "notes": "",
+      "created_at": "2026-05-24T16:07:11.829Z",
+      "updated_at": "2026-05-24T16:07:11.833Z"
+    }
+  },
+  {
+    "model": "validation.operatorvalidation",
+    "pk": 6,
+    "fields": {
+      "operator": 8,
+      "isolator_section": 1,
+      "status": "VALID",
+      "valid_from": "2026-06-19",
+      "expires_on": "2026-12-19",
+      "assessed_by": "",
+      "evidence_ref": "",
+      "notes": "",
+      "created_at": "2026-06-19T13:37:17.874Z",
+      "updated_at": "2026-06-19T13:37:17.878Z"
+    }
+  },
+  {
+    "model": "validation.operatorvalidation",
+    "pk": 7,
+    "fields": {
+      "operator": 8,
+      "isolator_section": 2,
+      "status": "VALID",
+      "valid_from": "2026-06-19",
+      "expires_on": "2026-12-19",
+      "assessed_by": "",
+      "evidence_ref": "",
+      "notes": "",
+      "created_at": "2026-06-19T13:37:21.407Z",
+      "updated_at": "2026-06-19T13:37:21.411Z"
+    }
+  },
+  {
+    "model": "validation.operatorvalidation",
+    "pk": 8,
+    "fields": {
+      "operator": 1,
+      "isolator_section": 5,
+      "status": "VALID",
+      "valid_from": "2026-06-19",
+      "expires_on": "2026-12-19",
+      "assessed_by": "",
+      "evidence_ref": "",
+      "notes": "",
+      "created_at": "2026-06-19T13:37:23.273Z",
+      "updated_at": "2026-06-19T13:37:23.277Z"
+    }
+  },
+  {
+    "model": "validation.operatorvalidation",
+    "pk": 9,
+    "fields": {
+      "operator": 4,
+      "isolator_section": 1,
+      "status": "VALID",
+      "valid_from": "2026-06-19",
+      "expires_on": "2026-12-19",
+      "assessed_by": "",
+      "evidence_ref": "",
+      "notes": "",
+      "created_at": "2026-06-19T13:37:28.907Z",
+      "updated_at": "2026-06-19T13:37:28.910Z"
+    }
+  },
+  {
+    "model": "validation.operatorvalidation",
+    "pk": 10,
+    "fields": {
+      "operator": 4,
+      "isolator_section": 2,
+      "status": "VALID",
+      "valid_from": "2026-06-19",
+      "expires_on": "2026-12-19",
+      "assessed_by": "",
+      "evidence_ref": "",
+      "notes": "",
+      "created_at": "2026-06-19T13:37:30.674Z",
+      "updated_at": "2026-06-19T13:37:30.677Z"
+    }
+  },
+  {
+    "model": "validation.operatorvalidation",
+    "pk": 11,
+    "fields": {
+      "operator": 8,
+      "isolator_section": 5,
+      "status": "VALID",
+      "valid_from": "2026-06-19",
+      "expires_on": "2026-12-19",
+      "assessed_by": "",
+      "evidence_ref": "",
+      "notes": "",
+      "created_at": "2026-06-19T13:37:32.695Z",
+      "updated_at": "2026-06-19T13:37:32.700Z"
+    }
+  },
+  {
+    "model": "validation.operatorvalidation",
+    "pk": 12,
+    "fields": {
+      "operator": 4,
+      "isolator_section": 6,
+      "status": "VALID",
+      "valid_from": "2026-06-19",
+      "expires_on": "2026-12-19",
+      "assessed_by": "",
+      "evidence_ref": "",
+      "notes": "",
+      "created_at": "2026-06-19T13:37:34.390Z",
+      "updated_at": "2026-06-19T13:37:34.393Z"
+    }
+  },
+  {
+    "model": "validation.operatorvalidation",
+    "pk": 13,
+    "fields": {
+      "operator": 4,
+      "isolator_section": 5,
+      "status": "VALID",
+      "valid_from": "2026-06-19",
+      "expires_on": "2026-12-19",
+      "assessed_by": "",
+      "evidence_ref": "",
+      "notes": "",
+      "created_at": "2026-06-19T13:37:35.773Z",
+      "updated_at": "2026-06-19T13:37:35.778Z"
+    }
+  },
+  {
+    "model": "validation.operatorvalidation",
+    "pk": 14,
+    "fields": {
+      "operator": 4,
+      "isolator_section": 9,
+      "status": "VALID",
+      "valid_from": "2026-06-19",
+      "expires_on": "2026-12-19",
+      "assessed_by": "",
+      "evidence_ref": "",
+      "notes": "",
+      "created_at": "2026-06-19T13:37:37.106Z",
+      "updated_at": "2026-06-19T13:37:37.109Z"
+    }
+  },
+  {
+    "model": "validation.operatorvalidation",
+    "pk": 15,
+    "fields": {
+      "operator": 4,
+      "isolator_section": 10,
+      "status": "VALID",
+      "valid_from": "2026-06-19",
+      "expires_on": "2026-12-19",
+      "assessed_by": "",
+      "evidence_ref": "",
+      "notes": "",
+      "created_at": "2026-06-19T13:38:02.507Z",
+      "updated_at": "2026-06-19T13:38:02.511Z"
+    }
+  },
+  {
+    "model": "validation.operatorvalidation",
+    "pk": 16,
+    "fields": {
+      "operator": 4,
+      "isolator_section": 13,
+      "status": "VALID",
+      "valid_from": "2026-06-19",
+      "expires_on": "2026-12-19",
+      "assessed_by": "",
+      "evidence_ref": "",
+      "notes": "",
+      "created_at": "2026-06-19T13:38:03.927Z",
+      "updated_at": "2026-06-19T13:38:03.931Z"
+    }
+  },
+  {
+    "model": "validation.operatorvalidation",
+    "pk": 17,
+    "fields": {
+      "operator": 4,
+      "isolator_section": 14,
+      "status": "VALID",
+      "valid_from": "2026-06-19",
+      "expires_on": "2026-12-19",
+      "assessed_by": "",
+      "evidence_ref": "",
+      "notes": "",
+      "created_at": "2026-06-19T13:38:05.302Z",
+      "updated_at": "2026-06-19T13:38:05.306Z"
+    }
+  },
+  {
+    "model": "validation.operatorvalidation",
+    "pk": 18,
+    "fields": {
+      "operator": 4,
+      "isolator_section": 17,
+      "status": "VALID",
+      "valid_from": "2026-06-19",
+      "expires_on": "2026-12-19",
+      "assessed_by": "",
+      "evidence_ref": "",
+      "notes": "",
+      "created_at": "2026-06-19T13:38:08.141Z",
+      "updated_at": "2026-06-19T13:38:08.144Z"
+    }
+  },
+  {
+    "model": "validation.operatorvalidation",
+    "pk": 19,
+    "fields": {
+      "operator": 4,
+      "isolator_section": 18,
+      "status": "IN_TRAINING",
+      "valid_from": "2026-06-19",
+      "expires_on": null,
+      "assessed_by": "",
+      "evidence_ref": "",
+      "notes": "",
+      "created_at": "2026-06-19T13:38:11.269Z",
+      "updated_at": "2026-06-19T13:38:11.272Z"
+    }
+  },
+  {
+    "model": "validation.operatorvalidation",
+    "pk": 20,
+    "fields": {
+      "operator": 4,
+      "isolator_section": 21,
+      "status": "VALID",
+      "valid_from": "2026-06-19",
+      "expires_on": "2026-12-19",
+      "assessed_by": "",
+      "evidence_ref": "",
+      "notes": "",
+      "created_at": "2026-06-19T13:38:12.906Z",
+      "updated_at": "2026-06-19T13:38:12.910Z"
+    }
+  },
+  {
+    "model": "validation.operatorvalidation",
+    "pk": 21,
+    "fields": {
+      "operator": 1,
+      "isolator_section": 6,
+      "status": "VALID",
+      "valid_from": "2026-06-19",
+      "expires_on": "2026-12-19",
+      "assessed_by": "",
+      "evidence_ref": "",
+      "notes": "",
+      "created_at": "2026-06-19T13:44:16.591Z",
+      "updated_at": "2026-06-19T13:44:16.595Z"
+    }
+  },
+  {
+    "model": "validation.operatorvalidation",
+    "pk": 22,
+    "fields": {
+      "operator": 8,
+      "isolator_section": 6,
+      "status": "VALID",
+      "valid_from": "2026-06-19",
+      "expires_on": "2026-12-19",
+      "assessed_by": "",
+      "evidence_ref": "",
+      "notes": "",
+      "created_at": "2026-06-19T13:44:18.433Z",
+      "updated_at": "2026-06-19T13:44:18.438Z"
+    }
+  },
+  {
+    "model": "validation.operatorvalidation",
+    "pk": 23,
+    "fields": {
+      "operator": 1,
+      "isolator_section": 9,
+      "status": "VALID",
+      "valid_from": "2026-06-19",
+      "expires_on": "2026-12-19",
+      "assessed_by": "",
+      "evidence_ref": "",
+      "notes": "",
+      "created_at": "2026-06-19T13:44:19.900Z",
+      "updated_at": "2026-06-19T13:44:19.903Z"
+    }
+  },
+  {
+    "model": "validation.operatorvalidation",
+    "pk": 24,
+    "fields": {
+      "operator": 8,
+      "isolator_section": 9,
+      "status": "VALID",
+      "valid_from": "2026-06-19",
+      "expires_on": "2026-12-19",
+      "assessed_by": "",
+      "evidence_ref": "",
+      "notes": "",
+      "created_at": "2026-06-19T13:44:21.374Z",
+      "updated_at": "2026-06-19T13:44:21.379Z"
+    }
+  },
+  {
+    "model": "validation.operatorvalidation",
+    "pk": 25,
+    "fields": {
+      "operator": 1,
+      "isolator_section": 10,
+      "status": "VALID",
+      "valid_from": "2026-06-19",
+      "expires_on": "2026-12-19",
+      "assessed_by": "",
+      "evidence_ref": "",
+      "notes": "",
+      "created_at": "2026-06-19T13:44:22.866Z",
+      "updated_at": "2026-06-19T13:44:22.870Z"
+    }
+  },
+  {
+    "model": "validation.operatorvalidation",
+    "pk": 26,
+    "fields": {
+      "operator": 8,
+      "isolator_section": 10,
+      "status": "VALID",
+      "valid_from": "2026-06-19",
+      "expires_on": "2026-12-19",
+      "assessed_by": "",
+      "evidence_ref": "",
+      "notes": "",
+      "created_at": "2026-06-19T13:44:24.375Z",
+      "updated_at": "2026-06-19T13:44:24.378Z"
+    }
+  },
+  {
+    "model": "validation.operatorvalidation",
+    "pk": 27,
+    "fields": {
+      "operator": 1,
+      "isolator_section": 13,
+      "status": "VALID",
+      "valid_from": "2026-06-19",
+      "expires_on": "2026-12-19",
+      "assessed_by": "",
+      "evidence_ref": "",
+      "notes": "",
+      "created_at": "2026-06-19T13:44:32.315Z",
+      "updated_at": "2026-06-19T13:44:32.318Z"
+    }
+  },
+  {
+    "model": "validation.operatorvalidation",
+    "pk": 28,
+    "fields": {
+      "operator": 8,
+      "isolator_section": 13,
+      "status": "VALID",
+      "valid_from": "2026-06-19",
+      "expires_on": "2026-12-19",
+      "assessed_by": "",
+      "evidence_ref": "",
+      "notes": "",
+      "created_at": "2026-06-19T13:44:33.833Z",
+      "updated_at": "2026-06-19T13:44:33.838Z"
+    }
+  },
+  {
+    "model": "validation.operatorvalidation",
+    "pk": 29,
+    "fields": {
+      "operator": 1,
+      "isolator_section": 14,
+      "status": "VALID",
+      "valid_from": "2026-06-19",
+      "expires_on": "2026-12-19",
+      "assessed_by": "",
+      "evidence_ref": "",
+      "notes": "",
+      "created_at": "2026-06-19T13:44:36.501Z",
+      "updated_at": "2026-06-19T13:44:36.505Z"
+    }
+  },
+  {
+    "model": "validation.operatorvalidation",
+    "pk": 30,
+    "fields": {
+      "operator": 8,
+      "isolator_section": 14,
+      "status": "VALID",
+      "valid_from": "2026-06-19",
+      "expires_on": "2026-12-19",
+      "assessed_by": "",
+      "evidence_ref": "",
+      "notes": "",
+      "created_at": "2026-06-19T13:44:39.278Z",
+      "updated_at": "2026-06-19T13:44:39.283Z"
+    }
+  },
+  {
+    "model": "validation.operatorvalidation",
+    "pk": 31,
+    "fields": {
+      "operator": 7,
+      "isolator_section": 1,
+      "status": "VALID",
+      "valid_from": "2026-06-19",
+      "expires_on": "2026-12-19",
+      "assessed_by": "",
+      "evidence_ref": "",
+      "notes": "",
+      "created_at": "2026-06-19T13:45:24.567Z",
+      "updated_at": "2026-06-19T13:45:24.574Z"
+    }
+  },
+  {
+    "model": "validation.operatorvalidation",
+    "pk": 32,
+    "fields": {
+      "operator": 7,
+      "isolator_section": 2,
+      "status": "VALID",
+      "valid_from": "2026-06-19",
+      "expires_on": "2026-12-19",
+      "assessed_by": "",
+      "evidence_ref": "",
+      "notes": "",
+      "created_at": "2026-06-19T13:45:25.732Z",
+      "updated_at": "2026-06-19T13:45:25.738Z"
+    }
+  },
+  {
+    "model": "validation.operatorvalidation",
+    "pk": 33,
+    "fields": {
+      "operator": 7,
+      "isolator_section": 5,
+      "status": "VALID",
+      "valid_from": "2026-06-19",
+      "expires_on": "2026-12-19",
+      "assessed_by": "",
+      "evidence_ref": "",
+      "notes": "",
+      "created_at": "2026-06-19T13:45:27.800Z",
+      "updated_at": "2026-06-19T13:45:27.804Z"
+    }
+  },
+  {
+    "model": "validation.operatorvalidation",
+    "pk": 34,
+    "fields": {
+      "operator": 7,
+      "isolator_section": 6,
+      "status": "VALID",
+      "valid_from": "2026-06-19",
+      "expires_on": "2026-12-19",
+      "assessed_by": "",
+      "evidence_ref": "",
+      "notes": "",
+      "created_at": "2026-06-19T13:45:28.966Z",
+      "updated_at": "2026-06-19T13:45:28.970Z"
+    }
+  },
+  {
+    "model": "validation.operatorvalidation",
+    "pk": 35,
+    "fields": {
+      "operator": 11,
+      "isolator_section": 1,
+      "status": "VALID",
+      "valid_from": "2026-06-19",
+      "expires_on": "2026-12-19",
+      "assessed_by": "",
+      "evidence_ref": "",
+      "notes": "",
+      "created_at": "2026-06-19T13:45:34.630Z",
+      "updated_at": "2026-06-19T13:45:34.634Z"
+    }
+  },
+  {
+    "model": "validation.operatorvalidation",
+    "pk": 36,
+    "fields": {
+      "operator": 11,
+      "isolator_section": 2,
+      "status": "VALID",
+      "valid_from": "2026-06-19",
+      "expires_on": "2026-12-19",
+      "assessed_by": "",
+      "evidence_ref": "",
+      "notes": "",
+      "created_at": "2026-06-19T13:45:35.717Z",
+      "updated_at": "2026-06-19T13:45:35.722Z"
+    }
+  },
+  {
+    "model": "validation.operatorvalidation",
+    "pk": 37,
+    "fields": {
+      "operator": 11,
+      "isolator_section": 5,
+      "status": "VALID",
+      "valid_from": "2026-06-19",
+      "expires_on": "2026-12-19",
+      "assessed_by": "",
+      "evidence_ref": "",
+      "notes": "",
+      "created_at": "2026-06-19T13:45:36.894Z",
+      "updated_at": "2026-06-19T13:45:36.898Z"
+    }
+  },
+  {
+    "model": "validation.operatorvalidation",
+    "pk": 38,
+    "fields": {
+      "operator": 11,
+      "isolator_section": 6,
+      "status": "VALID",
+      "valid_from": "2026-06-19",
+      "expires_on": "2026-12-19",
+      "assessed_by": "",
+      "evidence_ref": "",
+      "notes": "",
+      "created_at": "2026-06-19T13:45:38.065Z",
+      "updated_at": "2026-06-19T13:45:38.068Z"
+    }
+  },
+  {
+    "model": "validation.operatorvalidation",
+    "pk": 39,
+    "fields": {
+      "operator": 7,
+      "isolator_section": 9,
+      "status": "VALID",
+      "valid_from": "2026-06-19",
+      "expires_on": "2026-12-19",
+      "assessed_by": "",
+      "evidence_ref": "",
+      "notes": "",
+      "created_at": "2026-06-19T13:47:03.996Z",
+      "updated_at": "2026-06-19T13:47:04.000Z"
+    }
+  },
+  {
+    "model": "validation.operatorvalidation",
+    "pk": 40,
+    "fields": {
+      "operator": 7,
+      "isolator_section": 10,
+      "status": "VALID",
+      "valid_from": "2026-06-19",
+      "expires_on": "2026-12-19",
+      "assessed_by": "",
+      "evidence_ref": "",
+      "notes": "",
+      "created_at": "2026-06-19T13:47:05.767Z",
+      "updated_at": "2026-06-19T13:47:05.771Z"
+    }
+  },
+  {
+    "model": "validation.operatorvalidation",
+    "pk": 41,
+    "fields": {
+      "operator": 7,
+      "isolator_section": 13,
+      "status": "VALID",
+      "valid_from": "2026-06-19",
+      "expires_on": "2026-12-19",
+      "assessed_by": "",
+      "evidence_ref": "",
+      "notes": "",
+      "created_at": "2026-06-19T13:47:07.185Z",
+      "updated_at": "2026-06-19T13:47:07.190Z"
+    }
+  },
+  {
+    "model": "validation.operatorvalidation",
+    "pk": 42,
+    "fields": {
+      "operator": 7,
+      "isolator_section": 14,
+      "status": "VALID",
+      "valid_from": "2026-06-19",
+      "expires_on": "2026-12-19",
+      "assessed_by": "",
+      "evidence_ref": "",
+      "notes": "",
+      "created_at": "2026-06-19T13:47:08.602Z",
+      "updated_at": "2026-06-19T13:47:08.606Z"
+    }
+  }
+]

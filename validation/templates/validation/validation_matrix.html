@@ -120,7 +120,7 @@
 
           {% for column in columns %}
             <div class="aps-head-cell {% if column.side_label == 'R' %}is-rside{% else %}is-lside{% endif %}">
-              <span class="aps-head-iso">{{ column.section.isolator.name }}</span>
+              <span class="aps-head-iso">{{ column.iso_label }}</span>
               <span class="aps-head-side">{{ column.side_label }}</span>
               <span class="aps-head-stats">
                 <span class="aps-head-stat-v">{{ column.stats.valid }}</span>

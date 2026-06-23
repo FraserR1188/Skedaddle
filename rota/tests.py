@@ -152,6 +152,24 @@ class APSSectionAssignmentWorkflowTests(TestCase):
             suite_html.index("Needs Attention"),
         )
 
+    def test_suite_overview_shows_iso_label_and_both_section_sides(self):
+        self.client.force_login(self.viewer_user)
+
+        response = self.client.get(
+            reverse(
+                "suite_overview",
+                kwargs={"year": 2026, "month": 5, "day": 2},
+            )
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Isolator 1")
+        self.assertContains(response, "Right AM")
+        self.assertContains(response, "Right PM")
+        self.assertContains(response, "Left AM")
+        self.assertContains(response, "Left PM")
+        self.assertContains(response, "L Wall")
+
     def test_manager_can_save_assignments_with_explicit_sections(self):
         self.client.force_login(self.manager_user)
 
@@ -222,6 +240,38 @@ class APSSectionAssignmentWorkflowTests(TestCase):
                 location_type=Assignment.LocationType.ISOLATOR,
             ).exists()
         )
+
+    def test_isolator_assignment_page_uses_iso_label(self):
+        url = reverse(
+            "isolator_assignment",
+            kwargs={"year": 2026, "month": 5, "day": 2, "isolator_id": self.isolator.id},
+        )
+
+        self.client.force_login(self.viewer_user)
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Iso 1")
+        self.assertNotContains(response, "Isolator 1")
+
+    def test_side_named_isolator_page_uses_iso_label(self):
+        side_isolator = Isolator.objects.create(
+            clean_room=self.room,
+            name="Isolator 4 L",
+            order=4,
+        )
+
+        url = reverse(
+            "isolator_assignment",
+            kwargs={"year": 2026, "month": 5, "day": 2, "isolator_id": side_isolator.id},
+        )
+
+        self.client.force_login(self.viewer_user)
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Iso 4")
+        self.assertNotContains(response, "Isolator 4 L")
 
     def test_manager_cannot_save_operator_row_without_section(self):
         self.client.force_login(self.manager_user)

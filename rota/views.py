@@ -29,6 +29,7 @@ from .models import (
     WorkArea,
 )
 from .services.suite_overview import build_isolator_display_layout, build_suite_overview
+from validation.services import aps_target_sections_for_isolator, isolator_base_label
 
 
 # ------------------------------------------------------------
@@ -431,9 +432,7 @@ def daily_rota(request, year, month, day):
         right_wall = room_card_layout["right_wall"]
 
         for isolator in left_wall + right_wall:
-            isolator.active_sections = [
-                section for section in isolator.sections.all() if section.is_active
-            ]
+            isolator.active_sections = aps_target_sections_for_isolator(isolator)
             ops = sorted(
                 isolator_assignments.get(isolator.id, []),
                 key=lambda item: (
@@ -541,6 +540,7 @@ def isolator_assignment(request, year, month, day, isolator_id):
         Isolator.objects.select_related("clean_room"),
         pk=isolator_id,
     )
+    isolator.display_label = isolator_base_label(isolator)
 
     shift_templates = list(ShiftTemplate.objects.all().order_by("start_time"))
     if not shift_templates:
@@ -598,7 +598,7 @@ def isolator_assignment(request, year, month, day, isolator_id):
     operators = staff_list.filter(role="OPERATIVE")
     supervisors = staff_list.filter(role="SUPERVISOR")
 
-    active_sections = list(isolator.sections.filter(is_active=True).order_by("section"))
+    active_sections = aps_target_sections_for_isolator(isolator)
     section_choices = {
         section.id: section for section in active_sections
     }

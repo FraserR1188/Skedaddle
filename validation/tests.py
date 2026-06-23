@@ -7,7 +7,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from rota.models import CleanRoom, Crew, Isolator, StaffMember
-from validation.models import OperatorValidation
+from validation.models import IsolatorSection, OperatorValidation
 from validation.services import check_operator_valid_for_section
 
 
@@ -113,3 +113,62 @@ class ValidationCardsTemplateTests(TestCase):
                 isolator_section=self.left_section,
             ).exists()
         )
+
+
+class APSMatrixSectionCountTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        user_model = get_user_model()
+        manager_permission = Permission.objects.get(codename="rota_manager")
+
+        cls.manager_user = user_model.objects.create_user(
+            username="aps-matrix-manager",
+            password="testpass123",
+        )
+        cls.manager_user.user_permissions.add(manager_permission)
+
+        crew = Crew.objects.create(name="A", sort_order=1)
+        StaffMember.objects.create(
+            first_name="Arin",
+            last_name="Powell",
+            role="OPERATIVE",
+            crew=crew,
+            is_active=True,
+        )
+        room = CleanRoom.objects.create(number=1, name="Room 1")
+
+        cls.iso_left = Isolator.objects.create(
+            clean_room=room,
+            name="Isolator 1 L",
+            order=1,
+        )
+        cls.iso_right = Isolator.objects.create(
+            clean_room=room,
+            name="Isolator 1 R",
+            order=2,
+        )
+
+    def test_side_named_isolators_render_both_aps_sides(self):
+        self.client.force_login(self.manager_user)
+
+        response = self.client.get(reverse("validation:validation_cards"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["total_sides"], 2)
+        self.assertEqual(
+            [
+                (column["iso_label"], column["side_label"])
+                for column in response.context["columns"]
+            ],
+            [("Iso 1", "L"), ("Iso 1", "R")],
+        )
+
+    def test_validation_matrix_uses_normalized_iso_labels(self):
+        self.client.force_login(self.manager_user)
+
+        response = self.client.get(reverse("validation:validation_cards"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Iso 1")
+        self.assertNotContains(response, "Isolator 1 L")
+        self.assertNotContains(response, "Isolator 1 R")
